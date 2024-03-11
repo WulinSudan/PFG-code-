@@ -1,1 +1,3 @@
 # PFG-code-
+
+Inicialitzar
