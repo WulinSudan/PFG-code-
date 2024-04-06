@@ -26,6 +26,7 @@ android {
     namespace "com.example.client"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
+    compileSdkVersion 32
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -49,6 +50,8 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        minSdkVersion 21  // Minimum required SDK version
+        targetSdkVersion 30  // Target SDK version
     }
 
     buildTypes {
