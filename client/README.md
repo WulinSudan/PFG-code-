@@ -14,4 +14,6 @@ Per començar cal modificar dependencies:
   * Si es traballa amb Android Studio,es requereix una alta versió de compileSDKVersion. Anar a android/app/build.gradle en apartat d'android afegir:  compileSdkVersion 30 
 
 
+per fer una proba de git
+
 
