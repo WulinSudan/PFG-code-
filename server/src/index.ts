@@ -1,13 +1,21 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { typeDefs } from './schema/typeDefs.js';
 import { resolvers } from './resolvers.js'
 import mysql from 'mysql';
+import fs from 'fs';
+import { buildSchema, GraphQLSchema } from 'graphql';
+
+
+// Lee el esquema GraphQL desde el archivo
+const schemaString: string = fs.readFileSync('src/graphql/schema.graphql', 'utf-8');
+// Construye el esquema GraphQL
+const schema: GraphQLSchema = buildSchema(schemaString);
+
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
 const server = new ApolloServer({
-    typeDefs,
+    typeDefs:schema,
     resolvers,
   });
   
