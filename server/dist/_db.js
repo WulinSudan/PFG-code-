@@ -13,4 +13,9 @@ const books = [
         author: 'Paul Auster',
     },
 ];
-export default { authors, books };
+const users = [
+    { id: 1, name: 'maria', passwoed: 'maria123' },
+    { id: 2, name: 'joan', passwoed: 'joan123' },
+    { id: 3, name: 'pere', passwoed: 'pere123' },
+];
+export default { authors, books, users };

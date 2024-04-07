@@ -1,3 +1,14 @@
+  
+  type Query {
+    books: [Book]
+    authors: [Author]
+    users: [User]
+  }
+
+  type Mutation {
+    removeUser(userId: ID!): Int!
+  }
+  
   type Book {
     title: String
     author: String
@@ -9,7 +20,9 @@
     varified: Boolean
   }
 
-    type Query {
-    books: [Book]
-    authors: [Author]
+  type User{
+    id: ID!
+    name: String!
+    password: String!
   }
+
