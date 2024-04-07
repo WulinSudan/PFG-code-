@@ -2,7 +2,7 @@ import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs, books } from './schema/typeDefs.js';
 import { resolvers } from './schema/resolvers.js'
-
+import mysql from 'mysql';
 
 
 
