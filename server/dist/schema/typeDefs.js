@@ -10,20 +10,17 @@ export const typeDefs = `#graphql
     author: String
   }
 
+  type Author {
+    id: ID!
+    name: String
+    varified: Boolean
+  }
+
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
     books: [Book]
+    authors: [Author]
   }
 `;
-export const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin',
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster',
-    },
-];
