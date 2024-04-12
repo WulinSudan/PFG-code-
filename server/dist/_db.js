@@ -1,3 +1,4 @@
+const dbFilePath = './db.ts';
 const authors = [
     { id: '1', name: 'mario', varified: true },
     { id: '2', name: 'ypshi', varified: true },

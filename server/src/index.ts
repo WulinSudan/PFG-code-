@@ -4,6 +4,19 @@ import { resolvers } from './resolvers.js'
 import mysql from 'mysql';
 import fs from 'fs';
 import { buildSchema, GraphQLSchema } from 'graphql';
+import mongoose from 'mongoose';
+
+
+
+
+mongoose.set('strictQuery', true);
+
+mongoose.connect('mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/PFG?retryWrites=true&w=majority');
+                  //mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/pfg?retryWrites=true&w=majority
+
+mongoose.connection.once('open', () => {
+    console.log('Conectado a la base de datos pfg');
+});
 
 
 // Lee el esquema GraphQL desde el archivo

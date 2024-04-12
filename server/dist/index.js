@@ -3,6 +3,13 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 import { resolvers } from './resolvers.js';
 import fs from 'fs';
 import { buildSchema } from 'graphql';
+import mongoose from 'mongoose';
+mongoose.set('strictQuery', true);
+mongoose.connect('mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/PFG?retryWrites=true&w=majority');
+//mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/pfg?retryWrites=true&w=majority
+mongoose.connection.once('open', () => {
+    console.log('Conectado a la base de datos pfg');
+});
 // Lee el esquema GraphQL desde el archivo
 const schemaString = fs.readFileSync('src/graphql/schema.graphql', 'utf-8');
 // Construye el esquema GraphQL
