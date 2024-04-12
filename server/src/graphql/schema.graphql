@@ -3,10 +3,18 @@
     books: [Book]
     authors: [Author]
     users: [User]
+    games: [Game]
+    reviews: [Review]
+    review(id: ID!): Review
   }
 
   type Mutation {
-    removeUser(userId: ID!): Int!
+    updateGame(id: ID!, edits: EditGameInput): Game
+    deleteGame(id: ID!): [Game]
+    addGame(game: AddGameInput): Game
+    removeUser(id: ID!): Int!
+    addBook(title: String!, author: String!): Book
+    
   }
   
   type Book {
@@ -26,3 +34,24 @@
     password: String!
   }
 
+  type Game {
+    id: ID!
+    title: String!
+    platform: [String!]!
+  }
+
+  type Review {
+    id: ID!
+    rating: Int!
+    content: String!
+  }
+
+  input AddGameInput{
+    title: String!
+    platform: [String!]!
+  }
+
+  input EditGameInput{
+    title: String!
+    platform: [String!]!
+  }

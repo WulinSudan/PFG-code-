@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class QrMainPage extends StatelessWidget {
 
+  //print(sprintf("%s %s", ["Hello", "World"]));
+
   final String username;
 
   QrMainPage({required this.username});
