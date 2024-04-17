@@ -5,6 +5,7 @@ export const resolvers = {
         authors: () => db.authors,
         users: () => db.users,
         games: () => db.games,
+        gamess: () => db.gamess,
         reviews: () => db.reviews,
         review(_, args) {
             return db.reviews.find((review) => review.id === args.id);

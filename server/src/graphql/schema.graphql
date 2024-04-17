@@ -6,6 +6,7 @@
     games: [Game]
     reviews: [Review]
     review(id: ID!): Review
+    products: [Product]
   }
 
   type Mutation {
@@ -17,6 +18,14 @@
     
   }
   
+
+  type Product {
+    _id: ID!
+    productId: Int!
+    price: Int!
+    quality: Int!
+  }
+
   type Book {
     title: String
     author: String
