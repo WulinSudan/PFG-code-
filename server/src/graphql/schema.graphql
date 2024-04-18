@@ -1,66 +1,11 @@
   
   type Query {
-    books: [Book]
-    authors: [Author]
-    users: [User]
-    games: [Game]
-    reviews: [Review]
-    review(id: ID!): Review
     products: [Product]
   }
 
-  type Mutation {
-    updateGame(id: ID!, edits: EditGameInput): Game
-    deleteGame(id: ID!): [Game]
-    addGame(game: AddGameInput): Game
-    removeUser(id: ID!): Int!
-    addBook(title: String!, author: String!): Book
-    
-  }
-  
-
   type Product {
     _id: ID!
-    productId: Int!
+    prodId: Int!
     price: Int!
-    quality: Int!
-  }
-
-  type Book {
-    title: String
-    author: String
-  }
-
-  type Author {
-    id: ID!
-    name: String
-    varified: Boolean
-  }
-
-  type User{
-    id: ID!
-    name: String!
-    password: String!
-  }
-
-  type Game {
-    id: ID!
-    title: String!
-    platform: [String!]!
-  }
-
-  type Review {
-    id: ID!
-    rating: Int!
-    content: String!
-  }
-
-  input AddGameInput{
-    title: String!
-    platform: [String!]!
-  }
-
-  input EditGameInput{
-    title: String!
-    platform: [String!]!
+    quantity: Int!
   }

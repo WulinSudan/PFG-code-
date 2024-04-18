@@ -1,9 +1,13 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
+
 const Schema = mongoose.Schema;
 
 const movieSchema = new Schema({
-    imdbID: String,
+    Id: String,
     Title: String,
 });
 
-module.exports = mongoose.model('Movie', movieSchema);
+
+export default mongoose.model('Movie', movieSchema);
+
+

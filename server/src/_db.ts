@@ -19,6 +19,13 @@ const books = [
     },
   ];
 
+const products = [
+    {id: '1', productId: '1', price: '1', quality: '1'},
+    {id: '2', productId: '2', price: '2', quality: '2'},
+    {id: '3', productId: '3', price: '3', quality: '3'},
+    {id: '4', productId: '4', price: '4', quality: '4'}, 
+  ];
+
 
 const users = [
 
@@ -38,4 +45,4 @@ const reviews = [
   {id: '2', rating: 9, content: 'BB', author_id: '1', game_id: '2'},
 ]
 
-  export default { authors, books, users, games, reviews }
+  export default { authors, books, users, games, reviews, products }
