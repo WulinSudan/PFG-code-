@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const productSchema = new Schema({
     _id: ObjectId,
     prodId: Number,
-    price: Double,
+    price: Number,
     quantity: Number
 });
 
