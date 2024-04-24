@@ -4,10 +4,7 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
-    _id: ObjectId,
-    prodId: Number,
-    price: Number,
-    quantity: Number
+    name: String
 });
 
 

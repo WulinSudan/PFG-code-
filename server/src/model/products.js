@@ -4,13 +4,12 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
-    _id: ObjectId,
-    prodId: Number,
-    price: Number,
-    quantity: Number
+    name: {
+        type: String
+    }
 });
 
 
-export default mongoose.model('Product', productSchema, 'product');
+export default mongoose.model('Product', productSchema);
 
 

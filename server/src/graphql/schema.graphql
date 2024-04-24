@@ -1,11 +1,39 @@
   
   type Query {
-    products: [Product]
+    me: User
+    personCount: Int!
+    allPersons: [Person]!
+    findPerson(name: String!): Person
   }
 
-  type Product {
-    _id: ID!
-    prodId: Int!
-    price: Int!
-    quantity: Int!
+  type Mutation {
+    createUser(username: String!): User
+    login(username: String!, password: String!): Token
+    addPerson(name: String!, phone: Int!, street: String!, city: String!): Person
+    editNumber(name: String!, phone: Int!): Person
+    removePerson(name: String!): Int!
   }
+
+  type Address {
+    street: String!
+    city: String!
+  }
+
+  type Person {
+    name: String!
+    phone: Int!
+    address: Address!
+  }
+
+  type User {
+    username: String!
+    friends: [Person]!
+  }
+
+  type Token {
+    value: String!
+  }
+
+
+
+

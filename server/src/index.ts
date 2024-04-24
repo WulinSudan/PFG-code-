@@ -7,6 +7,7 @@ import { buildSchema, GraphQLSchema } from 'graphql';
 import mongoose from 'mongoose';
 
 
+
 //connecxió a base de dades
 mongoose.set('strictQuery', true);
 
@@ -19,11 +20,11 @@ const db = mongoose.connection.once('open', () => {
 
 const getone =async ()=>{
   const post = await db.collection("product").findOne({});
-  console.log("hhh");
-  console.log(post);
 }
 
-getone();
+//getone();
+
+
 
 // Lee el esquema GraphQL desde el archivo
 const schemaString: string = fs.readFileSync('src/graphql/schema.graphql', 'utf-8');
