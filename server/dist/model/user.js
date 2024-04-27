@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import person from "./person";
+import Person from "./person.js";
 
 const schema = new mongoose.Schema({
     username: {

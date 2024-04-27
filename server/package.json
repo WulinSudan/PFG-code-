@@ -15,6 +15,7 @@
   "dependencies": {
     "@apollo/server": "^4.10.2",
     "@types/mysql": "^2.15.26",
+    "apollo-server": "^3.13.0",
     "apollo-server-express": "^3.13.0",
     "express": "^4.19.2",
     "graphql": "^16.8.1",

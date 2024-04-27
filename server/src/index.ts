@@ -5,8 +5,12 @@ import { resolvers } from './resolvers.js'
 import fs from 'fs';
 import { buildSchema, GraphQLSchema } from 'graphql';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken'
+import { Request, Response } from 'express';
+import User from './model/user.js'
 
 
+const JWT_SECRET = "PARABLA_SECRETA";
 
 //connecxió a base de dades
 mongoose.set('strictQuery', true);
@@ -31,13 +35,16 @@ const schemaString: string = fs.readFileSync('src/graphql/schema.graphql', 'utf-
 // Construye el esquema GraphQL
 const schema: GraphQLSchema = buildSchema(schemaString);
 
-
+interface MyContext {
+  token?: String;
+}
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
-const server = new ApolloServer({
+const server = new ApolloServer<MyContext>({
     typeDefs: schema,
     resolvers,
+    
   });
   
   // Passing an ApolloServer instance to the `startStandaloneServer` function:
@@ -45,6 +52,7 @@ const server = new ApolloServer({
   //  2. installs your ApolloServer instance as middleware
   //  3. prepares your app to handle incoming requests
   const { url } = await startStandaloneServer(server, {
+    context: async ({ req }) => ({ token: req.headers.token }),
     listen: { port: 4000 },
   });
   
