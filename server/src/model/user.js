@@ -1,5 +1,4 @@
 import mongoose, { mongo } from "mongoose";
-import person from "./person";
 
 const schema = new mongoose.Schema({
     username: {
@@ -8,12 +7,12 @@ const schema = new mongoose.Schema({
         unique: true,
         minlength: 3
     },
-    friends: [
-       {
-        ref: person,
-        type: mongoose.Schema.Types.ObjectId
-       }
-    ]
+    password: {
+        type: String,
+        required: true,
+        unique: true,
+        minlength: 3
+    }
 })
 
 

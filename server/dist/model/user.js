@@ -1,21 +1,19 @@
-import mongoose from 'mongoose';
+import mongoose, { mongo } from "mongoose";
 
 const schema = new mongoose.Schema({
-    name: {
+    username: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        minlength: 3
     },
-    phone: {
-        type: String
-    },
-    street: {
+    password: {
         type: String,
-        required: true
-    },
-    city: {
-        type: String,
-        required: true
+        required: true,
+        unique: true,
+        minlength: 3
     }
 })
+
 
 export default mongoose.model('User',schema)

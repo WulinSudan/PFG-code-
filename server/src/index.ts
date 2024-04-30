@@ -5,8 +5,7 @@ import { resolvers } from './resolvers.js'
 import fs from 'fs';
 import { buildSchema, GraphQLSchema } from 'graphql';
 import mongoose from 'mongoose';
-
-
+import jwt from 'jsonwebtoken';
 
 //connecxió a base de dades
 mongoose.set('strictQuery', true);

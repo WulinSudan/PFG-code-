@@ -7,8 +7,8 @@
   }
 
   type Mutation {
-    createUser(username: String!): User
-    login(username: String!, password: String!): Token
+    login(username: String!, password:String!): Token!
+    signUp(username: String!, password:String!): User!
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
@@ -27,7 +27,7 @@
 
   type User {
     username: String!
-    friends: [Person]!
+    password: String!
   }
 
   type Token {
