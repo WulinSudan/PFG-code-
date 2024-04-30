@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import person from "./person";
 
 const schema = new mongoose.Schema({
@@ -10,7 +10,7 @@ const schema = new mongoose.Schema({
     },
     friends: [
        {
-        ref: Person,
+        ref: person,
         type: mongoose.Schema.Types.ObjectId
        }
     ]

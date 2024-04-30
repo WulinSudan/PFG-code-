@@ -4,7 +4,6 @@ import { resolvers } from './resolvers.js';
 import fs from 'fs';
 import { buildSchema } from 'graphql';
 import mongoose from 'mongoose';
-const JWT_SECRET = "PARABLA_SECRETA";
 //connecxió a base de dades
 mongoose.set('strictQuery', true);
 //mongoose.connect('mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/PFG?retryWrites=true&w=majority');
@@ -31,7 +30,6 @@ const server = new ApolloServer({
 //  2. installs your ApolloServer instance as middleware
 //  3. prepares your app to handle incoming requests
 const { url } = await startStandaloneServer(server, {
-    context: async ({ req }) => ({ token: req.headers.token }),
     listen: { port: 4000 },
 });
 console.log(`🚀  Server ready at: ${url}`);

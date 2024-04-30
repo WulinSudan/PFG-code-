@@ -1,6 +1,6 @@
   
   type Query {
-    me: Token
+    me: User
     personCount: Int!
     allPersons: [Person]!
     findPerson(name: String!): Person
