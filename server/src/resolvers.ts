@@ -1,11 +1,5 @@
-import db from './_db.js';
-import fs from 'fs';
-import Movie from './model/movies.js';
-import Product from './model/products.js';
-import { v1 as uuid } from 'uuid'
 import Person from './model/person.js'
-import User from './model/user.js'
-import jwt from 'jsonwebtoken'
+
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
