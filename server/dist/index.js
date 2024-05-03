@@ -1,35 +1,35 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
-import { resolvers } from './resolvers.js';
-import fs from 'fs';
-import { buildSchema } from 'graphql';
-import mongoose from 'mongoose';
-//connecxió a base de dades
-mongoose.set('strictQuery', true);
-//mongoose.connect('mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/PFG?retryWrites=true&w=majority');
-mongoose.connect('mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/pfg?retryWrites=true&w=majority&appName=PFGCluster');
-const db = mongoose.connection.once('open', () => {
-    console.log('Conectado a la base de datos pfg');
-});
-const getone = async () => {
-    const post = await db.collection("product").findOne({});
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-//getone();
-// Lee el esquema GraphQL desde el archivo
-const schemaString = fs.readFileSync('src/graphql/schema.graphql', 'utf-8');
-// Construye el esquema GraphQL
-const schema = buildSchema(schemaString);
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
-const server = new ApolloServer({
+Object.defineProperty(exports, "__esModule", { value: true });
+const server_1 = require("@apollo/server");
+const standalone_1 = require("@apollo/server/standalone");
+const resolvers_1 = require("./resolvers/resolvers");
+const fs_1 = __importDefault(require("fs"));
+const graphql_1 = require("graphql");
+const mongoose_1 = __importDefault(require("mongoose"));
+const context_1 = require("./utils/context");
+//connecxió a base de dades
+mongoose_1.default.set("strictQuery", true);
+//mongoose.connect('mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/PFG?retryWrites=true&w=majority');
+mongoose_1.default.connect("mongodb+srv://sudan88792:sudan6519@pfgcluster.fe95ztn.mongodb.net/pfg?retryWrites=true&w=majority&appName=PFGCluster");
+const db = mongoose_1.default.connection.once("open", () => {
+    console.log("Conectado a la base de datos pfg");
+});
+const schemaString = fs_1.default.readFileSync("src/graphql/schema.graphql", "utf-8");
+const schema = (0, graphql_1.buildSchema)(schemaString);
+const server = new server_1.ApolloServer({
     typeDefs: schema,
-    resolvers,
+    resolvers: resolvers_1.resolvers,
 });
-// Passing an ApolloServer instance to the `startStandaloneServer` function:
-//  1. creates an Express app
-//  2. installs your ApolloServer instance as middleware
-//  3. prepares your app to handle incoming requests
-const { url } = await startStandaloneServer(server, {
+(0, standalone_1.startStandaloneServer)(server, {
     listen: { port: 4000 },
+    context: context_1.createContext,
+})
+    .then(({ url }) => {
+    console.log(`🚀  Server ready at: ${url}`);
+})
+    .catch((error) => {
+    console.log(error);
 });
-console.log(`🚀  Server ready at: ${url}`);

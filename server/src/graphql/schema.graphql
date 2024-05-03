@@ -7,8 +7,8 @@
   }
 
   type Mutation {
-    login(username: String!, password:String!): Token!
-    signUp(username: String!, password:String!): User!
+    loginUser(input: LoginInput!): AuthToken!
+    signup(name: String!, password:String!): User!
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
@@ -26,13 +26,35 @@
   }
 
   type User {
-    username: String!
+    name: String!
     password: String!
   }
 
   type Token {
     value: String!
   }
+
+  type AuthToken {
+    access_token: String!
+    user: User!
+  }
+  
+  input RegisterInput{
+    name: String!
+    password: String!
+  }
+  
+  input SignUpInput {
+    name: String
+    password: String
+  }
+
+  input LoginInput {
+    name: String!
+    password: String!
+  }
+
+
 
 
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-
 import 'pages/welcomepage.dart';
 import 'pages/login.dart';
 import 'pages/mainpage.dart';
@@ -10,14 +8,14 @@ import 'pages/qrscannerpage.dart';
 
 void main() => runApp(MaterialApp(
 
-  initialRoute: '/mainpage',
+  initialRoute: '/welcomepage',
 
 
   routes: {
     '/welcomepage': (context) => WelcomePage(),
     '/login': (context) => Login(),
     '/mainpage': (context) => MainPage(username: 'Maria'),
-    '/qrmainpage': (context) => QrMainPage(username:'Maria'),
+    '/qrmainpage': (context) => QrMainPage(username: 'Maria'),
     '/qrscannerpage': (context) => QRViewExample(),
     '/qrpayment': (context) => QrPayment(),
   },
