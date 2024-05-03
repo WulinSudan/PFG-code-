@@ -20,6 +20,30 @@ export const userResolvers = {
         },
     },
     Muation: {
+
+        removeUser: async (_root: any, args: any) => {
+            const deletionResult = await User.deleteOne({ name: args.name });
+            return deletionResult.deletedCount;
+        },
+
+        signUp: async (_root: any, { input: {name, password} }: any ) => {
+            try {
+                const userInput = {
+                    name: name,
+                    password: await hashPassword(password),
+                };
+
+                const user = new User(userInput);
+                await user.save();
+                return user;
+            } catch (error: any) {
+                if (error.code === 11000) {
+                    throw new Error("User already exist");
+                }
+                throw error;
+            }
+        },
+
         loginUser: async (_root: any, { input: { name, password } }: any) => {
             const user = await User.findOne({ name }).select("password");
             console.log(user);

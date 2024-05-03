@@ -7,8 +7,11 @@
   }
 
   type Mutation {
+    signUp(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
     signup(name: String!, password:String!): User!
+    removeUser(name: String!): Int!
+
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
