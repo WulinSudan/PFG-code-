@@ -6,6 +6,17 @@ import { comparePassword, hashPassword } from "../utils/crypt";
 
 export const userResolvers = {
     Query: {
+
+        allUsers: async () => {
+            const users = await User.find();
+            return users.map((user) => {
+                return {
+                    name:user.name
+                };
+            });
+        },
+
+        
         me: async (_root: any, _args: any, context: Context) => {
             const userId = getUserId(context);
 

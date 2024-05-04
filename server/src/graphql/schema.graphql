@@ -3,6 +3,7 @@
     me: User
     personCount: Int!
     allPersons: [Person]!
+    allUsers: [User]!
     findPerson(name: String!): Person
   }
 
