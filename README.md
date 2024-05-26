@@ -2,6 +2,9 @@
 
 CLIENT
 
+Preparació del entorn:
+Instal·lar Flutter
+Instal·lar dependencies: npm install -g npm
 
 
 

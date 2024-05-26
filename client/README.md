@@ -3,6 +3,8 @@
 A new Flutter project.
 
 ## Getting Started
+Cal instal·lar Flutter i editar enviroment de flutter/bin
+
 
 Per començar cal modificar dependencies:
 - Per poder traballar amb imatges, cal anar a "pubspec.yaml" i descomentar "assets" i a sota possar el nom de la carpeta on es guarden els imatges
