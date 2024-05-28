@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'mainpage.dart';
-
-
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../graphql_client.dart';
+import 'package:flutter/material.dart';
 
 class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Login App',
       theme: ThemeData(
@@ -30,20 +31,6 @@ class _LoginPageState extends State<LoginPage> {
   void _login() {
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
-
-    // Verifica si el usuario y la contraseña son válidos
-    if (username == 'Maria' && password == '123') {
-      // Si son válidos, navega a la siguiente pantalla
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MainPage(username: username)),
-      );
-    } else {
-      // Si no son válidos, muestra un mensaje de error
-      setState(() {
-        _errorMessage = 'Usuario o contraseña incorrectos';
-      });
-    }
   }
 
   @override

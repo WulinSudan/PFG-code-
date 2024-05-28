@@ -3,9 +3,10 @@ import 'account.dart';
 import 'account_card.dart';
 
 class MainPage extends StatefulWidget {
-  final String username;
 
-  MainPage({required this.username});
+  final String? accessToken;
+
+  MainPage({required this.accessToken});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -25,7 +26,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('Mis Cuentas - ${widget.username}'),
+        title: Text('Mis Cuentas - ${widget.accessToken}'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),
