@@ -23,13 +23,12 @@ class _State extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/mutation',
+      initialRoute: '/login',
       routes: {
         '/mainpage': (context) {
             final accessToken = ModalRoute.of(context)!.settings.arguments as String?;
             return MainPage(accessToken: accessToken);
         },
-        '/mutation': (context) => MyMutation(),
         '/welcomepage': (context) => WelcomePage(),
         '/login': (context) => Login(), // Asumiendo que tienes una clase llamada Login para tu pantalla de inicio de sesión.
       },
