@@ -5,3 +5,13 @@ const String allUsersGraphql = """
     }
   }
 """;
+
+
+const String loginUserMutation = """
+  mutation LoginUser(\$input: LoginInput!) {
+    loginUser(input: \$input) {
+      access_token
+    }
+  }
+""";
+
