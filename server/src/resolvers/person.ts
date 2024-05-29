@@ -36,7 +36,7 @@ export const personResolvers = {
                   };
         },
     },
-    Muation: {
+    Mutation: {
         addPerson: (_root: any, args: any) => {
             const person = new Person({ ...args });
             return person.save();

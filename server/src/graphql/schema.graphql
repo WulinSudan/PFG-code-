@@ -5,6 +5,7 @@
     allPersons: [Person]!
     allUsers: [User]!
     findPerson(name: String!): Person
+    allAccount: [Account]!
   }
 
   type Mutation {
@@ -13,9 +14,11 @@
     signup(name: String!, password:String!): User!
     removeUser(name: String!): Int!
 
-    addPerson(name: String!, phone: Int!, street: String!, city: String!): Person
+    addPerson(name: String!, phone: Int!, street: String!, city: String!): Person!
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
+
+    addAccount(owner: String!, number_account: String!, balance: Float!, active: Boolean!): Account!
   }
 
   type Address {
@@ -28,6 +31,14 @@
     phone: Int!
     address: Address!
   }
+
+  type Account {
+    owner: String!
+    number_account: String!
+    balance: Float!
+    active: Boolean!
+  }
+
 
   type User {
     name: String!

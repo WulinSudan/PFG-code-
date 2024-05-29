@@ -30,7 +30,7 @@ export const userResolvers = {
             return user;
         },
     },
-    Muation: {
+    Mutation: {
 
         removeUser: async (_root: any, args: any) => {
             const deletionResult = await User.deleteOne({ name: args.name });
