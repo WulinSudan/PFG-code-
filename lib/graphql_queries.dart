@@ -24,3 +24,12 @@ const String meQuery = """
 """;
 
 
+const String signUpMutation = """
+  mutation Signup(\$name: String!, \$password: String!) {
+    signup(name: \$name, password: \$password) {
+      name
+    }
+  }                 
+""";
+
+
