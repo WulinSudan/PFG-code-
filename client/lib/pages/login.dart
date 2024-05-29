@@ -1,37 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart';
-import 'package:flutter/material.dart';
+import '../graphql_client.dart'; // Asegúrate de importar tus consultas/mutaciones GraphQL aquí
+import '../graphql_queries.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-
-    return MaterialApp(
-      title: 'Login App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: LoginPage(),
-    );
-  }
+  _LoginState createState() => _LoginState();
 }
 
-class LoginPage extends StatefulWidget {
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
+class _LoginState extends State<Login> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String _errorMessage = '';
-
-  void _login() {
-    final String username = _usernameController.text.trim();
-    final String password = _passwordController.text.trim();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,16 +39,43 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
-              onPressed: _login,
+              onPressed: () async {
+                final String username = _usernameController.text.trim();
+                final String password = _passwordController.text.trim();
+
+                final GraphQLClient client = GraphQLService.createGraphQLClient('Bearer YourAuthToken');
+
+                // Envío de la mutación al servidor GraphQL
+                final QueryResult result = await client.mutate(
+                  MutationOptions(
+                    document: gql(loginUserMutation),
+                    variables: {
+                      'input': {
+                        'name': username,
+                        'password': password,
+                      },
+                    },
+                  ),
+                );
+
+                // Manejo del resultado de la mutación
+                if (result.hasException) {
+                  print("++++++++++++++++++++++++++++++++++++++++++++");
+                  // Manejar errores de autenticación
+                  print("Error en la autenticación: ${result.exception}");
+                } else {
+                  print("************************************************");
+                  // Autenticación exitosa, obtener el token de acceso y navegar a la siguiente pantalla
+                  final String accessToken = result.data!['loginUser']['access_token'];
+                  print(accessToken);
+                  Navigator.pushNamed(
+                      context,
+                      '/mainpage',
+                      arguments: accessToken);
+                }
+              },
               child: Text('Login'),
             ),
-            if (_errorMessage.isNotEmpty)
-              Text(
-                _errorMessage,
-                style: TextStyle(
-                  color: Colors.red,
-                ),
-              ),
           ],
         ),
       ),
