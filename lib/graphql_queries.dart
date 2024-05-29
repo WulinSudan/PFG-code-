@@ -15,3 +15,12 @@ const String loginUserMutation = """
   }
 """;
 
+const String meQuery = """
+  query{
+    me{
+      name
+    }
+  }
+""";
+
+
