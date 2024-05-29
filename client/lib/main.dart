@@ -1,4 +1,5 @@
 import 'package:client/pages/mainpage.dart';
+import 'package:client/pages/registration.dart';
 import 'package:flutter/material.dart';
 import 'pages/welcomepage.dart';
 import 'pages/login.dart';
@@ -24,6 +25,7 @@ class _State extends State<MyApp> {
           final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
           return MainPage(accessToken: accessToken!);
         },
+        '/registration': (context) => RegistrationPage(),
         '/welcomepage': (context) => WelcomePage(),
         '/login': (context) => Login(), // Asumiendo que tienes una clase llamada Login para tu pantalla de inicio de sesión.
       },
