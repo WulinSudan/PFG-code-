@@ -4,13 +4,15 @@ import Account from "../model/account";
 export const accountResolvers = {
     Query: {
         allAccount: async () => {
-            try {
-                const count = await Account.countDocuments();
-                return count;
-            } catch (error) {
-                console.error("Error fetching account count:", error);
-                throw error;
-            }
+            const persons = await Account.find();
+            return persons.map((account) => {
+                return {
+                    owner: account.owner
+                };
+            });
+        },
+        countAccount: async () => {
+            return await Account.collection.countDocuments();
         }
     },
     Mutation: {
@@ -23,6 +25,10 @@ export const accountResolvers = {
                 console.error("Error adding account:", error);
                 throw error;
             }
-        }
+        },
+        removeAccount: async (_root: any, args: any) => {
+            const deletionResult = await Account.deleteOne({ number_account: args.number_account });
+            return deletionResult.deletedCount;
+        },
     }
 };

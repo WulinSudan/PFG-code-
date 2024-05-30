@@ -6,6 +6,7 @@
     allUsers: [User]!
     findPerson(name: String!): Person
     allAccount: [Account]!
+    countAccount: Int!
   }
 
   type Mutation {
@@ -19,6 +20,7 @@
     removePerson(name: String!): Int!
 
     addAccount(owner: String!, number_account: String!, balance: Float!, active: Boolean!): Account!
+    removeAccount(number_account:String!):Int!
   }
 
   type Address {
