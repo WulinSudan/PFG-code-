@@ -1,25 +1,23 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Document, Schema, Model } from 'mongoose';
+import { IAccount } from './account';
 
-interface IUser {
-    name: string;
-    password: string;
+// Interface for User
+interface IUser extends Document {
+  dni: string;
+  name: string;
+  password: string;
+  accounts: IAccount['_id'][];
 }
 
-const schema = new Schema<IUser>({
-    name: {
-        type: String,
-        required: true,
-        unique: true,
-        minlength: 3,
-    },
-    password: {
-        type: String,
-        required: true,
-        unique: true,
-        minlength: 3,
-    },
+// User Schema
+const UserSchema: Schema = new Schema({
+  dni: { type: String, unique: true, required: true },
+  name: { type: String, required: true },
+  password: { type: String, required: true },
+  accounts: [{ type: Schema.Types.ObjectId, ref: 'Account' }],
 });
 
-schema.index({ email: 1 });
+// User Model
+const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
 
-export default model<IUser>("User", schema);
+export { User, IUser };

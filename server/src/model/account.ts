@@ -1,35 +1,24 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Document, Schema, Model } from 'mongoose';
 
-interface IAccount {
-    owner: string;
-    number_account: string;
-    balance: number;
-    active: boolean;
+// Interface for Account
+interface IAccount extends Document {
+  owner_dni: string;
+  owner_name: string;
+  number_account: string;
+  balance: number;
+  active: boolean;
 }
 
-const schema = new Schema<IAccount>({
-    owner: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    number_account: {
-        type: String,
-        required: true,
-        unique: true,
-        minlength: 10,
-    },
-    balance: {
-        type: Number,
-        required: true,
-        unique: false,
-    },
-    active: {
-        type: Boolean,
-        required: true,
-    },
+// Account Schema
+const AccountSchema: Schema = new Schema({
+  owner_dni: { type: String, required: true },
+  owner_name: { type: String, required: true },
+  number_account: { type: String, required: true },
+  balance: { type: Number, required: true },
+  active: { type: Boolean, required: true },
 });
 
-schema.index({ number_account: 1 });
+// Account Model
+const Account: Model<IAccount> = mongoose.model<IAccount>('Account', AccountSchema);
 
-export default model<IAccount>("Account", schema);
+export { Account, IAccount };

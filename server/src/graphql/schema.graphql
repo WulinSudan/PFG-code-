@@ -1,26 +1,35 @@
   
   type Query {
+
     me: User
+
     personCount: Int!
     allPersons: [Person]!
-    allUsers: [User]!
     findPerson(name: String!): Person
+
+    allUsers: [User]!
     allAccount: [Account]!
     countAccount: Int!
+    user(dni: String!): User
+    users: [User]
+    getAllAccounts:[Account]
+    getUserAccountCount(dni: String!): Int!
+    getUserAccountsInfoByDni(dni: String!): [Account]
   }
 
   type Mutation {
+
     signUp(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
-    signup(name: String!, password:String!): User!
     removeUser(name: String!): Int!
 
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person!
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
 
-    addAccount(owner: String!, number_account: String!, balance: Float!, active: Boolean!): Account!
+    addAccount(input:addAccountInput):Account!
     removeAccount(number_account:String!):Int!
+    addAccountForUser(input: addAccountInput): Account!
   }
 
   type Address {
@@ -35,7 +44,8 @@
   }
 
   type Account {
-    owner: String!
+    owner_dni: String!
+    owner_name: String!
     number_account: String!
     balance: Float!
     active: Boolean!
@@ -43,9 +53,12 @@
 
 
   type User {
+    dni: String!
     name: String!
     password: String!
+    accounts: [Account]
   }
+
 
   type Token {
     value: String!
@@ -55,6 +68,14 @@
     access_token: String!
     user: User!
   }
+
+  input addAccountInput{
+    owner_dni: String!
+    owner_name: String!
+    number_account: String!
+    balance: Float!
+    active: Boolean!
+  }
   
   input RegisterInput{
     name: String!
@@ -62,6 +83,7 @@
   }
   
   input SignUpInput {
+    dni: String
     name: String
     password: String
   }
