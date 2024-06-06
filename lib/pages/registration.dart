@@ -9,6 +9,7 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  final TextEditingController _dniController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -40,6 +41,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
+              controller: _dniController,
+              decoration: InputDecoration(
+                labelText: 'dni',
+              ),
+            ),
+            SizedBox(height: 12.0),
+            TextField(
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Username',
@@ -56,6 +64,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () async {
+                final String dni = _dniController.text.trim();
                 final String username = _usernameController.text.trim();
                 final String password = _passwordController.text.trim();
 
@@ -65,8 +74,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   MutationOptions(
                     document: gql(signUpMutation),
                     variables: {
-                      'name': username,
-                      'password': password,
+                      'input': {
+                        'dni': dni,
+                        'name': username,
+                        'password': password,
+                      },
                     },
                   ),
                 );
