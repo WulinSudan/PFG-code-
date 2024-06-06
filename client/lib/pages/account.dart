@@ -1,8 +1,9 @@
 class Account {
-  final String name;
+  final String owner_dni;
+  final String owner_name;
+  final String account_number;
   final double balance;
-  final int account_number;
-  final bool select;
+  final bool active;
 
-  Account({required this.name, required this.balance, required this.account_number, required this.select});
+  Account({required this.owner_dni, required this.owner_name, required this.balance, required this.account_number, required this.active});
 }

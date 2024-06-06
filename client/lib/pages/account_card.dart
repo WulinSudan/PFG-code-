@@ -3,10 +3,8 @@ import 'account.dart';
 
 class AccountCard extends StatefulWidget {
   final Account account;
-  final bool isSelected;
-  final Function(bool) onSelect;
 
-  AccountCard({required this.account, required this.isSelected, required this.onSelect});
+  AccountCard({required this.account});
 
   @override
   _AccountCardState createState() => _AccountCardState();
@@ -17,13 +15,8 @@ class _AccountCardState extends State<AccountCard> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        if (!widget.isSelected) {
-          widget.onSelect(true);
-        }
-      },
+
       child: Card(
-        color: widget.isSelected ? Colors.redAccent : Colors.white, // Cambia el color de fondo según el estado
         margin: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -31,7 +24,15 @@ class _AccountCardState extends State<AccountCard> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                widget.account.name,
+                widget.account.owner_name,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.grey[400],
+                ),
+              ),
+              SizedBox(height: 6.0),
+              Text(
+                widget.account.owner_dni,
                 style: TextStyle(
                   fontSize: 18.0,
                   color: Colors.grey[400],

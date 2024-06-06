@@ -16,23 +16,29 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String? userName;
-
-  List<Account> accounts = [
-    Account(account_number: 12345678, name: 'Cuenta de Ahorro', balance: 5000, select: false),
-    Account(account_number: 12344678, name: 'Cuenta Corriente', balance: 10000, select: false),
-    Account(account_number: 12244678, name: 'Tarjeta de Crédito', balance: -2000, select: false),
-  ];
-
-  int selectedAccountIndex = -1;
+  String? dni;
+  // List<Account> list_accounts = [];
+  List<dynamic> list_accounts = [];
+  int? contador = 1;
 
   @override
   void initState() {
     super.initState();
-    // Llamar a una consulta GraphQL para obtener el nombre del usuario
-    fetchUserName();
+    // Llamar a una consulta GraphQL para obtener el nombre, dni y cuentas del usuario
+    fetchUserData();
   }
 
-  Future<void> fetchUserName() async {
+  Future<void> fetchUserData() async {
+    await fetchUserInfo();
+    await fetchUserAccounts();
+
+    print(userName);
+    print(dni);
+    print(list_accounts.length);
+
+  }
+
+  Future<void> fetchUserInfo() async {
     final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
 
     final QueryResult result = await client.query(
@@ -46,6 +52,29 @@ class _MainPageState extends State<MainPage> {
     } else {
       setState(() {
         userName = result.data!['me']['name'];
+        dni = result.data!['me']['dni'];
+      });
+    }
+  }
+
+  Future<void> fetchUserAccounts() async {
+    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+    print(dni);
+    final QueryOptions options = QueryOptions(
+      document: gql(getAccountsQuery),
+      variables: <String, dynamic>{
+        'dni': dni,
+      },
+    );
+
+    final QueryResult result = await client.query(options);
+
+    if (result.hasException) {
+      print("Error al obtener las cuentas del usuario: ${result.exception}");
+    } else if (result.data != null && result.data!['getUserAccountsInfoByDni'] != null) {
+      setState(() {
+        list_accounts = List<dynamic>.from(result.data!['getUserAccountsInfoByDni']);
+        contador = list_accounts.length;
       });
     }
   }
@@ -59,59 +88,19 @@ class _MainPageState extends State<MainPage> {
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: accounts.length,
-              itemBuilder: (context, index) {
-                return AccountCard(
-                  account: accounts[index],
-                  isSelected: index == selectedAccountIndex,
-                  onSelect: (bool isSelected) {
-                    setState(() {
-                      if (isSelected) {
-                        if (selectedAccountIndex == index) {
-                          selectedAccountIndex = -1;
-                        } else {
-                          selectedAccountIndex = index;
-                        }
-                      } else {
-                        selectedAccountIndex = -1;
-                        isSelected = false;
-                        print(selectedAccountIndex);
-                      }
-                    });
-                  },
-                );
-              },
-            ),
-            SizedBox(height: 100), // Espacio adicional al final para evitar que el contenido se superponga con el FloatingActionButton
+            Text('Total de cuentas del usuario: ${contador ?? 0}'),
+            SizedBox(height: 8),
+            Text('Nombre de usuario: ${userName ?? ''}'),
+            SizedBox(height: 8),
+            Text('DNI: ${dni ?? ''}'),
+            // Puedes agregar más widgets aquí si lo necesitas
           ],
         ),
-      ),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(width: 8),
-          Text(
-            selectedAccountIndex == -1
-                ? 'Seleccionar una cuenta para hacer una transferencia.'
-                : 'La cuenta seleccionada.',
-            style: TextStyle(
-              fontSize: 15.0,
-              color: Colors.grey[500],
-            ),
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/qrmainpage');
-            },
-            child: Icon(Icons.compare_arrows),
-            backgroundColor: selectedAccountIndex == -1 ? Colors.grey : Colors.redAccent,
-          ),
-        ],
       ),
     );
   }

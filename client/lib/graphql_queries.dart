@@ -19,17 +19,29 @@ const String meQuery = """
   query{
     me{
       name
+      dni
     }
   }
 """;
 
 
 const String signUpMutation = """
-  mutation Signup(\$name: String!, \$password: String!) {
-    signup(name: \$name, password: \$password) {
-      name
+  mutation signUp(\$input: SignUpInput!){
+    signUp(input: \$input) {
+      dni
     }
-  }                 
+  }          
 """;
 
+const String getAccountsQuery = """
+  query q(\$dni: String!){
+    getUserAccountsInfoByDni(dni: \$dni) {
+      owner_dni
+      owner_name
+      number_account
+      balance
+      active
+    }
+  }
+""";
 
