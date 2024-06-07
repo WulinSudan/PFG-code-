@@ -58,26 +58,40 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> fetchUserAccounts() async {
-    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
-    print(dni);
-    final QueryOptions options = QueryOptions(
-      document: gql(getAccountsQuery),
-      variables: <String, dynamic>{
-        'dni': dni,
-      },
-    );
+    try {
+      final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+      print('Fetching accounts for DNI: $dni');
 
-    final QueryResult result = await client.query(options);
+      // Define query options with variables
+      final QueryOptions options = QueryOptions(
+        document: gql(getAccountsQuery),
+        variables: <String, dynamic>{
+          'dni': dni,
+        },
+      );
 
-    if (result.hasException) {
-      print("Error al obtener las cuentas del usuario: ${result.exception}");
-    } else if (result.data != null && result.data!['getUserAccountsInfoByDni'] != null) {
-      setState(() {
-        list_accounts = List<dynamic>.from(result.data!['getUserAccountsInfoByDni']);
-        contador = list_accounts.length;
-      });
+      // Perform the query
+      final QueryResult result = await client.query(options);
+
+      if (result.hasException) {
+        print("Error al obtener las cuentas del usuario: ${result.exception}");
+      } else if (result.data != null && result.data!['getUserAccountsInfoByDni'] != null) {
+        setState(() {
+          // Parse the accounts list
+          list_accounts = List<dynamic>.from(result.data!['getUserAccountsInfoByDni']);
+          contador = list_accounts.length;
+
+          // Print account balances
+          for (var account in list_accounts) {
+            print('Cuenta ID: ${account['number_account']}, Saldo: ${account['balance']}');
+          }
+        });
+      }
+    } catch (e) {
+      print('Ocurrió un error inesperado: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,19 +102,23 @@ class _MainPageState extends State<MainPage> {
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Total de cuentas del usuario: ${contador ?? 0}'),
-            SizedBox(height: 8),
-            Text('Nombre de usuario: ${userName ?? ''}'),
-            SizedBox(height: 8),
-            Text('DNI: ${dni ?? ''}'),
-            // Puedes agregar más widgets aquí si lo necesitas
-          ],
-        ),
+      body: ListView.builder(
+        itemCount: list_accounts.length,
+        itemBuilder: (context, index) {
+          final account = list_accounts[index];
+          return ListTile(
+            title: Text('Cuenta ID: ${account['number_account']}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Saldo: ${account['balance']}'),
+                Text('Propietario DNI: ${account['owner_dni']}'),
+                Text('Propietario Nombre: ${account['owner_name']}'),
+                Text('Activa: ${account['active']}'),
+              ],
+            )
+          );
+        },
       ),
     );
   }
