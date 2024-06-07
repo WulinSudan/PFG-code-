@@ -15,14 +15,16 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  bool selectAll = false;
   String? userName;
   String? dni;
   List<dynamic> list_accounts = [];
   int? contador = 1;
+  int selectedAccountIndex = -1;
 
 
   List<Account> accounts = [
-    Account(ownerDni: '123456789A', ownerName: 'Juan Pérez', numberAccount: '123456', balance: 1000, active: true),
+    Account(ownerDni: '123456789A', ownerName: 'Juan Pérez', numberAccount: '123456', balance: -5, active: true),
     Account(ownerDni: '987654321B', ownerName: 'María López', numberAccount: '654321', balance: 2000, active: false),
     // Agrega más cuentas si es necesario
   ];
@@ -105,13 +107,12 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('Mis Cuentas - ${userName ?? ''}'), // Mostrar el nombre del usuario
+        title: Text('Mis Cuentas - ${userName ?? ''}'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),
@@ -119,8 +120,41 @@ class _MainPageState extends State<MainPage> {
         itemCount: accounts.length,
         itemBuilder: (context, index) {
           final account = accounts[index];
-          return accountCard(account);
+          return GestureDetector(
+            onTap: () {
+              if (account.balance > 0) {
+                setState(() {
+                  if (selectedAccountIndex == index) {
+                    // Si la cuenta ya está seleccionada, deseleccionarla
+                    selectedAccountIndex = -1;
+                  } else {
+                    // Si no, seleccionar la cuenta y deseleccionar todas las demás
+                    selectedAccountIndex = index;
+                  }
+                });
+              } else {
+                // No hagas nada si el saldo de la cuenta es 0 o menos
+              }
+            },
+            child: Container(
+              color: selectedAccountIndex == index ? Colors.blue : Colors.transparent, // Cambiar el color de fondo según si la cuenta está seleccionada o no
+              child: AccountCard(account: account),
+            ),
+          );
         },
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ElevatedButton(
+          onPressed: selectedAccountIndex != -1 ? () {
+            // Navegar a otra página cuando se presione el botón, solo si hay una cuenta seleccionada
+           /* Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => OtraPagina()),
+            );*/
+          } : null, // Deshabilitar el botón si no hay ninguna cuenta seleccionada
+          child: Text('Ir a Otra Página'),
+        ),
       ),
     );
   }

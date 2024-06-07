@@ -4,6 +4,7 @@ class Account {
   final String numberAccount;
   final int balance;
   final bool active;
+  bool isSelected; // Nuevo campo para indicar si la cuenta está seleccionada
 
   Account({
     required this.ownerDni,
@@ -11,6 +12,7 @@ class Account {
     required this.numberAccount,
     required this.balance,
     required this.active,
+    this.isSelected = false, // Por defecto, la cuenta no está seleccionada
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
