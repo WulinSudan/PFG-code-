@@ -24,3 +24,7 @@ class AccountCard extends StatelessWidget {
     );
   }
 }
+
+Widget accountCard(Account account) {
+  return AccountCard(account: account);
+}

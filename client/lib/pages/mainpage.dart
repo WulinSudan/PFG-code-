@@ -116,21 +116,10 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.redAccent,
       ),
       body: ListView.builder(
-        itemCount: list_accounts.length,
+        itemCount: accounts.length,
         itemBuilder: (context, index) {
-          final account = list_accounts[index];
-          return ListTile(
-            title: Text('Cuenta ID: ${account['number_account']}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Saldo: ${account['balance']}'),
-                Text('Propietario DNI: ${account['owner_dni']}'),
-                Text('Propietario Nombre: ${account['owner_name']}'),
-                Text('Activa: ${account['active']}'),
-              ],
-            )
-          );
+          final account = accounts[index];
+          return accountCard(account);
         },
       ),
     );
