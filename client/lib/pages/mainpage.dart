@@ -17,9 +17,15 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String? userName;
   String? dni;
-  // List<Account> list_accounts = [];
   List<dynamic> list_accounts = [];
   int? contador = 1;
+
+
+  List<Account> accounts = [
+    Account(ownerDni: '123456789A', ownerName: 'Juan Pérez', numberAccount: '123456', balance: 1000, active: true),
+    Account(ownerDni: '987654321B', ownerName: 'María López', numberAccount: '654321', balance: 2000, active: false),
+    // Agrega más cuentas si es necesario
+  ];
 
   @override
   void initState() {
@@ -35,6 +41,13 @@ class _MainPageState extends State<MainPage> {
     print(userName);
     print(dni);
     print(list_accounts.length);
+
+    for (var accountJson in list_accounts) {
+      accounts.add(Account.fromJson(accountJson));
+    }
+    print("---------------------48------------------------");
+    print(accounts.length);
+
 
   }
 
