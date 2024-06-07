@@ -24,8 +24,8 @@ class _MainPageState extends State<MainPage> {
 
 
   List<Account> accounts = [
-    Account(ownerDni: '123456789A', ownerName: 'Juan Pérez', numberAccount: '123456', balance: -5, active: true),
-    Account(ownerDni: '987654321B', ownerName: 'María López', numberAccount: '654321', balance: 2000, active: false),
+    Account(ownerDni: '123456789A', ownerName: 'Juan Pérez (Eloi)', numberAccount: '123456', balance: -5, active: true),
+    Account(ownerDni: '987654321B', ownerName: 'María López (Eloi)', numberAccount: '654321', balance: 2000, active: false),
     // Agrega más cuentas si es necesario
   ];
 
@@ -138,7 +138,38 @@ class _MainPageState extends State<MainPage> {
             },
             child: Container(
               color: selectedAccountIndex == index ? Colors.blue : Colors.transparent, // Cambiar el color de fondo según si la cuenta está seleccionada o no
-              child: AccountCard(account: account),
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AccountCard(account: account),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      // Aquí puedes manejar la acción cuando se presiona el botón de la cuenta
+                      // Por ejemplo, puedes mostrar un diálogo con más detalles de la cuenta
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Detalles de la cuenta'),
+                            content: Text('Número de cuenta: ${account.numberAccount}\nSaldo: ${account.balance}\nPropietario: ${account.ownerName}'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Cerrar'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    icon: Icon(Icons.info_outline),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -147,15 +178,16 @@ class _MainPageState extends State<MainPage> {
         padding: const EdgeInsets.all(8.0),
         child: ElevatedButton(
           onPressed: selectedAccountIndex != -1 ? () {
-            // Navegar a otra página cuando se presione el botón, solo si hay una cuenta seleccionada
-           /* Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(builder: (context) => OtraPagina()),
-            );*/
+              '/qrmainpage',
+              arguments: {'accessToken': widget.accessToken},
+            );
           } : null, // Deshabilitar el botón si no hay ninguna cuenta seleccionada
           child: Text('Ir a Otra Página'),
         ),
       ),
     );
   }
+
 }
