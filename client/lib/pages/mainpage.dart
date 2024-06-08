@@ -4,6 +4,7 @@ import 'account_card.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
+import 'package:qr_flutter/qr_flutter.dart'; // Importa el paquete qr_flutter
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -21,7 +22,6 @@ class _MainPageState extends State<MainPage> {
   List<dynamic> list_accounts = [];
   int? contador = 1;
   int selectedAccountIndex = -1;
-
 
   List<Account> accounts = [
     Account(ownerDni: '123456789A', ownerName: 'Juan Pérez (Eloi)', numberAccount: '123456', balance: -5, active: true),
@@ -49,8 +49,6 @@ class _MainPageState extends State<MainPage> {
     }
     print("---------------------48------------------------");
     print(accounts.length);
-
-
   }
 
   Future<void> fetchUserInfo() async {
@@ -146,14 +144,20 @@ class _MainPageState extends State<MainPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // Aquí puedes manejar la acción cuando se presiona el botón de la cuenta
-                      // Por ejemplo, puedes mostrar un diálogo con más detalles de la cuenta
                       showDialog(
                         context: context,
                         builder: (context) {
                           return AlertDialog(
-                            title: Text('Detalles de la cuenta'),
-                            content: Text('Número de cuenta: ${account.numberAccount}\nSaldo: ${account.balance}\nPropietario: ${account.ownerName}'),
+                            title: Text('Codi qr para cobrar'),
+                            content: Container(
+                              width: 200,
+                              height: 200,
+                              child: QrImageView(
+                                data: 'Número de cuenta: ${account.numberAccount}',
+                                version: QrVersions.auto,
+                                size: 200.0,
+                              ),
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -189,5 +193,4 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-
 }
