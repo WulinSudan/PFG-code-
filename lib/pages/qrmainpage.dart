@@ -1,35 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart'; // Asegúrate de tener esta dependencia
+import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
+import '../graphql_queries.dart';
 
-class QrMainPage extends StatelessWidget {
+class QrMainPage extends StatefulWidget {
 
-  //print(sprintf("%s %s", ["Hello", "World"]));
+  final String accessToken;
+  QrMainPage({required this.accessToken});
 
-  final String username;
+  @override
+  _QrMainPageState createState() => _QrMainPageState();
+}
 
-  QrMainPage({required this.username});
+class _QrMainPageState extends State<QrMainPage> {
+  String userName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    // Aquí debes realizar tu consulta GraphQL para obtener el nombre del usuario
+    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+
+    final QueryResult result = await client.query(
+      QueryOptions(
+        document: gql(meQuery),
+      ),
+    );
+
+    if (result.hasException) {
+      print("Error al obtener el nombre del usuario: ${result.exception}");
+    } else {
+      setState(() {
+        userName = result.data!['me']['name'];
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('Mis Cuentas - ${username}'),
+        title: Text('Mis Cuentas - $userName'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),
-
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start, // Alinea la imagen en la parte superior
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(height: 30.0),
             Image(
               image: AssetImage('assets/qr.png'),
             ),
-            SizedBox(height: 20), // Espacio entre la imagen y el botón de texto
+            SizedBox(height: 20),
             TextButton(
               onPressed: () {
-                // Acción para abrir la cámara
                 Navigator.pushNamed(context, '/qrscannerpage');
               },
               child: Text(
@@ -37,12 +68,10 @@ class QrMainPage extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
               ),
             ),
-            SizedBox(height: 20), // Espacio entre la imagen y el botón de texto
+            SizedBox(height: 20),
             TextButton(
               onPressed: () {
-                // Acción para generar qr pagament
                 Navigator.pushNamed(context, '/qrpayment');
-
               },
               child: Text(
                 'Generar QR pagament',
@@ -52,7 +81,6 @@ class QrMainPage extends StatelessWidget {
           ],
         ),
       ),
-
     );
   }
 }
