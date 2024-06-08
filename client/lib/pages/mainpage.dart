@@ -192,8 +192,8 @@ class _MainPageState extends State<MainPage> {
               onPressed: selectedAccountIndex != null ? () {
                 Navigator.pushNamed(
                   context,
-                  '/qrmainpage',
-                  arguments: {'accessToken': widget.accessToken},
+                  '/chargepage',
+                  arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
                 );
               } : null,
               style: ButtonStyle(

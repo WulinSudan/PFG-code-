@@ -5,6 +5,7 @@ import 'pages/login.dart';
 import 'pages/mainpage.dart';
 import 'pages/registration.dart';
 import 'mutation.dart';
+import 'pages/chargepage.dart';
 void main() {
   runApp(MyApp());
 }
@@ -22,6 +23,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
+        '/chargepage': (context) => ChargePage(),
         '/mutation': (context) => MutationPage(),
         '/mainpage': (context) {
           final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
