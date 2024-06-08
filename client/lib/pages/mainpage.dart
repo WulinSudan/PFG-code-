@@ -16,18 +16,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  bool selectAll = false;
   String? userName;
   String? dni;
   List<dynamic> list_accounts = [];
   int? contador = 1;
-  int selectedAccountIndex = -1;
+  int? selectedAccountIndex;
 
-  List<Account> accounts = [
-    Account(ownerDni: '123456789A', ownerName: 'Juan Pérez (Eloi)', numberAccount: '123456', balance: -5, active: true),
-    Account(ownerDni: '987654321B', ownerName: 'María López (Eloi)', numberAccount: '654321', balance: 2000, active: false),
-    // Agrega más cuentas si es necesario
-  ];
+  List<Account> accounts = [];
 
   @override
   void initState() {
@@ -120,19 +115,9 @@ class _MainPageState extends State<MainPage> {
           final account = accounts[index];
           return GestureDetector(
             onTap: () {
-              if (account.balance > 0) {
-                setState(() {
-                  if (selectedAccountIndex == index) {
-                    // Si la cuenta ya está seleccionada, deseleccionarla
-                    selectedAccountIndex = -1;
-                  } else {
-                    // Si no, seleccionar la cuenta y deseleccionar todas las demás
-                    selectedAccountIndex = index;
-                  }
-                });
-              } else {
-                // No hagas nada si el saldo de la cuenta es 0 o menos
-              }
+              setState(() {
+                selectedAccountIndex = index;
+              });
             },
             child: Container(
               color: selectedAccountIndex == index ? Colors.blue : Colors.transparent, // Cambiar el color de fondo según si la cuenta está seleccionada o no
@@ -180,15 +165,50 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ElevatedButton(
-          onPressed: selectedAccountIndex != -1 ? () {
-            Navigator.pushNamed(
-              context,
-              '/qrmainpage',
-              arguments: {'accessToken': widget.accessToken},
-            );
-          } : null, // Deshabilitar el botón si no hay ninguna cuenta seleccionada
-          child: Text('Ir a Otra Página'),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ElevatedButton(
+              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
+                Navigator.pushNamed(
+                  context,
+                  '/qrmainpage',
+                  arguments: {'accessToken': widget.accessToken},
+                );
+              } : null,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                      (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return null; // Use the default color.
+                    }
+                    return Colors.green; // Use the green color when enabled.
+                  },
+                ),
+              ),
+              child: Text('A pagar'),
+            ),
+            ElevatedButton(
+              onPressed: selectedAccountIndex != null ? () {
+                Navigator.pushNamed(
+                  context,
+                  '/qrmainpage',
+                  arguments: {'accessToken': widget.accessToken},
+                );
+              } : null,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                      (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return null; // Use the default color.
+                    }
+                    return Colors.green; // Use the green color when enabled.
+                  },
+                ),
+              ),
+              child: Text('A cobrar'),
+            ),
+          ],
         ),
       ),
     );
