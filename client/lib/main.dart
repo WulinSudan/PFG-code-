@@ -32,20 +32,6 @@ class _MyAppState extends State<MyApp> {
           return MainPage(accessToken: accessToken!);
         },
         '/registration': (context) => RegistrationPage(),
-        '/qrmainpage': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments;
-          if (args is String) {
-            // Si los argumentos son simplemente un String, puedes manejarlos aquí
-            return QrMainPage(accessToken: args);
-          } else if (args is Map<String, dynamic>) {
-            // Si los argumentos son un mapa, puedes extraer el accessToken del mapa
-            final accessToken = args['accessToken'] as String?;
-            return QrMainPage(accessToken: accessToken ?? '');
-          } else {
-            // Maneja otros tipos de argumentos o errores aquí
-            throw ArgumentError('Invalid arguments provided for route /qrmainpage');
-          }
-        },
         '/welcomepage': (context) => WelcomePage(),
         '/login': (context) => Login(), // Asumiendo que tienes una clase llamada Login para tu pantalla de inicio de sesión.
       },
