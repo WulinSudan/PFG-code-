@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/welcomepage.dart';
-import 'pages/qrmainpage.dart';
+import 'pages/perEsborrar.dart';
 import 'pages/login.dart';
 import 'pages/mainpage.dart';
 import 'pages/registration.dart';

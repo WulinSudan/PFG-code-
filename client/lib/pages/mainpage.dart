@@ -169,6 +169,10 @@ class _MainPageState extends State<MainPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             ElevatedButton(
+              //camara
+            ),
+
+            ElevatedButton(
               onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
                 Navigator.pushNamed(
                   context,
