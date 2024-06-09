@@ -73,7 +73,7 @@ class _PaymentPageState extends State<PaymentPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 30.0),
-                QrImage(
+                QrImageView(
                   data: qrData,
                   version: QrVersions.auto,
                   size: 200.0,
@@ -99,7 +99,6 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
         ),
-      ),
-    );
+      );
   }
 }
