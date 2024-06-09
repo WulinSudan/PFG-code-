@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Asegúrate de tener esta dependencia
 
-class PaymentPage extends StatefulWidget {
+class ChargePage extends StatefulWidget {
   @override
-  _PaymentPageState createState() => _PaymentPageState();
+  _ChargePageState createState() => _ChargePageState();
 }
 
-class _PaymentPageState extends State<PaymentPage> {
+class _ChargePageState extends State<ChargePage> {
   late String accountNumber = '';
   String qrData = '';
   TextEditingController amountController = TextEditingController();
@@ -19,7 +19,7 @@ class _PaymentPageState extends State<PaymentPage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          qrData = 'accountNumber:$accountNumber,importe:0';
+          qrData = 'destination:$accountNumber,importe:0';
         });
       }
     });
@@ -29,41 +29,13 @@ class _PaymentPageState extends State<PaymentPage> {
     setState(() {
       qrData = 'accountNumber:$accountNumber,importe:${amountController.text}';
     });
-    _showInfoDialog();
-  }
-
-  void _showInfoDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Detalles del pago'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Número de cuenta: $accountNumber'),
-              Text('Importe: ${amountController.text}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment Page'),
+        title: Text('Charge Page'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -73,13 +45,13 @@ class _PaymentPageState extends State<PaymentPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 30.0),
-                QrImage(
+                QrImageView(
                   data: qrData,
                   version: QrVersions.auto,
                   size: 200.0,
                 ),
                 SizedBox(height: 20),
-                Text('Account Number: $accountNumber'),
+                Text('Account Number: ${accountNumber}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
@@ -97,7 +69,6 @@ class _PaymentPageState extends State<PaymentPage> {
               ],
             ),
           ),
-        ),
         ),
       ),
     );
