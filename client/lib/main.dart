@@ -6,6 +6,7 @@ import 'pages/mainpage.dart';
 import 'pages/registration.dart';
 import 'mutation.dart';
 import 'pages/chargepage.dart';
+import 'pages/paymentpage.dart';
 void main() {
   runApp(MyApp());
 }
@@ -23,6 +24,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
+        '/paymentpage': (context) => PaymentPage(),
         '/chargepage': (context) => ChargePage(),
         '/mutation': (context) => MutationPage(),
         '/mainpage': (context) {

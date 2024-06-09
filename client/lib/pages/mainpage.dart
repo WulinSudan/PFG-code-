@@ -172,8 +172,8 @@ class _MainPageState extends State<MainPage> {
               onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
                 Navigator.pushNamed(
                   context,
-                  '/qrmainpage',
-                  arguments: {'accessToken': widget.accessToken},
+                  '/paymentpage',
+                  arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
                 );
               } : null,
               style: ButtonStyle(
@@ -188,6 +188,7 @@ class _MainPageState extends State<MainPage> {
               ),
               child: Text('A pagar'),
             ),
+
             ElevatedButton(
               onPressed: selectedAccountIndex != null ? () {
                 Navigator.pushNamed(

@@ -19,7 +19,7 @@ class _PaymentPageState extends State<PaymentPage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          qrData = 'accountNumber:$accountNumber,importe:0';
+          qrData = 'origin:$accountNumber,importe:0';
         });
       }
     });
@@ -29,34 +29,6 @@ class _PaymentPageState extends State<PaymentPage> {
     setState(() {
       qrData = 'accountNumber:$accountNumber,importe:${amountController.text}';
     });
-    _showInfoDialog();
-  }
-
-  void _showInfoDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Detalles del pago'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Número de cuenta: $accountNumber'),
-              Text('Importe: ${amountController.text}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -73,13 +45,8 @@ class _PaymentPageState extends State<PaymentPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 30.0),
-                QrImage(
-                  data: qrData,
-                  version: QrVersions.auto,
-                  size: 200.0,
-                ),
                 SizedBox(height: 20),
-                Text('Account Number: $accountNumber'),
+                Text('Account Number: ${accountNumber}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
@@ -92,12 +59,42 @@ class _PaymentPageState extends State<PaymentPage> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _updateQrCode,
-                  child: Text('Update'),
+                  child: Text('Validar import'),
                 ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('Codi qr para cobrar'),
+                          content: Container(
+                            width: 200,
+                            height: 200,
+                            child: QrImageView(
+                              data: 'Número de cuenta:',
+                              version: QrVersions.auto,
+                              size: 200.0,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('Cerrar'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Text('Obtenir Codi QR'),
+                )
               ],
             ),
           ),
-        ),
         ),
       ),
     );

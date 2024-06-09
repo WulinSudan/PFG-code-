@@ -7,7 +7,7 @@ class ChargePage extends StatefulWidget {
 }
 
 class _ChargePageState extends State<ChargePage> {
-  late String accountNumber;
+  late String accountNumber = '';
   String qrData = '';
   TextEditingController amountController = TextEditingController();
 
@@ -19,19 +19,16 @@ class _ChargePageState extends State<ChargePage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          qrData = 'accountNumber:$accountNumber,importe:0';
+          qrData = 'destination:$accountNumber,importe:0';
         });
       }
     });
   }
 
   void _updateQrCode() {
-    final newQrData = 'accountNumber:$accountNumber,importe:${amountController.text}';
-    print('New QR Data: $newQrData'); // Verifica el nuevo valor de qrData
     setState(() {
-      qrData = newQrData;
+      qrData = 'accountNumber:$accountNumber,importe:${amountController.text}';
     });
-    print('QR Data Updated'); // Verifica si se actualiza qrData correctamente
   }
 
   @override
@@ -54,7 +51,7 @@ class _ChargePageState extends State<ChargePage> {
                   size: 200.0,
                 ),
                 SizedBox(height: 20),
-                Text('Account Number: ${accountNumber ?? ''}'),
+                Text('Account Number: ${accountNumber}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
