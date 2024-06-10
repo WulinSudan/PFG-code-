@@ -3,6 +3,8 @@
 A new Flutter project.
 
 ## Getting Started
+Actualitzar dependencies: flutter pub get
+
 Cal instal·lar Flutter i editar enviroment de flutter/bin
 
 
