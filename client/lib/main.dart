@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'pages/welcomepage.dart';
-import 'pages/perEsborrar.dart';
 import 'pages/login.dart';
 import 'pages/mainpage.dart';
 import 'pages/registration.dart';
 import 'mutation.dart';
 import 'pages/chargepage.dart';
 import 'pages/paymentpage.dart';
+import 'pages/qrscanner.dart';
+
+
 void main() {
   runApp(MyApp());
 }
@@ -24,6 +26,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
+        '/qrscanner': (context) => QrScanner(),
         '/paymentpage': (context) => PaymentPage(),
         '/chargepage': (context) => ChargePage(),
         '/mutation': (context) => MutationPage(),

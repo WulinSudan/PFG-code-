@@ -169,6 +169,29 @@ class _MainPageState extends State<MainPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
 
+            //primer boto
+            ElevatedButton(
+              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
+                Navigator.pushNamed(
+                  context,
+                  '/qrscanner',
+                  //arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
+                );
+              } : null,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                      (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return null; // Use the default color.
+                    }
+                    return Colors.green; // Use the green color when enabled.
+                  },
+                ),
+              ),
+              child: Text('Camera'),
+            ),
+
+            //segom boto
             ElevatedButton(
               onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
                 Navigator.pushNamed(
