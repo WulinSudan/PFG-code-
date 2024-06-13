@@ -30,6 +30,8 @@
     addAccount(input:addAccountInput):Account!
     removeAccount(number_account:String!):Int!
     addAccountForUser(input: addAccountInput): Account!
+
+    makeTransfer(input: TransferInput!): TransferResult!
   }
 
   type Address {
@@ -68,6 +70,18 @@
     access_token: String!
     user: User!
   }
+
+  input TransferInput {
+    accountOrigen: String!
+    accountDestin: String!
+    importNumber: Int!
+  }
+
+  type TransferResult {
+    success: Boolean!
+    message: String
+  }
+
 
   input addAccountInput{
     owner_dni: String!
