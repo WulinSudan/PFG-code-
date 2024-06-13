@@ -1,5 +1,7 @@
+import 'dart:async'; // Importar dart:async para usar Timer
+
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart'; // Asegúrate de tener esta dependencia
+import 'package:qr_flutter/qr_flutter.dart';
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -8,8 +10,10 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   late String accountNumber = '';
-  String qrData = '';
+  double amountToPay = 0.0; // Importe a pagar
+  String qrData = ''; // Datos para el código QR
   TextEditingController amountController = TextEditingController();
+  bool isDialogOpen = false; // Para controlar si el AlertDialog está abierto
 
   @override
   void initState() {
@@ -27,8 +31,87 @@ class _PaymentPageState extends State<PaymentPage> {
 
   void _updateQrCode() {
     setState(() {
-      qrData = 'accountNumber:$accountNumber,importe:${amountController.text}';
+      amountToPay = double.tryParse(amountController.text) ?? 0.0;
+      qrData = 'accountNumber:$accountNumber,importe:$amountToPay';
     });
+
+    _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
+  }
+
+  void _showQrDialog() {
+    const duration = const Duration(seconds: 10);
+    isDialogOpen = true; // Indicar que el AlertDialog está abierto
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Evitar que se cierre al tocar fuera
+      builder: (context) {
+        // Iniciar un Timer para cerrar automáticamente después de 10 segundos
+        Timer(duration, () {
+          if (isDialogOpen) {
+            Navigator.of(context).pop(); // Cerrar el AlertDialog
+            isDialogOpen = false; // Indicar que el AlertDialog está cerrado
+          }
+        });
+
+        return AlertDialog(
+          title: Text('Codi QR per pagar'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 200,
+                  height: 200,
+                  child: QrImageView(
+                    data: qrData, // Usar qrData que has actualizado
+                    version: QrVersions.auto,
+                    size: 200.0,
+                  ),
+                ),
+                SizedBox(height: 10),
+                RichText(
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: [
+                      TextSpan(
+                        text: 'Import a pagar: ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '€$amountToPay',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text('Aquest codi QR es caducarà en:'),
+                CountdownWidget(duration: duration), // Widget para mostrar el contador de tiempo
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                isDialogOpen = false; // Indicar que el AlertDialog está cerrado
+              },
+              child: Text('Tanca'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -45,14 +128,13 @@ class _PaymentPageState extends State<PaymentPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 30.0),
-                SizedBox(height: 20),
                 Text('Account Number: ${accountNumber}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Enter the amount',
+                    labelText: 'Entrar el import que es vol pagar (buit=màxim)',
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -61,34 +143,10 @@ class _PaymentPageState extends State<PaymentPage> {
                   onPressed: _updateQrCode,
                   child: Text('Validar import'),
                 ),
-
+                SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Codi qr para cobrar'),
-                          content: Container(
-                            width: 200,
-                            height: 200,
-                            child: QrImageView(
-                              data: 'Número de cuenta:',
-                              version: QrVersions.auto,
-                              size: 200.0,
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('Cerrar'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    //Navigator.pushNamed(context, '/qr'); // Navigate to another screen if needed
                   },
                   child: Text('Obtenir Codi QR'),
                 )
@@ -98,5 +156,51 @@ class _PaymentPageState extends State<PaymentPage> {
         ),
       ),
     );
+  }
+}
+
+class CountdownWidget extends StatefulWidget {
+  final Duration duration;
+
+  const CountdownWidget({Key? key, required this.duration}) : super(key: key);
+
+  @override
+  _CountdownWidgetState createState() => _CountdownWidgetState();
+}
+
+class _CountdownWidgetState extends State<CountdownWidget> {
+  late Timer _timer;
+  int _remainingSeconds = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = widget.duration.inSeconds;
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _remainingSeconds--;
+      });
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$_remainingSeconds seconds',
+      style: TextStyle(fontWeight: FontWeight.bold),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 }
