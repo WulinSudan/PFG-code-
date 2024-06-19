@@ -144,12 +144,6 @@ class _PaymentPageState extends State<PaymentPage> {
                   child: Text('Validar import'),
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    //Navigator.pushNamed(context, '/qr'); // Navigate to another screen if needed
-                  },
-                  child: Text('Obtenir Codi QR'),
-                )
               ],
             ),
           ),

@@ -127,36 +127,6 @@ class _MainPageState extends State<MainPage> {
                   Expanded(
                     child: AccountCard(account: account),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Codi qr para cobrar'),
-                            content: Container(
-                              width: 200,
-                              height: 200,
-                              child: QrImageView(
-                                data: 'Número de cuenta: ${account.numberAccount}',
-                                version: QrVersions.auto,
-                                size: 200.0,
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Cerrar'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    icon: Icon(Icons.info_outline),
-                  ),
                 ],
               ),
             ),

@@ -56,7 +56,8 @@ export const userResolvers = {
         allUsers: async () => {
             const users = await User.find();
             return users.map((user) => {
-                return {
+                return
+                 {
                     name:user.name
                 };
             });

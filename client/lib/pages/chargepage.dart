@@ -19,17 +19,31 @@ class _ChargePageState extends State<ChargePage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          qrData = 'destination:$accountNumber,importe:0';
+          updateQrData();
         });
       }
     });
   }
 
-  void _updateQrCode() {
+  void updateQrData() {
+    String maskedAccountNumber = maskAccountNumber(accountNumber);
+    String amountText = amountController.text.isEmpty ? 'undefined' : amountController.text;
+
     setState(() {
-      qrData = 'accountNumber:$accountNumber,importe:${amountController.text}';
+      qrData = 'to:$maskedAccountNumber,import:$amountText';
     });
   }
+
+  String maskAccountNumber(String accountNumber) {
+    if (accountNumber.length != 10) {
+      return 'Número de cuenta inválido';
+    }
+
+    String visibleDigits = accountNumber.substring(accountNumber.length - 6); // Muestra los últimos 6 dígitos
+    String maskedDigits = accountNumber.substring(0, 4).replaceAll(RegExp(r'\d'), 'x'); // Oculta los primeros 4 dígitos
+    return '$maskedDigits$visibleDigits';
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +65,12 @@ class _ChargePageState extends State<ChargePage> {
                   size: 200.0,
                 ),
                 SizedBox(height: 20),
-                Text('Account Number: ${accountNumber}'),
+                Text('Account Number: ${maskAccountNumber(accountNumber)}'),
+                Text('Import: ${amountController.text.isEmpty ? 'undefined' : amountController.text}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
+                  onChanged: (_) => updateQrData(),
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Enter the amount',
@@ -62,10 +78,6 @@ class _ChargePageState extends State<ChargePage> {
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _updateQrCode,
-                  child: Text('Update'),
-                ),
               ],
             ),
           ),
