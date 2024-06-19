@@ -6,6 +6,22 @@ import { User } from "../model/user";
 import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
 
+
+function generateUniqueAccountNumber(): string {
+  const now = new Date();
+  const year = String(now.getFullYear()).slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = String(now.getMinutes()).padStart(2, '0');
+  
+  const aux = `${year}${month}${day}${hour}${minute}`;
+  console.log(aux);
+  return aux;
+}
+
+
+
 interface AddAccountInput {
     owner_dni: string;
     owner_name: string;
@@ -89,6 +105,43 @@ export const userResolvers = {
     },
     Mutation: {
 
+        addAccountByAccessToken: async (_root: any, _args: any, context: Context): Promise<IAccount> => {
+          try {
+
+            const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+            if (!userId) {
+              throw new Error('User not authenticated');
+            }
+    
+            const user = await User.findById(new Types.ObjectId(userId));
+            if (!user) {
+                throw new Error("User not found");
+            }
+      
+
+            // Crear una nueva cuenta con saldo inicial de 10€
+            const newAccount = new Account({
+              owner_dni: user.dni,
+              owner_name: user.name,
+              number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
+              balance: 10.5, // Saldo inicial de 10€
+              active: true,
+            });
+      
+            await newAccount.save();
+
+            // Asociar la cuenta al usuario
+            user.accounts.push(newAccount._id);
+            await user.save();
+    
+            return newAccount;
+          } catch (error) {
+            throw new Error(`Error al crear cuenta para el usuario`);
+          }
+        },
+
+
+
         removeUser: async (_root: any, args: any) => {
             const deletionResult = await User.deleteOne({ name: args.name });
             return deletionResult.deletedCount;
@@ -155,7 +208,7 @@ export const userResolvers = {
                 user: await User.findById(user.id),
             };
         },
-        addAccountForUser: async (_root: any, { input: { owner_dni, owner_name, number_account, balance, active } }: AddAccountArgs): Promise<IAccount> => {
+        addAccountByUser: async (_root: any, { input: { owner_dni, owner_name, number_account, balance, active } }: AddAccountArgs): Promise<IAccount> => {
             try {
               // Create a new account
               const newAccount = new Account({

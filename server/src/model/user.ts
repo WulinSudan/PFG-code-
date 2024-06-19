@@ -1,17 +1,28 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
-import { IAccount } from './account';
+import mongoose, { Document, Schema } from 'mongoose';
 
 // Interface for User
 interface IUser extends Document {
-  dni: string;
+  dni: string; // Debe ser un string de 8 dígitos seguidos de 1 letra
   name: string;
   password: string;
-  accounts: IAccount['_id'][];
+  role: string;
+  accounts: mongoose.Types.ObjectId[]; // Array de referencias a objetos de tipo Account
 }
 
 // User Schema
 const UserSchema: Schema = new Schema({
-  dni: { type: String, unique: true, required: true },
+  dni: {
+    type: String,
+    unique: true,
+    required: true,
+    validate: {
+      validator: function(v: string) {
+        // Expresión regular para validar el formato de dni: 8 dígitos seguidos de 1 letra
+        return /^\d{8}[A-Za-z]$/.test(v);
+      },
+      message: (props: any) => `${props.value} no es un DNI válido. Debe tener 8 dígitos seguidos de 1 letra.`,
+    },
+  },
   name: { type: String, required: true },
   password: { type: String, required: true },
   role: { type: String, default: "client" },
@@ -19,6 +30,6 @@ const UserSchema: Schema = new Schema({
 });
 
 // User Model
-const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
+const User = mongoose.model<IUser>('User', UserSchema);
 
 export { User, IUser };

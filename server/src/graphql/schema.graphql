@@ -30,7 +30,9 @@
 
     addAccount(input:addAccountInput):Account!
     removeAccount(number_account:String!):Int!
-    addAccountForUser(input: addAccountInput): Account!
+
+    addAccountByUser(input: addAccountInput): Account!
+    addAccountByAccessToken: Account!
 
     makeTransfer(input: TransferInput!): TransferResult!
 

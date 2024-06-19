@@ -1,6 +1,22 @@
 import { Types } from "mongoose";
 import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
+import { Context } from "../utils/context";
+import { getAccessToken, getUserId } from "../utils/jwt";
+import { User } from "../model/user";
+
+
+function generateUniqueAccountNumber(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = String(now.getMinutes()).padStart(2, '0');
+  
+  return `${month}${day}${hour}${minute}`;
+}
+
+
 
 interface AddAccountInput {
     owner_dni: string;
@@ -43,6 +59,10 @@ export const accountResolvers = {
         }
     },
     Mutation: {
+
+  
+
+
         addAccount: async (_root: any, { input }: { input: AddAccountInput }): Promise<IAccount> => {
             try {
               const { owner_dni, owner_name, number_account, balance, active } = input;

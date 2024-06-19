@@ -27,7 +27,18 @@ exports.User = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 // User Schema
 const UserSchema = new mongoose_1.Schema({
-    dni: { type: String, unique: true, required: true },
+    dni: {
+        type: String,
+        unique: true,
+        required: true,
+        validate: {
+            validator: function (v) {
+                // Expresión regular para validar el formato de dni: 8 dígitos seguidos de 1 letra
+                return /^\d{8}[A-Za-z]$/.test(v);
+            },
+            message: (props) => `${props.value} no es un DNI válido. Debe tener 8 dígitos seguidos de 1 letra.`,
+        },
+    },
     name: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, default: "client" },
