@@ -2,7 +2,7 @@ class Account {
   final String ownerDni;
   final String ownerName;
   final String numberAccount;
-  final int balance;
+  final double balance;
   final bool active;
   bool isSelected; // Nuevo campo para indicar si la cuenta está seleccionada
 
@@ -20,7 +20,7 @@ class Account {
       ownerDni: json['owner_dni'],
       ownerName: json['owner_name'],
       numberAccount: json['number_account'],
-      balance: json['balance'],
+      balance: (json['balance'] as num).toDouble(),
       active: json['active'],
     );
   }
