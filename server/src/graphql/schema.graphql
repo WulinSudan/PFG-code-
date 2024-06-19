@@ -22,6 +22,7 @@
     signUp(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
     removeUser(name: String!): Int!
+    addNewAdmin(input: AddNewAdminInput!): User!
 
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person!
     editNumber(name: String!, phone: Int!): Person
@@ -32,6 +33,8 @@
     addAccountForUser(input: addAccountInput): Account!
 
     makeTransfer(input: TransferInput!): TransferResult!
+
+    
   }
 
   type Address {
@@ -106,6 +109,13 @@
     name: String!
     password: String!
   }
+
+  input AddNewAdminInput {
+  dni: String!
+  name: String!
+  password: String!
+  role: String
+}
 
 
 

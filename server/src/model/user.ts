@@ -14,6 +14,7 @@ const UserSchema: Schema = new Schema({
   dni: { type: String, unique: true, required: true },
   name: { type: String, required: true },
   password: { type: String, required: true },
+  role: { type: String, default: "client" },
   accounts: [{ type: Schema.Types.ObjectId, ref: 'Account' }],
 });
 

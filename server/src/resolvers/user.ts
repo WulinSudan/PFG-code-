@@ -113,6 +113,27 @@ export const userResolvers = {
             }
         },
 
+        addNewAdmin: async (_root: any, { input: {dni,name, password,role} }: any ) => {
+          try {
+              const userInput = {
+                  dni:dni,
+                  name: name,
+                  password: await hashPassword(password),
+                  role: role,
+              };
+
+              const user = new User(userInput);
+              await user.save();
+              return user;
+          } catch (error: any) {
+              if (error.code === 11000) {
+                  throw new Error("User already exist");
+              }
+              throw error;
+          }
+      },
+
+
         loginUser: async (_root: any, { input: { name, password } }: any) => {
             const user = await User.findOne({ name }).select("password");
             console.log(user);

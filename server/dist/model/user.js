@@ -30,6 +30,7 @@ const UserSchema = new mongoose_1.Schema({
     dni: { type: String, unique: true, required: true },
     name: { type: String, required: true },
     password: { type: String, required: true },
+    role: { type: String, default: "client" },
     accounts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Account' }],
 });
 // User Model
