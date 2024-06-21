@@ -82,10 +82,11 @@ export const accountResolvers = {
               throw new Error('Error adding account: ');
             }
           },
-        // removeAccount: async (_root: any, args: any) => {
-        //     const deletionResult = await Account.deleteOne({ number_account: args.number_account });
-        //     return deletionResult.deletedCount;
-        // },
+          
+         removeAccount: async (_root: any, args: any) => {
+             const deletionResult = await Account.deleteOne({ number_account: args.number_account });
+             return deletionResult.deletedCount;
+         },
 
         makeTransfer: async (_root: any, { input }: { input: TransferInput }): Promise<any> => {
           try {

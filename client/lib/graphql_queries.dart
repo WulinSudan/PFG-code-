@@ -45,3 +45,24 @@ const String getAccountsQuery = """
   }
 """;
 
+
+
+final String addAccountMutation = """
+  mutation {
+    addAccountByAccessToken {
+      balance
+    }
+  }
+""";
+
+
+const String removeAccountMutation = """
+  mutation m(\$number_account: String!) {
+    removeAccount(number_account: \$number_account)
+  }
+ """;
+
+
+
+
+

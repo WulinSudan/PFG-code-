@@ -100,6 +100,46 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  Future<void> removeAccount(String accountNumber) async {
+    print("-------------------104-----------$accountNumber---");
+    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+
+    try {
+      final QueryResult result = await client.mutate(
+        MutationOptions(
+          document: gql(removeAccountMutation),
+          variables: {
+            'number_account': accountNumber,
+          },
+        ),
+      );
+
+      if (result.hasException) {
+        print('Mutación no exitosa-----------117----------------------');
+        print('Error al ejecutar la mutación: ${result.exception.toString()}');
+        // Aquí puedes manejar el error de alguna manera (mostrar un mensaje, etc.)
+      } else {
+        print('Mutación exitosa-----------120----------------------');
+
+        Navigator.pushNamed(
+          context,
+          '/mainpage',
+          arguments: widget.accessToken,
+        );
+
+        setState(() {
+          accounts.removeWhere((account) => account.numberAccount == accountNumber);
+          selectedAccountIndex = null; //
+          // Deseleccionar la cuenta después de eliminarla
+        });
+        // Aquí puedes manejar la respuesta de la mutación si es necesario
+      }
+    } catch (e) {
+      print('Error inesperado: $e');
+      // Manejo de errores inesperados
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,6 +148,13 @@ class _MainPageState extends State<MainPage> {
         title: Text('Mis Cuentas - ${userName ?? ''}'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () => addAccount(),
+            tooltip: 'Añadir nueva cuenta',
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: accounts.length,
@@ -133,21 +180,29 @@ class _MainPageState extends State<MainPage> {
           );
         },
       ),
+      floatingActionButton: selectedAccountIndex != null
+          ? FloatingActionButton(
+        onPressed: () => removeAccount(accounts[selectedAccountIndex!].numberAccount),
+        tooltip: 'Eliminar cuenta',
+        child: Icon(Icons.delete),
+        backgroundColor: Colors.red,
+      )
+          : null,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-
-            //primer boto
+            // Primer botón
             ElevatedButton(
-              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
+              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0
+                  ? () {
                 Navigator.pushNamed(
                   context,
                   '/qrscanner',
-                  //arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
                 );
-              } : null,
+              }
+                  : null,
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith<Color?>(
                       (Set<MaterialState> states) {
@@ -160,16 +215,17 @@ class _MainPageState extends State<MainPage> {
               ),
               child: Text('Camera'),
             ),
-
-            //segom boto
+            // Segundo botón
             ElevatedButton(
-              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0 ? () {
+              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0
+                  ? () {
                 Navigator.pushNamed(
                   context,
                   '/paymentpage',
                   arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
                 );
-              } : null,
+              }
+                  : null,
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith<Color?>(
                       (Set<MaterialState> states) {
@@ -182,15 +238,17 @@ class _MainPageState extends State<MainPage> {
               ),
               child: Text('A pagar'),
             ),
-
+            // Tercer botón
             ElevatedButton(
-              onPressed: selectedAccountIndex != null ? () {
+              onPressed: selectedAccountIndex != null
+                  ? () {
                 Navigator.pushNamed(
                   context,
                   '/chargepage',
                   arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
                 );
-              } : null,
+              }
+                  : null,
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith<Color?>(
                       (Set<MaterialState> states) {
@@ -207,5 +265,37 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+
+  Future<void> addAccount() async {
+    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+
+    try {
+      final QueryResult result = await client.mutate(
+        MutationOptions(
+          document: gql(addAccountMutation),
+        ),
+      );
+
+      if (result.hasException) {
+        print('Error al ejecutar la mutación: ${result.exception.toString()}');
+        // Aquí puedes manejar el error de alguna manera (mostrar un mensaje, etc.)
+      } else {
+        print('Mutación exitosa');
+        // Aquí puedes manejar la respuesta de la mutación si es necesario
+        fetchUserAccounts();
+        print("-----------------------------------");
+
+        Navigator.pushNamed(
+          context,
+          '/mainpage',
+          arguments: widget.accessToken,
+        );
+
+      }
+    } catch (e) {
+      print('Error inesperado: $e');
+      // Manejo de errores inesperados
+    }
   }
 }
