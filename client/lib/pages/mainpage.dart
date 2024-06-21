@@ -5,6 +5,8 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Importa el paquete qr_flutter
+import '../functions/fetchUserDate.dart';
+
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -18,90 +20,32 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String? userName;
   String? dni;
-  List<dynamic> list_accounts = [];
-  int? contador = 1;
-  int? selectedAccountIndex;
-
   List<Account> accounts = [];
+  int? selectedAccountIndex;
 
   @override
   void initState() {
     super.initState();
-    // Llamar a una consulta GraphQL para obtener el nombre, dni y cuentas del usuario
-    fetchUserData();
+    fetchData();
   }
 
-  Future<void> fetchUserData() async {
-    await fetchUserInfo();
-    await fetchUserAccounts();
-
-    print(userName);
-    print(dni);
-    print(list_accounts.length);
-
-    for (var accountJson in list_accounts) {
-      accounts.add(Account.fromJson(accountJson));
-    }
-    print("---------------------48------------------------");
-    print(accounts.length);
+  Future<void> fetchData() async {
+    await fetchUserData(widget.accessToken, updateUserData);
   }
 
-  Future<void> fetchUserInfo() async {
-    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+  void updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) {
+    setState(() {
+      userName = name;
+      dni = id;
+      accounts = fetchedAccounts.map((accountData) => Account.fromJson(accountData)).toList();
+    });
 
-    final QueryResult result = await client.query(
-      QueryOptions(
-        document: gql(meQuery),
-      ),
-    );
-
-    if (result.hasException) {
-      print("Error al obtener el nombre del usuario: ${result.exception}");
-    } else {
-      setState(() {
-        userName = result.data!['me']['name'];
-        dni = result.data!['me']['dni'];
-      });
-    }
-  }
-
-  Future<void> fetchUserAccounts() async {
-    try {
-      final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
-      print('Fetching accounts for DNI: $dni');
-
-      // Define query options with variables
-      final QueryOptions options = QueryOptions(
-        document: gql(getAccountsQuery),
-        variables: <String, dynamic>{
-          'dni': dni,
-        },
-      );
-
-      // Perform the query
-      final QueryResult result = await client.query(options);
-
-      if (result.hasException) {
-        print("Error al obtener las cuentas del usuario: ${result.exception}");
-      } else if (result.data != null && result.data!['getUserAccountsInfoByDni'] != null) {
-        setState(() {
-          // Parse the accounts list
-          list_accounts = List<dynamic>.from(result.data!['getUserAccountsInfoByDni']);
-          contador = list_accounts.length;
-
-          // Print account balances
-          for (var account in list_accounts) {
-            print('Cuenta ID: ${account['number_account']}, Saldo: ${account['balance']}');
-          }
-        });
-      }
-    } catch (e) {
-      print('Ocurrió un error inesperado: $e');
-    }
+    print('UserName actualizado: $userName');
+    print('DNI actualizado: $dni');
+    print('Cuentas actualizadas: $accounts');
   }
 
   Future<void> removeAccount(String accountNumber) async {
-    print("-------------------104-----------$accountNumber---");
     final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
 
     try {
@@ -115,29 +59,74 @@ class _MainPageState extends State<MainPage> {
       );
 
       if (result.hasException) {
-        print('Mutación no exitosa-----------117----------------------');
         print('Error al ejecutar la mutación: ${result.exception.toString()}');
-        // Aquí puedes manejar el error de alguna manera (mostrar un mensaje, etc.)
       } else {
-        print('Mutación exitosa-----------120----------------------');
-
         Navigator.pushNamed(
           context,
           '/mainpage',
           arguments: widget.accessToken,
         );
-
-        setState(() {
-          accounts.removeWhere((account) => account.numberAccount == accountNumber);
-          selectedAccountIndex = null; //
-          // Deseleccionar la cuenta después de eliminarla
-        });
-        // Aquí puedes manejar la respuesta de la mutación si es necesario
       }
     } catch (e) {
       print('Error inesperado: $e');
-      // Manejo de errores inesperados
     }
+  }
+
+  Future<void> showDeleteConfirmationDialog(String accountNumber, double balance) async {
+    if (balance == 0) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirmar eliminación'),
+            content: Text('¿Estás seguro de que quieres eliminar esta cuenta?'),
+            actions: [
+              TextButton(
+                child: Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Eliminar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  removeAccount(accountNumber);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showTransferDialog(context);
+    }
+  }
+
+  Future<void> showTransferDialog(BuildContext context) async {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Queda saldo, Transferencia entre cuentas propias'),
+          content: Text('¿Qué deseas hacer?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Hacer transferencia'),
+              onPressed: () {
+                Navigator.of(context).pop('transfer');
+              },
+            ),
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop('cancel');
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -167,7 +156,7 @@ class _MainPageState extends State<MainPage> {
               });
             },
             child: Container(
-              color: selectedAccountIndex == index ? Colors.blue : Colors.transparent, // Cambiar el color de fondo según si la cuenta está seleccionada o no
+              color: selectedAccountIndex == index ? Colors.blue : Colors.transparent,
               padding: EdgeInsets.all(8.0),
               child: Row(
                 children: [
@@ -182,7 +171,9 @@ class _MainPageState extends State<MainPage> {
       ),
       floatingActionButton: selectedAccountIndex != null
           ? FloatingActionButton(
-        onPressed: () => removeAccount(accounts[selectedAccountIndex!].numberAccount),
+        onPressed: () {
+          showDeleteConfirmationDialog(accounts[selectedAccountIndex!].numberAccount, accounts[selectedAccountIndex!].balance);
+        },
         tooltip: 'Eliminar cuenta',
         child: Icon(Icons.delete),
         backgroundColor: Colors.red,
@@ -193,7 +184,6 @@ class _MainPageState extends State<MainPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // Primer botón
             ElevatedButton(
               onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0
                   ? () {
@@ -203,19 +193,8 @@ class _MainPageState extends State<MainPage> {
                 );
               }
                   : null,
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                      (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
-                      return null; // Use the default color.
-                    }
-                    return Colors.green; // Use the green color when enabled.
-                  },
-                ),
-              ),
               child: Text('Camera'),
             ),
-            // Segundo botón
             ElevatedButton(
               onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0
                   ? () {
@@ -226,19 +205,8 @@ class _MainPageState extends State<MainPage> {
                 );
               }
                   : null,
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                      (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
-                      return null; // Use the default color.
-                    }
-                    return Colors.green; // Use the green color when enabled.
-                  },
-                ),
-              ),
               child: Text('A pagar'),
             ),
-            // Tercer botón
             ElevatedButton(
               onPressed: selectedAccountIndex != null
                   ? () {
@@ -249,16 +217,6 @@ class _MainPageState extends State<MainPage> {
                 );
               }
                   : null,
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                      (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.disabled)) {
-                      return null; // Use the default color.
-                    }
-                    return Colors.green; // Use the green color when enabled.
-                  },
-                ),
-              ),
               child: Text('A cobrar'),
             ),
           ],
@@ -279,23 +237,22 @@ class _MainPageState extends State<MainPage> {
 
       if (result.hasException) {
         print('Error al ejecutar la mutación: ${result.exception.toString()}');
-        // Aquí puedes manejar el error de alguna manera (mostrar un mensaje, etc.)
       } else {
-        print('Mutación exitosa');
-        // Aquí puedes manejar la respuesta de la mutación si es necesario
-        fetchUserAccounts();
-        print("-----------------------------------");
+        setState(() {
+          // Aquí deberías manejar la respuesta de la mutación si es necesario
+          // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
+          print('Mutación exitosa');
 
-        Navigator.pushNamed(
-          context,
-          '/mainpage',
-          arguments: widget.accessToken,
-        );
+          Navigator.pushNamed(
+            context,
+            '/mainpage',
+            arguments: widget.accessToken,
+          );
 
+        });
       }
     } catch (e) {
       print('Error inesperado: $e');
-      // Manejo de errores inesperados
     }
   }
 }

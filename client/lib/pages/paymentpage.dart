@@ -15,6 +15,7 @@ class _PaymentPageState extends State<PaymentPage> {
   TextEditingController amountController = TextEditingController();
   bool isDialogOpen = false; // Para controlar si el AlertDialog está abierto
 
+
   @override
   void initState() {
     super.initState();
@@ -23,7 +24,7 @@ class _PaymentPageState extends State<PaymentPage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          qrData = 'origin:$accountNumber,importe:0';
+          qrData = 'from:$accountNumber,import:0';
         });
       }
     });
@@ -114,6 +115,16 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
+  String maskAccountNumber(String accountNumber) {
+    if (accountNumber.length != 10) {
+      return 'Número de cuenta inválido';
+    }
+
+    String visibleDigits = accountNumber.substring(accountNumber.length - 6); // Muestra los últimos 6 dígitos
+    String maskedDigits = accountNumber.substring(0, 4).replaceAll(RegExp(r'\d'), 'x'); // Oculta los primeros 4 dígitos
+    return '$maskedDigits$visibleDigits';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,7 +139,7 @@ class _PaymentPageState extends State<PaymentPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 30.0),
-                Text('Account Number: ${accountNumber}'),
+                Text('Account Number: ${maskAccountNumber(accountNumber)}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
