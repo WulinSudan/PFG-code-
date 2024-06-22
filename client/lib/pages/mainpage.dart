@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'account.dart';
 import 'account_card.dart';
@@ -6,6 +8,7 @@ import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Importa el paquete qr_flutter
 import '../functions/fetchUserDate.dart';
+import '../functions/addAccount.dart';
 
 
 class MainPage extends StatefulWidget {
@@ -45,6 +48,7 @@ class _MainPageState extends State<MainPage> {
     print('Cuentas actualizadas: $accounts');
   }
 
+
   Future<void> removeAccount(String accountNumber) async {
     final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
 
@@ -72,7 +76,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  Future<void> showDeleteConfirmationDialog(String accountNumber, double balance) async {
+
+  //per eliminar un compte, primer pas
+  Future<void> showDeleteConfirmationDialog(BuildContext context, List<Account> accounts, String accountNumber, double balance) async {
     if (balance == 0) {
       showDialog(
         context: context,
@@ -99,11 +105,13 @@ class _MainPageState extends State<MainPage> {
         },
       );
     } else {
-      showTransferDialog(context);
+      showTransferDialog(context,accountNumber);
     }
   }
 
-  Future<void> showTransferDialog(BuildContext context) async {
+
+  //per eliminar un compte, segon pas
+  Future<void> showTransferDialog(BuildContext context, String accountNumber) async {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -115,6 +123,8 @@ class _MainPageState extends State<MainPage> {
               child: Text('Hacer transferencia'),
               onPressed: () {
                 Navigator.of(context).pop('transfer');
+                //selectAccoutDialog(context,accounts,accountNumber);
+                selectAccountDialog(context, accounts, accountNumber);
               },
             ),
             TextButton(
@@ -129,6 +139,81 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  Future<void> selectAccountDialog(BuildContext context, List<Account> accounts, String currentAccount) async {
+    // Filtrar las cuentas excluyendo la cuenta actual
+    List<Account> filteredAccounts = accounts.where((account) => account.numberAccount != currentAccount).toList();
+
+    // Mostrar el AlertDialog con el listado de cuentas
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Seleccionar una cuenta para vaciar el saldo'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: filteredAccounts.map((account) {
+                return ListTile(
+                  title: Text('${account.numberAccount} - Saldo: ${account.balance.toStringAsFixed(2)}'),
+                  onTap: () {
+                    // Acción al seleccionar una cuenta
+                    Navigator.of(context).pop();
+                    showSnackbar(context);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showSnackbar(BuildContext context) {
+    // Crear un OverlayEntry personalizado
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (BuildContext context) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.green[800],
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            width: 400.0,
+            height: 160.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Esta es una Snackbar',
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 8.0),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Mostrar el OverlayEntry en el contexto actual
+    Overlay.of(context)?.insert(overlayEntry);
+
+    // Cerrar la Snackbar después de 3 segundos
+    Timer(Duration(seconds: 5), () {
+      overlayEntry.remove();
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,7 +225,15 @@ class _MainPageState extends State<MainPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
-            onPressed: () => addAccount(),
+            onPressed: () {
+              addAccount(widget.accessToken);
+              Navigator.pushNamed(
+                context,
+                '/mainpage',
+                arguments: widget.accessToken,
+              );
+
+            },
             tooltip: 'Añadir nueva cuenta',
           ),
         ],
@@ -172,7 +265,7 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: selectedAccountIndex != null
           ? FloatingActionButton(
         onPressed: () {
-          showDeleteConfirmationDialog(accounts[selectedAccountIndex!].numberAccount, accounts[selectedAccountIndex!].balance);
+          showDeleteConfirmationDialog(context, accounts,accounts[selectedAccountIndex!].numberAccount, accounts[selectedAccountIndex!].balance);
         },
         tooltip: 'Eliminar cuenta',
         child: Icon(Icons.delete),
@@ -224,6 +317,7 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
+  /*
 
   Future<void> addAccount() async {
     final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
@@ -254,5 +348,5 @@ class _MainPageState extends State<MainPage> {
     } catch (e) {
       print('Error inesperado: $e');
     }
-  }
+  }*/
 }
