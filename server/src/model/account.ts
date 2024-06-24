@@ -24,7 +24,7 @@ const AccountSchema: Schema = new Schema({
       message: (props: any) => `${props.value} no es un número de cuenta válido. Debe tener 10 dígitos.`,
     },
   },
-  balance: { type: Number, required: true },
+  balance: { type: Number, required: true, default: 0 },
   active: { type: Boolean, required: true },
 });
 

@@ -78,8 +78,8 @@ class _MainPageState extends State<MainPage> {
 
 
   //per eliminar un compte, primer pas
-  Future<void> showDeleteConfirmationDialog(BuildContext context, List<Account> accounts, String accountNumber, double balance) async {
-    if (balance == 0) {
+  Future<void> showDeleteConfirmationDialog(BuildContext context, List<Account> accounts, Account selectedAccount) async {
+    if (selectedAccount.balance == 0) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -97,7 +97,7 @@ class _MainPageState extends State<MainPage> {
                 child: Text('Eliminar'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  removeAccount(accountNumber);
+                  removeAccount(selectedAccount.numberAccount);
                 },
               ),
             ],
@@ -105,13 +105,13 @@ class _MainPageState extends State<MainPage> {
         },
       );
     } else {
-      showTransferDialog(context,accountNumber);
+      showTransferDialog(context,selectedAccount);
     }
   }
 
 
   //per eliminar un compte, segon pas
-  Future<void> showTransferDialog(BuildContext context, String accountNumber) async {
+  Future<void> showTransferDialog(BuildContext context, Account currentAccount) async {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -124,7 +124,7 @@ class _MainPageState extends State<MainPage> {
               onPressed: () {
                 Navigator.of(context).pop('transfer');
                 //selectAccoutDialog(context,accounts,accountNumber);
-                selectAccountDialog(context, accounts, accountNumber);
+                selectAccountDialog(context, accounts, currentAccount);
               },
             ),
             TextButton(
@@ -139,79 +139,102 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Future<void> selectAccountDialog(BuildContext context, List<Account> accounts, String currentAccount) async {
+  Future<void> selectAccountDialog(BuildContext context, List<Account> accounts, Account currentAccount) async {
     // Filtrar las cuentas excluyendo la cuenta actual
-    List<Account> filteredAccounts = accounts.where((account) => account.numberAccount != currentAccount).toList();
+    List<Account> filteredAccounts = accounts.where((account) => account.numberAccount != currentAccount.numberAccount).toList();
 
-    // Mostrar el AlertDialog con el listado de cuentas
+    // Variable para guardar la cuenta seleccionada
+    Account? selectedAccount;
+
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Seleccionar una cuenta para vaciar el saldo'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: filteredAccounts.map((account) {
-                return ListTile(
-                  title: Text('${account.numberAccount} - Saldo: ${account.balance.toStringAsFixed(2)}'),
-                  onTap: () {
-                    // Acción al seleccionar una cuenta
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Seleccionar una cuenta para vaciar el saldo'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: filteredAccounts.map((account) {
+                    return ListTile(
+                      title: Text('${account.numberAccount} - Saldo: ${account.balance.toStringAsFixed(2)}'),
+                      tileColor: selectedAccount == account ? Colors.blue.withOpacity(0.5) : null,
+                      onTap: () {
+                        setState(() {
+                          selectedAccount = account;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancelar'),
+                  onPressed: () {
                     Navigator.of(context).pop();
-                    showSnackbar(context);
                   },
-                );
-              }).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+                ),
+                TextButton(
+                  child: Text('Aceptar'),
+                  onPressed: selectedAccount != null
+                      ? () {
+                    if (selectedAccount != null) {
+                      Navigator.of(context).pop();
+                      double import = 100.0; // Define aquí el valor de import
+                      makeTransfer(context, currentAccount,selectedAccount!);
+                    }
+                  }
+                      : null,
+                  style: TextButton.styleFrom(
+                    foregroundColor: selectedAccount != null ? Colors.blue : Colors.grey,
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  void showSnackbar(BuildContext context) {
-    // Crear un OverlayEntry personalizado
-    OverlayEntry overlayEntry = OverlayEntry(
-      builder: (BuildContext context) => Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.green[800],
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            width: 400.0,
-            height: 160.0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Esta es una Snackbar',
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(height: 8.0),
-              ],
-            ),
-          ),
+
+  Future<void> makeTransfer(BuildContext context, Account currentAccount, Account selectedAccount) async {
+    print(currentAccount.numberAccount);
+    print(selectedAccount.numberAccount);
+    print(currentAccount.balance);
+
+    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
+
+    try {
+      final QueryResult result = await client.mutate(
+        MutationOptions(
+          document: gql(makeTransferMutation),
+          variables: {
+            'input': {
+              'accountOrigen': currentAccount.numberAccount,
+              'accountDestin': selectedAccount.numberAccount,
+              'importNumber': currentAccount.balance,
+            }
+          },
         ),
-      ),
-    );
+      );
 
-    // Mostrar el OverlayEntry en el contexto actual
-    Overlay.of(context)?.insert(overlayEntry);
+      if (result.hasException) {
+        print('Error al ejecutar la mutación: ${result.exception.toString()}');
+      } else {
+        print('Mutación exitosa');
 
-    // Cerrar la Snackbar después de 3 segundos
-    Timer(Duration(seconds: 5), () {
-      overlayEntry.remove();
-    });
+        // Aquí puedes manejar la respuesta de la mutación si es necesario
+        // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
+        // O realizar alguna otra acción según tus necesidades
+      }
+    } catch (e) {
+      print('Error inesperado: $e');
+    }
   }
+
+
 
 
   @override
@@ -265,7 +288,7 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: selectedAccountIndex != null
           ? FloatingActionButton(
         onPressed: () {
-          showDeleteConfirmationDialog(context, accounts,accounts[selectedAccountIndex!].numberAccount, accounts[selectedAccountIndex!].balance);
+          showDeleteConfirmationDialog(context, accounts,accounts[selectedAccountIndex!]);
         },
         tooltip: 'Eliminar cuenta',
         child: Icon(Icons.delete),
@@ -317,36 +340,6 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-  /*
 
-  Future<void> addAccount() async {
-    final GraphQLClient client = GraphQLService.createGraphQLClient(widget.accessToken);
 
-    try {
-      final QueryResult result = await client.mutate(
-        MutationOptions(
-          document: gql(addAccountMutation),
-        ),
-      );
-
-      if (result.hasException) {
-        print('Error al ejecutar la mutación: ${result.exception.toString()}');
-      } else {
-        setState(() {
-          // Aquí deberías manejar la respuesta de la mutación si es necesario
-          // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
-          print('Mutación exitosa');
-
-          Navigator.pushNamed(
-            context,
-            '/mainpage',
-            arguments: widget.accessToken,
-          );
-
-        });
-      }
-    } catch (e) {
-      print('Error inesperado: $e');
-    }
-  }*/
 }

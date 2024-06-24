@@ -63,6 +63,16 @@ const String removeAccountMutation = """
  """;
 
 
+const String makeTransferMutation = """
+mutation MakeTransfer(\$input: TransferInput!) {
+  makeTransfer(input: \$input) {
+    success
+    message
+  }
+}
+""";
+
+
 
 
 

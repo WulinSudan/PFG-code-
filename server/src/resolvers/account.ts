@@ -29,7 +29,7 @@ interface AddAccountInput {
   interface TransferInput {
     accountOrigen: string;
     accountDestin: string;
-    importNumber: number;
+    import: number;
   }
   
   interface TransferResult {
@@ -102,7 +102,7 @@ export const accountResolvers = {
             }
     
             // Convierte el importe a transferir a un número válido
-            const importNumber = input.importNumber;
+            const importNumber = input.import;
     
             // Verifica si importNumber es un número válido
             if (isNaN(importNumber) || importNumber <= 0) {

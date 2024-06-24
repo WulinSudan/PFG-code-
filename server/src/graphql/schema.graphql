@@ -79,7 +79,7 @@
   input TransferInput {
     accountOrigen: String!
     accountDestin: String!
-    importNumber: Int!
+    import: Float!
   }
 
   type TransferResult {
