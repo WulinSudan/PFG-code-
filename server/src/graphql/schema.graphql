@@ -15,6 +15,7 @@
     getAllAccounts:[Account]
     getUserAccountCount(dni: String!): Int!
     getUserAccountsInfoByDni(dni: String!): [Account]
+    findAccount(accountNumber:String!):Account
   }
 
   type Mutation {
