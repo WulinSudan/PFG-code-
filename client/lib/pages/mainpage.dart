@@ -6,7 +6,6 @@ import 'account_card.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
-import 'package:qr_flutter/qr_flutter.dart'; // Importa el paquete qr_flutter
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
 
@@ -76,7 +75,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-
   //per eliminar un compte, primer pas
   Future<void> showDeleteConfirmationDialog(BuildContext context, List<Account> accounts, Account selectedAccount) async {
     if (selectedAccount.balance == 0) {
@@ -105,38 +103,8 @@ class _MainPageState extends State<MainPage> {
         },
       );
     } else {
-      showTransferDialog(context,selectedAccount);
+      selectAccountDialog(context,accounts,selectedAccount);
     }
-  }
-
-
-  //per eliminar un compte, segon pas
-  Future<void> showTransferDialog(BuildContext context, Account currentAccount) async {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Queda saldo, Transferencia entre cuentas propias'),
-          content: Text('¿Qué deseas hacer?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Hacer transferencia'),
-              onPressed: () {
-                Navigator.of(context).pop('transfer');
-                //selectAccoutDialog(context,accounts,accountNumber);
-                selectAccountDialog(context, accounts, currentAccount);
-              },
-            ),
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop('cancel');
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> selectAccountDialog(BuildContext context, List<Account> accounts, Account currentAccount) async {
