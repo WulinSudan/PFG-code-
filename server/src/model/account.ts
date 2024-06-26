@@ -24,7 +24,15 @@ const AccountSchema: Schema = new Schema({
       message: (props: any) => `${props.value} no es un número de cuenta válido. Debe tener 10 dígitos.`,
     },
   },
-  balance: { type: Number, required: true, default: 0 },
+  balance: {
+    type: Number,
+    required: true,
+    default: 0,
+    // Getter para formatear el balance a 2 decimales al obtenerlo del modelo
+    get: (value: number) => parseFloat(value.toFixed(2)),
+    // Setter para asegurar que se almacene con 2 decimales
+    set: (value: number) => parseFloat(value.toFixed(2)),
+  },
   active: { type: Boolean, required: true },
 });
 

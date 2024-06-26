@@ -181,8 +181,8 @@ class _MainPageState extends State<MainPage> {
                       ? () {
                     if (selectedAccount != null) {
                       Navigator.of(context).pop();
-                      double import = 100.0; // Define aquí el valor de import
                       makeTransfer(context, currentAccount,selectedAccount!);
+
                     }
                   }
                       : null,
@@ -214,7 +214,7 @@ class _MainPageState extends State<MainPage> {
             'input': {
               'accountOrigen': currentAccount.numberAccount,
               'accountDestin': selectedAccount.numberAccount,
-              'importNumber': currentAccount.balance,
+              'import': currentAccount.balance,
             }
           },
         ),
@@ -225,6 +225,37 @@ class _MainPageState extends State<MainPage> {
       } else {
         print('Mutación exitosa');
 
+        removeAccount(currentAccount.numberAccount);
+
+        // Mostrar el diálogo
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Cuenta eliminada'),
+              content: Text('Se ha eliminado correctamente la cuenta.'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushNamed(
+                      context,
+                      '/mainpage',
+                      arguments: widget.accessToken,
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+
+        Navigator.pushNamed(
+          context,
+          '/mainpage',
+          arguments: widget.accessToken,
+        );
         // Aquí puedes manejar la respuesta de la mutación si es necesario
         // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
         // O realizar alguna otra acción según tus necesidades
@@ -232,9 +263,10 @@ class _MainPageState extends State<MainPage> {
     } catch (e) {
       print('Error inesperado: $e');
     }
+
+
+
   }
-
-
 
 
   @override

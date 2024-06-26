@@ -9,13 +9,14 @@ import { print } from "graphql";
 
 function generateUniqueAccountNumber(): string {
   const now = new Date();
-  const year = String(now.getFullYear()).slice(-2);
+  //const year = String(now.getFullYear()).slice(-2);
   const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
   const day = String(now.getDate()).padStart(2, '0');
   const hour = String(now.getHours()).padStart(2, '0');
   const minute = String(now.getMinutes()).padStart(2, '0');
+  const second = String(now.getSeconds()).padStart(2,'0');
   
-  const aux = `${year}${month}${day}${hour}${minute}`;
+  const aux = `${month}${day}${hour}${minute}${second}`;
   console.log(aux);
   return aux;
 }

@@ -84,7 +84,26 @@ export const accountResolvers = {
     // Resolver para eliminar una cuenta por su número de cuenta
     removeAccount: async (_root: any, args: any) => {
       try {
+        // Encuentra la cuenta por su número de cuenta para verificar el saldo
+        //const account = await Account.findOne({ number_account: args.number_account });
+        const account = await findAccount(args.number_account);
+
+        if (!account) {
+          throw new Error(`No se encontró la cuenta con el número de cuenta ${args.number_account}`);
+        }
+
+        // Verifica si el saldo es mayor que 0
+        if (account.balance > 0) {
+          throw new Error('No se puede eliminar la cuenta porque el saldo es mayor que 0.');
+        }
+
+        // Si el saldo es 0, procede con la eliminación de la cuenta
         const deletionResult = await Account.deleteOne({ number_account: args.number_account });
+
+        if (deletionResult.deletedCount > 0) {
+          console.log('Cuenta eliminada exitosamente');
+        }
+
         return deletionResult.deletedCount;
       } catch (error) {
         console.error("Error removing account:", error);
@@ -145,6 +164,7 @@ export const accountResolvers = {
           success: true,
           message: `Transferencia de ${importNumber} unidades realizada correctamente desde ${input.accountOrigen} a ${input.accountDestin}.`,
         };
+        
       } catch (error) {
         console.error('Error al realizar la transferencia:', error);
         return {
