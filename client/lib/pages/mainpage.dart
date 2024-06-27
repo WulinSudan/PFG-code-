@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'account.dart';
 import 'account_card.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
-import '../graphql_queries.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
 import '../functions/removeAccount.dart';
@@ -148,7 +145,7 @@ class _MainPageState extends State<MainPage> {
                   ? () {
                 Navigator.pushNamed(
                   context,
-                  '/qrscanner',
+                  '/qrscanner'
                 );
               }
                   : null,

@@ -7,7 +7,7 @@ import 'mutation.dart';
 import 'pages/chargepage.dart';
 import 'pages/paymentpage.dart';
 import 'pages/qrscanner.dart';
-
+import 'pages/qrgestion.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
+        '/qrgestion': (context) => QrGestion(),
         '/qrscanner': (context) => QrScanner(),
         '/paymentpage': (context) => PaymentPage(),
         '/chargepage': (context) => ChargePage(),

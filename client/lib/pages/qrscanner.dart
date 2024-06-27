@@ -38,9 +38,11 @@ class _QRViewExampleState extends State<QrScanner> {
                 children: <Widget>[
                   if (result != null)
                     Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                      'QR Code Data: ${result!.code}',
+                      style: TextStyle(fontSize: 20),
+                    )
                   else
-                    const Text('Scan a code'),
+                    const Text('Scan a QR code'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -110,7 +112,7 @@ class _QRViewExampleState extends State<QrScanner> {
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: const Text('Salir',
+                          child: const Text('Exit',
                               style: TextStyle(fontSize: 20)),
                         ),
                       ),
@@ -151,6 +153,12 @@ class _QRViewExampleState extends State<QrScanner> {
       setState(() {
         result = scanData;
       });
+
+      // Navegar a otra página cuando se escanea un código QR
+      if (result != null) {
+        Navigator.pushNamed(context, '/qrgestion', arguments: result!.code);
+
+      }
     });
   }
 
