@@ -8,6 +8,7 @@ class ChargePage extends StatefulWidget {
 
 class _ChargePageState extends State<ChargePage> {
   late String accountNumber = '';
+  double amountToCharge = -1; // Importe a pagar
   String qrData = '';
   TextEditingController amountController = TextEditingController();
 
@@ -26,11 +27,9 @@ class _ChargePageState extends State<ChargePage> {
   }
 
   void updateQrData() {
-    String maskedAccountNumber = maskAccountNumber(accountNumber);
-    String amountText = amountController.text.isEmpty ? 'undefined' : amountController.text;
-
     setState(() {
-      qrData = 'to:$maskedAccountNumber,import:$amountText';
+      amountToCharge = double.tryParse(amountController.text) ?? -1;
+      qrData = 'c $accountNumber $amountToCharge';
     });
   }
 

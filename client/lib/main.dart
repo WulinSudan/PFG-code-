@@ -8,6 +8,7 @@ import 'pages/chargepage.dart';
 import 'pages/paymentpage.dart';
 import 'pages/qrscanner.dart';
 import 'pages/qrgestion.dart';
+import 'pages/account.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,7 +28,14 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/login',
       routes: {
         '/qrgestion': (context) => QrGestion(),
-        '/qrscanner': (context) => QrScanner(),
+        '/qrscanner': (context) {
+          // Extraer los argumentos de la ruta
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final String accessToken = args['accessToken'] as String;
+          final Account account = args['account'] as Account;
+          // Devolver el widget QrScanner con los argumentos pasados
+          return QrScanner(accessToken: accessToken, account: account);
+        },
         '/paymentpage': (context) => PaymentPage(),
         '/chargepage': (context) => ChargePage(),
         '/mutation': (context) => MutationPage(),

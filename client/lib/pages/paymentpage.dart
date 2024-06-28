@@ -10,7 +10,7 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   late String accountNumber = '';
-  double amountToPay = 0.0; // Importe a pagar
+  double amountToPay = -1; // Importe a pagar
   String qrData = ''; // Datos para el código QR
   TextEditingController amountController = TextEditingController();
   bool isDialogOpen = false; // Para controlar si el AlertDialog está abierto
@@ -24,16 +24,16 @@ class _PaymentPageState extends State<PaymentPage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          qrData = 'from:$accountNumber,import:0';
+          updateQrData();
         });
       }
     });
   }
 
-  void _updateQrCode() {
+  void updateQrData() {
     setState(() {
-      amountToPay = double.tryParse(amountController.text) ?? 0.0;
-      qrData = 'accountNumber:$accountNumber,importe:$amountToPay';
+      amountToPay = double.tryParse(amountController.text) ?? -1;
+      qrData = 'p $accountNumber $amountToPay';
     });
 
     _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
@@ -151,7 +151,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _updateQrCode,
+                  onPressed: updateQrData,
                   child: Text('Validar import'),
                 ),
                 SizedBox(height: 20),

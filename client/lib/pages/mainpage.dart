@@ -145,7 +145,11 @@ class _MainPageState extends State<MainPage> {
                   ? () {
                 Navigator.pushNamed(
                   context,
-                  '/qrscanner'
+                  '/qrscanner',
+                  arguments: {
+                    'accessToken': widget.accessToken,
+                    'account': accounts[selectedAccountIndex!],
+                  },
                 );
               }
                   : null,

@@ -3,8 +3,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'account.dart';
 
 class QrScanner extends StatefulWidget {
+  final String accessToken;
+  final Account account;
+  QrScanner({required this.accessToken, required this.account});
+
+
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
 }
@@ -13,6 +19,7 @@ class _QRViewExampleState extends State<QrScanner> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+
 
   @override
   void reassemble() {
@@ -156,11 +163,21 @@ class _QRViewExampleState extends State<QrScanner> {
 
       // Navegar a otra página cuando se escanea un código QR
       if (result != null) {
-        Navigator.pushNamed(context, '/qrgestion', arguments: result!.code);
-
+        controller.pauseCamera();
+        Navigator.pushNamed(
+          context,
+          '/qrgestion',
+          arguments: {
+            'accessToken': widget.accessToken,
+            'qrCode': result!.code,
+            'accountNumber': widget.account.numberAccount,
+          },
+        );
       }
     });
   }
+
+
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
