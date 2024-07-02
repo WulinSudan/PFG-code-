@@ -42,47 +42,71 @@ Future<void> doQr(String accessToken, String origen, String desti, double import
   }
 }
 
-class QrGestion extends StatelessWidget {
+class QrGestion extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
+  _QrGestionState createState() => _QrGestionState();
+}
+
+class _QrGestionState extends State<QrGestion> {
+  String origen = '';
+  String destino = '';
+  double importe = 0.0;
+  String? typePart = '';
+  String? accessToken;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
     // Recuperar los argumentos de la ruta
     Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     // Obtener los datos de los argumentos
-    String? accessToken = arguments?['accessToken'] as String?;
+    accessToken = arguments?['accessToken'] as String?;
     String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
     String accountNumber = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
 
-    // Determinar origen y destino
-    String origen = '';
-    String destino = '';
-    double importe = 0.0;
-
-    // Verificar si el código QR comienza con 'from' y extraer los datos
-    if (qrText.startsWith('from:')) {
+    // Verificar si el código QR comienza con 'c' o 'p' y extraer los datos
+    if (qrText.startsWith('c') || qrText.startsWith('p')) {
       // Obtener partes del qrText
       List<String> parts = qrText.split(' ');
-      String? originPart = parts.length > 1 ? parts[1] : null;
-      String? importPart = parts.length > 3 ? parts[3] : null;
+      typePart = parts.isNotEmpty ? parts[0] : null;
+      String? accountPart = parts.length > 1 ? parts[1] : null;
+      String? amountPart = parts.length > 2 ? parts[2] : null;
 
       print("-----------------------------68---------------------------");
       print(parts);
-      print(originPart);
-      print(importPart);
+      print(typePart);
+      print(accountPart);
+      print(amountPart);
 
       // Asignar origen, destino e importe
-      origen = originPart ?? 'Origen no disponible';
-      destino = accountNumber; // Usar el número de cuenta como destino
-      importe = double.tryParse(importPart ?? '0') ?? 0.0; // Parsear importe como double
+      if (typePart == 'p') {
+        origen = accountPart ?? 'Origen no disponible';
+        destino = accountNumber; // Usar el número de cuenta como destino
+      } else if (typePart == 'c') {
+        origen = accountNumber; // Usar el número de cuenta como origen
+        destino = accountPart ?? 'Destino no disponible';
+      }
+      importe = double.tryParse(amountPart?.replaceAll(',', '.') ?? '0') ?? 0.0; // Parsear importe como double
     } else {
       origen = accountNumber; // Usar el número de cuenta como origen
       destino = qrText; // Usar el código QR como destino
       importe = 2.0; // Ejemplo de importe, ajustar según tu lógica
     }
 
-    // Llamar a la función makeTransfer con los parámetros determinados
-    doQr(accessToken!, origen, destino, importe);
+    // Verificar si el importe es mayor a 0 o igual a -1
+    if (importe > 0) {
+      doQr(accessToken!, origen, destino, importe);
+    } else if (importe == -1) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        _showInputDialog(context);
+      });
+    }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('QR Capturado'),
@@ -94,18 +118,7 @@ class QrGestion extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Código QR:',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text(
-                qrText.isNotEmpty ? qrText : 'Texto no disponible',
-                style: TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 24),
-              Text(
-                'Transferencia realizada desde:',
+                'Transferencia escaneada por:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -114,10 +127,15 @@ class QrGestion extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
               Text(
-                'A cuenta:',
+                'Información del código QR:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Tipo de transferencia: ${typePart ?? 'Tipo no disponible'}',
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 8),
               Text(
@@ -125,10 +143,69 @@ class QrGestion extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: 8),
+              Text(
+                importe.toString(),
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(
+                      context,
+                      '/mainpage',
+                      arguments: accessToken);
+                },
+                child: Text('Volver a la página principal'),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showInputDialog(BuildContext context) {
+    TextEditingController _controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ingresar Importe'),
+          content: TextField(
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(hintText: "Ingrese el importe"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Aceptar'),
+              onPressed: () {
+                double? inputImporte = double.tryParse(_controller.text.replaceAll(',', '.'));
+                if (inputImporte != null && inputImporte > 0) {
+                  print("--------------------------194-----------------------");
+                  print(inputImporte);
+                  Navigator.of(context).pop();
+                  doQr(accessToken!, origen, destino, inputImporte);
+                } else {
+                  // Mostrar un error si el importe no es válido
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Por favor, ingrese un importe válido.')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
