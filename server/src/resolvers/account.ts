@@ -150,8 +150,8 @@ export const accountResolvers = {
           };
         }
 
-        accountOrigenDoc.balance -= importNumber;
-        accountDestinDoc.balance += importNumber;
+        accountOrigenDoc.balance += importNumber;
+        accountDestinDoc.balance -= importNumber;
 
         await accountOrigenDoc.save();
         await accountDestinDoc.save();

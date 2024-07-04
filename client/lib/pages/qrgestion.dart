@@ -81,10 +81,10 @@ class _QrGestionState extends State<QrGestion> {
       print(amountPart);
 
       // Asignar origen, destino e importe
-      if (typePart == 'p') {
+      if (typePart == 'c') {
         origen = accountPart ?? 'Origen no disponible';
         destino = accountNumber; // Usar el número de cuenta como destino
-      } else if (typePart == 'c') {
+      } else if (typePart == 'p') {
         origen = accountNumber; // Usar el número de cuenta como origen
         destino = accountPart ?? 'Destino no disponible';
       }
@@ -184,6 +184,11 @@ class _QrGestionState extends State<QrGestion> {
               child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
+                Navigator.pushNamed(
+                  context,
+                  '/mainpage',
+                  arguments: accessToken,
+                );
               },
             ),
             TextButton(
@@ -191,10 +196,38 @@ class _QrGestionState extends State<QrGestion> {
               onPressed: () {
                 double? inputImporte = double.tryParse(_controller.text.replaceAll(',', '.'));
                 if (inputImporte != null && inputImporte > 0) {
-                  print("--------------------------194-----------------------");
+                  print("--------------------------199-----------------------");
                   print(inputImporte);
                   Navigator.of(context).pop();
                   doQr(accessToken!, origen, destino, inputImporte);
+
+                  // Mostrar el diálogo de éxito
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false, // Evita que se cierre al tocar fuera del diálogo
+                    builder: (BuildContext context) {
+                      // Cerrar el diálogo automáticamente después de 3 segundos
+                      Future.delayed(Duration(seconds: 3), () {
+                        Navigator.of(context).pop(); // Cierra el diálogo de éxito
+                        Navigator.pushNamed(
+                          context,
+                          '/mainpage',
+                          arguments: accessToken,
+                        );
+                      });
+
+                      return AlertDialog(
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.asset('assets/exito.png'), // Ruta de la imagen de éxito
+                            SizedBox(height: 16),
+                            Text('Operación correcta'),
+                          ],
+                        ),
+                      );
+                    },
+                  );
                 } else {
                   // Mostrar un error si el importe no es válido
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -208,4 +241,6 @@ class _QrGestionState extends State<QrGestion> {
       },
     );
   }
+
+
 }
