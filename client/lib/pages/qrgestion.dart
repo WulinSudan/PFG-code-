@@ -4,6 +4,18 @@ import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
+
+
+String _decryptQrData(String encryptedText) {
+  final key = encrypt.Key.fromUtf8('my 32 length key................'); // Clave de cifrado (32 caracteres)
+  final iv = encrypt.IV.fromLength(16); // Vector de inicialización (16 bytes)
+  final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+  final decrypted = encrypter.decrypt64(encryptedText, iv: iv);
+  return decrypted; // Devuelve el dato descifrado
+}
+
 
 // Función para realizar la transferencia
 Future<void> doQr(String accessToken, String origen, String desti, double import) async {
@@ -64,6 +76,10 @@ class _QrGestionState extends State<QrGestion> {
     // Obtener los datos de los argumentos
     accessToken = arguments?['accessToken'] as String?;
     String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
+
+    //descifrar
+    //qrText = _decryptQrData(qrText);
+
     String accountNumber = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
 
     // Verificar si el código QR comienza con 'c' o 'p' y extraer los datos

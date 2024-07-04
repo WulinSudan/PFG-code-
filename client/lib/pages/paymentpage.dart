@@ -2,6 +2,7 @@ import 'dart:async'; // Importar dart:async para usar Timer
 
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -34,10 +35,22 @@ class _PaymentPageState extends State<PaymentPage> {
     setState(() {
       amountToPay = double.tryParse(amountController.text) ?? -1;
       qrData = 'p $accountNumber $amountToPay';
+      qrData = _encryptQrData(qrData);
     });
 
     _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
   }
+
+
+  String _encryptQrData(String data) {
+    final key = encrypt.Key.fromUtf8('my 32 length key................'); // Clave de cifrado (32 caracteres)
+    final iv = encrypt.IV.fromLength(16); // Vector de inicialización (16 bytes)
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+    final encrypted = encrypter.encrypt(data, iv: iv);
+    return encrypted.base64; // Devolver el dato cifrado en base64
+  }
+
 
   void _showQrDialog() {
     const duration = const Duration(seconds: 10);

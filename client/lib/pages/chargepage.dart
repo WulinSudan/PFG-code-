@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Asegúrate de tener esta dependencia
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class ChargePage extends StatefulWidget {
   @override
@@ -30,8 +31,19 @@ class _ChargePageState extends State<ChargePage> {
     setState(() {
       amountToCharge = double.tryParse(amountController.text) ?? -1;
       qrData = 'c $accountNumber $amountToCharge';
+      qrData = _encryptQrData(qrData);
     });
   }
+
+  String _encryptQrData(String data) {
+    final key = encrypt.Key.fromUtf8('my 32 length key................'); // Clave de cifrado (32 caracteres)
+    final iv = encrypt.IV.fromLength(16); // Vector de inicialización (16 bytes)
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+    final encrypted = encrypter.encrypt(data, iv: iv);
+    return encrypted.base64; // Devolver el dato cifrado en base64
+  }
+
 
   String maskAccountNumber(String accountNumber) {
     if (accountNumber.length != 10) {
