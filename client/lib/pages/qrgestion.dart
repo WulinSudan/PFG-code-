@@ -19,8 +19,8 @@ Future<void> doQr(String accessToken, String origen, String desti, double import
         document: gql(makeTransferMutation),
         variables: {
           'input': {
-            'accountOrigen': origen,
-            'accountDestin': desti,
+            'accountOrigen': desti,
+            'accountDestin': origen,
             'import': import,
           }
         },
