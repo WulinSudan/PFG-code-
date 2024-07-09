@@ -4,18 +4,8 @@ import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
-
-
-String _decryptQrData(String encryptedText) {
-  final key = encrypt.Key.fromUtf8('my 32 length key................'); // Clave de cifrado (32 caracteres)
-  final iv = encrypt.IV.fromLength(16); // Vector de inicialización (16 bytes)
-  final encrypter = encrypt.Encrypter(encrypt.AES(key));
-
-  final decrypted = encrypter.decrypt64(encryptedText, iv: iv);
-  return decrypted; // Devuelve el dato descifrado
-}
-
+import 'package:flutter/material.dart';
+import '../functions/encrypt.dart';
 
 // Función para realizar la transferencia
 Future<void> doQr(String accessToken, String origen, String desti, double import) async {
@@ -67,7 +57,7 @@ class _QrGestionState extends State<QrGestion> {
   String? accessToken;
 
   @override
-  void didChangeDependencies() {
+  Future<void> didChangeDependencies() async{
     super.didChangeDependencies();
 
     // Recuperar los argumentos de la ruta
@@ -77,8 +67,8 @@ class _QrGestionState extends State<QrGestion> {
     accessToken = arguments?['accessToken'] as String?;
     String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
 
-    //descifrar
-    //qrText = _decryptQrData(qrText);
+    // Descifrar el texto del código QR usando la función de desencriptación
+    qrText = await decryptData(qrText);
 
     String accountNumber = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
 
@@ -98,23 +88,29 @@ class _QrGestionState extends State<QrGestion> {
 
       // Asignar origen, destino e importe
       if (typePart == 'c') {
-        origen = accountPart ?? 'Origen no disponible';
-        destino = accountNumber; // Usar el número de cuenta como destino
+        setState(() {
+          origen = accountPart ?? 'Origen no disponible';
+          destino = accountNumber; // Usar el número de cuenta como destino
+        });
       } else if (typePart == 'p') {
-        origen = accountNumber; // Usar el número de cuenta como origen
-        destino = accountPart ?? 'Destino no disponible';
+        setState(() {
+          origen = accountNumber; // Usar el número de cuenta como origen
+          destino = accountPart ?? 'Destino no disponible';
+        });
       }
-      importe = double.tryParse(amountPart?.replaceAll(',', '.') ?? '0') ?? 0.0; // Parsear importe como double
+      setState(() {
+        importe = double.tryParse(amountPart?.replaceAll(',', '.') ?? '0') ?? 0.0; // Parsear importe como double
+      });
     } else {
-      origen = accountNumber; // Usar el número de cuenta como origen
-      destino = qrText; // Usar el código QR como destino
-      importe = 2.0; // Ejemplo de importe, ajustar según tu lógica
+      setState(() {
+        origen = accountNumber; // Usar el número de cuenta como origen
+        destino = qrText; // Usar el código QR como destino
+        importe = 2.0; // Ejemplo de importe, ajustar según tu lógica
+      });
     }
 
     // Verificar si el importe es mayor a 0 o igual a -1
-    if (importe > 0) {
-      doQr(accessToken!, origen, destino, importe);
-    } else if (importe == -1) {
+    if (importe == -1) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         _showInputDialog(context);
       });
@@ -257,6 +253,4 @@ class _QrGestionState extends State<QrGestion> {
       },
     );
   }
-
-
 }
