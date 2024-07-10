@@ -9,6 +9,7 @@ import '../functions/encrypt.dart';
 
 // Función para realizar la transferencia
 Future<void> doQr(String accessToken, String origen, String desti, double import) async {
+  print("------------------------12-----doQR------------------------");
   print('Origen: $origen');
   print('Destino: $desti');
   print('Importe: $import');
@@ -66,11 +67,19 @@ class _QrGestionState extends State<QrGestion> {
     // Obtener los datos de los argumentos
     accessToken = arguments?['accessToken'] as String?;
     String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
+    print("--------------------------70----------------- $qrText");
 
     // Descifrar el texto del código QR usando la función de desencriptación
-    qrText = await decryptData(qrText);
+    try {
+      qrText = MyEncryptionDecryption.decryptAES(qrText);
+    } catch (e) {
+      print('Error al descifrar el código QR: $e');
+      // Manejar el error según sea necesario
+      return;
+    }
 
     String accountNumber = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+    print("----------------------------75----------------------$accountNumber");
 
     // Verificar si el código QR comienza con 'c' o 'p' y extraer los datos
     if (qrText.startsWith('c') || qrText.startsWith('p')) {
@@ -81,18 +90,18 @@ class _QrGestionState extends State<QrGestion> {
       String? amountPart = parts.length > 2 ? parts[2] : null;
 
       print("-----------------------------68---------------------------");
-      print(parts);
-      print(typePart);
-      print(accountPart);
-      print(amountPart);
+      print("info QR: $parts");
+      print("tipo:  $typePart");
+      print("cuenta que genera codi qr: $accountPart");
+      print("importe: $amountPart");
 
       // Asignar origen, destino e importe
-      if (typePart == 'c') {
+      if (typePart == 'p') {
         setState(() {
           origen = accountPart ?? 'Origen no disponible';
           destino = accountNumber; // Usar el número de cuenta como destino
         });
-      } else if (typePart == 'p') {
+      } else if (typePart == 'c') {
         setState(() {
           origen = accountNumber; // Usar el número de cuenta como origen
           destino = accountPart ?? 'Destino no disponible';
@@ -109,11 +118,25 @@ class _QrGestionState extends State<QrGestion> {
       });
     }
 
+    print("------------------------113---------------------------");
+    print("origen: $origen");
+    print("destino: $destino");
+    print("importe: $importe");
+    print("accessToken: $accessToken");
+
+
     // Verificar si el importe es mayor a 0 o igual a -1
     if (importe == -1) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         _showInputDialog(context);
       });
+    }
+    else if (importe > 0){
+      print("----------------------135------------------");
+      doQr(accessToken.toString(), origen, destino, importe);
+    }
+    else{
+      print("error!");
     }
   }
 

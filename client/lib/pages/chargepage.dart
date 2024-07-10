@@ -36,20 +36,10 @@ class _ChargePageState extends State<ChargePage> {
     });
 
     print("------------------38--------------------");
-    String encryptedData = await encryptData(qrData);
+    String encryptedData = MyEncryptionDecryption.encryptAES(qrData);
     setState(() {
       qrData = encryptedData;
     });
-  }
-
-  String _encryptQrData(String plainText) {
-    final key = encrypt.Key.fromLength(32);
-    final iv = encrypt.IV.fromLength(16);
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-    final encrypted = encrypter.encrypt(plainText, iv: iv);
-    print("----------------------43-----------------------");
-    print(encrypted.base64);
-    return encrypted.base64;
   }
 
 

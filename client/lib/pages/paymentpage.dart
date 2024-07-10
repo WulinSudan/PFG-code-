@@ -38,7 +38,7 @@ class _PaymentPageState extends State<PaymentPage> {
       qrData = 'p $accountNumber $amountToPay';
     });
 
-    String encryptedData = await encryptData(qrData);
+    String encryptedData = MyEncryptionDecryption.encryptAES(qrData);
     setState(() {
       qrData = encryptedData;
     });
