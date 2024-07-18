@@ -33,6 +33,18 @@
       <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/client/linux/flutter/ephemeral/.plugin_symlinks/fast_rsa/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/client/linux/flutter/ephemeral/.plugin_symlinks/fast_rsa/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/client/linux/flutter/ephemeral/.plugin_symlinks/fast_rsa/build" />
+      <excludeFolder url="file://$MODULE_DIR$/client/linux/flutter/ephemeral/.plugin_symlinks/fast_rsa/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/client/linux/flutter/ephemeral/.plugin_symlinks/fast_rsa/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/client/linux/flutter/ephemeral/.plugin_symlinks/fast_rsa/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/fast_rsa/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/fast_rsa/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/fast_rsa/build" />
+      <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/fast_rsa/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/fast_rsa/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/client/windows/flutter/ephemeral/.plugin_symlinks/fast_rsa/example/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

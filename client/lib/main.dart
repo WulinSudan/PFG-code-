@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/login',
+      initialRoute: '/mutation',
       routes: {
         '/qrgestion': (context) => QrGestion(),
         '/qrscanner': (context) {

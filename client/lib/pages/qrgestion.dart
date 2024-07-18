@@ -57,6 +57,8 @@ class _QrGestionState extends State<QrGestion> {
   String? typePart = '';
   String? accessToken;
 
+  //c 1234667 8.0,temsp
+
   @override
   Future<void> didChangeDependencies() async{
     super.didChangeDependencies();

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-
-// Importa la clase MyEncryptionDecryption
-import 'my_encryption.dart';
+import 'package:encrypt/encrypt.dart';
+import 'package:encrypt/encrypt_io.dart';
+import 'package:pointycastle/asymmetric/api.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:pointycastle/asymmetric/api.dart'; // Para RSAPublicKey
 
 void main() => runApp(MaterialApp(home: MutationPage()));
 
@@ -11,76 +13,81 @@ class MutationPage extends StatefulWidget {
 }
 
 class _MutationPageState extends State<MutationPage> {
-  late TextEditingController _textController;
-  String _encryptedText = '';
-  String _decryptedText = '';
+  RSAPublicKey? publicKey;
+  RSAPrivateKey? privKey;
+  final plainText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit';
+  String? encryptedBase64;
+  String? decrypted;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
+    _initializeKeys();
   }
 
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
+  Future<String> loadPemFile(String path) async {
+    try {
+      // Cargar el archivo PEM como un string
+      String pemString = await rootBundle.loadString(path);
+      return pemString;
+    } catch (e) {
+      print('Error al cargar el archivo PEM: $e');
+      return '';
+    }
   }
 
-  void encryptText() {
-    // Obtén el texto del TextField
-    String plainText = _textController.text;
 
-    // Llama al método estático encryptAES de MyEncryptionDecryption
-    _encryptedText = MyEncryptionDecryption.encryptAES(plainText);
-    _decryptedText = ''; // Limpiar el texto desencriptado
-    setState(() {});
+  Future<void> _initializeKeys() async {
+    try {
+
+      final publicPem = await rootBundle.loadString('assets/public_key.pem');
+      // Cargar claves desde archivos PEM
+      String publicKeyString = await loadPemFile('assets/public_key.pem');
+      print("---------------------44-----------------");
+      print(publicKeyString);
+      print("---------------------46-----------------");
+
+
+      publicKey = RSAKeyParser().parse(publicPem) as RSAPublicKey;
+      //publicKey = await parseKeyFromFile<RSAPublicKey>('assets/public_key.pem');
+
+      privKey = await parseKeyFromFile<RSAPrivateKey>('assets/private_key.pem');
+
+      _encryptAndDecrypt();
+    } catch (e) {
+      print('Error al cargar las claves: $e');
+    }
   }
 
-  void decryptText() {
-    // Llama al método estático decryptAES de MyEncryptionDecryption
-    _decryptedText = MyEncryptionDecryption.decryptAES(_encryptedText);
-    setState(() {});
+  void _encryptAndDecrypt() {
+    if (publicKey != null && privKey != null) {
+      // PKCS1 (Default)
+      final encrypter = Encrypter(RSA(publicKey: publicKey!, privateKey: privKey!));
+      final encrypted = encrypter.encrypt(plainText);
+      decrypted = encrypter.decrypt(encrypted);
+      encryptedBase64 = encrypted.base64;
+
+      // Actualizar el estado para reflejar los nuevos valores
+      setState(() {});
+    } else {
+      print('Las claves no se han cargado correctamente.');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Mutation Page'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextField(
-                controller: _textController,
-                decoration: InputDecoration(
-                  labelText: 'Enter text to encrypt/decrypt',
-                ),
-              ),
-              SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: encryptText,
-                child: Text('Encrypt'),
-              ),
-              SizedBox(height: 10.0),
-              ElevatedButton(
-                onPressed: decryptText,
-                child: Text('Decrypt'),
-              ),
-              SizedBox(height: 20.0),
-              Text('Encrypted Text:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(_encryptedText),
-              SizedBox(height: 20.0),
-              Text('Decrypted Text:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(_decryptedText),
-            ],
-          ),
+      appBar: AppBar(title: Text('Mutation Page')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Mensaje en claro: $plainText'),
+            SizedBox(height: 16),
+            Text('Mensaje encriptado (Base64): ${encryptedBase64 ?? "Cargando..."}'),
+            SizedBox(height: 16),
+            Text('Mensaje desencriptado: ${decrypted ?? "Cargando..."}'),
+          ],
         ),
       ),
     );
