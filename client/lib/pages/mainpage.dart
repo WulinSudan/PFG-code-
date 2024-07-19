@@ -71,6 +71,12 @@ class _MainPageState extends State<MainPage> {
             },
 
           ),
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
         ],
       ),
       drawer: Drawer(
