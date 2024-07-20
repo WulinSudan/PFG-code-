@@ -1,5 +1,13 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
+function getUtcPlusTwoDate() {
+  const now = new Date();
+  // Obtener el tiempo en milisegundos y añadir dos horas (2 * 60 * 60 * 1000 milisegundos)
+  const utcPlusTwoTime = now.getTime() + (2 * 60 * 60 * 1000);
+  // Crear un nuevo objeto Date con el tiempo UTC+2
+  return new Date(utcPlusTwoTime);
+}
+
 // Interface for Account
 interface IAccount extends Document {
   owner_dni: string;
@@ -7,6 +15,10 @@ interface IAccount extends Document {
   number_account: string; // Debe ser un string de 10 caracteres numéricos no repetitivos
   balance: number; // Puede ser un número decimal
   active: boolean;
+  key: string;
+  qr_create_date: Date
+  maximum_amount_once: number
+  maximun_amount_day: number
 }
 
 // Account Schema
@@ -34,6 +46,10 @@ const AccountSchema: Schema = new Schema({
     set: (value: number) => parseFloat(value.toFixed(2)),
   },
   active: { type: Boolean, required: true },
+  key: { type: String, required: true, unique: true, default: "dddddddddsakjas_"},
+  qr_create_date: { type: Date, default: getUtcPlusTwoDate },
+  maximum_amount_once: { type: Number, requered:true, default:50},
+  maximum_amount_day: { type: Number, requered:true, default:500},
 });
 
 // Account Model

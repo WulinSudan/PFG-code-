@@ -7,6 +7,17 @@ import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
 
 
+
+function getUtcPlusTwoDate() {
+  const now = new Date();
+  // Obtener el tiempo en milisegundos y añadir dos horas (2 * 60 * 60 * 1000 milisegundos)
+  const utcPlusTwoTime = now.getTime() + (2 * 60 * 60 * 1000);
+  // Crear un nuevo objeto Date con el tiempo UTC+2
+  return new Date(utcPlusTwoTime);
+}
+
+
+
 function generateUniqueAccountNumber(): string {
   const now = new Date();
   //const year = String(now.getFullYear()).slice(-2);
@@ -128,6 +139,10 @@ export const userResolvers = {
               number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
               balance: 10.5, // Saldo inicial de 10€
               active: true,
+              key:"dsdbcsjldh===",
+              maximum_amount_once:50,
+              maximun_amount_day:500,
+              qr_create_date: getUtcPlusTwoDate(),
             });
       
             await newAccount.save();
