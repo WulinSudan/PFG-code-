@@ -28,6 +28,7 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> fetchData() async {
     await fetchUserData(widget.accessToken, updateUserData);
+    //await checkAndAddAccount();
   }
 
   void updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) {
@@ -41,6 +42,21 @@ class _MainPageState extends State<MainPage> {
     print('DNI actualizado: $dni');
     print('Cuentas actualizadas: $accounts');
   }
+
+  /*
+  Future<void> checkAndAddAccount() async {
+    if (accounts.isEmpty) {
+      await addAccount(widget.accessToken);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bienvenida!!!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      // Refresca la lista de cuentas después de añadir una nueva
+      await fetchData();
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +85,6 @@ class _MainPageState extends State<MainPage> {
                 arguments: widget.accessToken,
               );
             },
-
           ),
           IconButton(
             icon: Icon(Icons.logout),
@@ -105,7 +120,6 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
-
       body: ListView.builder(
         itemCount: accounts.length,
         itemBuilder: (context, index) {
@@ -132,10 +146,9 @@ class _MainPageState extends State<MainPage> {
       ),
       floatingActionButton: selectedAccountIndex != null
           ? FloatingActionButton(
-        onPressed: () async{
+        onPressed: () async {
           await showDeleteConfirmationDialog(context, widget.accessToken, accounts, accounts[selectedAccountIndex!]);
-          },
-
+        },
         tooltip: 'Eliminar cuenta',
         child: Icon(Icons.delete),
         backgroundColor: Colors.red,
@@ -167,7 +180,10 @@ class _MainPageState extends State<MainPage> {
                 Navigator.pushNamed(
                   context,
                   '/paymentpage',
-                  arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
+                  arguments: {
+                    'accessToken': widget.accessToken,
+                    'accountNumber': accounts[selectedAccountIndex!].numberAccount
+                  },
                 );
               }
                   : null,
@@ -179,7 +195,10 @@ class _MainPageState extends State<MainPage> {
                 Navigator.pushNamed(
                   context,
                   '/chargepage',
-                  arguments: {'accountNumber': accounts[selectedAccountIndex!].numberAccount},
+                  arguments: {
+                    'accessToken': widget.accessToken,
+                    'accountNumber': accounts[selectedAccountIndex!].numberAccount,
+                  },
                 );
               }
                   : null,

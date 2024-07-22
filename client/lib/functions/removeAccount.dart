@@ -38,13 +38,14 @@ Future<void> showDeleteConfirmationDialog(BuildContext context, String accessTok
         );
       },
     );
-  } else {
+  }
+  else {
     selectAccountDialog(context,accessToken,accounts,selectedAccount);
-
   }
 }
 
 Future<void> selectAccountDialog(BuildContext context, String accesToken, List<Account> accounts, Account currentAccount) async {
+
   // Filtrar las cuentas excluyendo la cuenta actual
   List<Account> filteredAccounts = accounts.where((account) => account.numberAccount != currentAccount.numberAccount).toList();
 

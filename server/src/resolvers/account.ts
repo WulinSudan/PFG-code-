@@ -61,6 +61,8 @@ export const accountResolvers = {
     },
   },
   Mutation: {
+
+    
     // Resolver para agregar una cuenta nueva
     addAccount: async (_root: any, { input }: { input: IAccount }): Promise<IAccount> => {
       try {

@@ -73,6 +73,20 @@ mutation MakeTransfer(\$input: TransferInput!) {
 """;
 
 
+final String getPayKeyQuery = """
+query(\$accountNumber: String!){
+  getAccountPayKey(accountNumber: \$accountNumber)
+}
+""";
+
+
+final String getChargeKeyQuery = """
+query(\$accountNumber: String!){
+  getAccountChargeKey(accountNumber: \$accountNumber)
+}
+""";
+
+
 
 
 

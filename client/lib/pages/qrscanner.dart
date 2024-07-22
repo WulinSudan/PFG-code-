@@ -10,7 +10,6 @@ class QrScanner extends StatefulWidget {
   final Account account;
   QrScanner({required this.accessToken, required this.account});
 
-
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
 }
@@ -19,7 +18,6 @@ class _QRViewExampleState extends State<QrScanner> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-
 
   @override
   void reassemble() {

@@ -16,6 +16,10 @@
     getUserAccountCount(dni: String!): Int!
     getUserAccountsInfoByDni(dni: String!): [Account]
     findAccount(accountNumber:String!):Account
+     
+      
+    getAccountPayKey(accountNumber:String!): String!
+    getAccountChargeKey(accountNumber:String!): String!
   }
 
   type Mutation {

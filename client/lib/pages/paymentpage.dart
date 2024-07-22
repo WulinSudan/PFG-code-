@@ -4,7 +4,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import '../functions/encrypt.dart';
 
-
 class PaymentPage extends StatefulWidget {
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -17,7 +16,6 @@ class _PaymentPageState extends State<PaymentPage> {
   TextEditingController amountController = TextEditingController();
   bool isDialogOpen = false; // Para controlar si el AlertDialog está abierto
 
-
   @override
   void initState() {
     super.initState();
@@ -26,13 +24,12 @@ class _PaymentPageState extends State<PaymentPage> {
       if (args != null && args.containsKey('accountNumber')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          updateQrData();
         });
       }
     });
   }
 
-  Future<void> updateQrData() async{
+  Future<void> updateQrData() async {
     setState(() {
       amountToPay = double.tryParse(amountController.text) ?? -1;
       qrData = 'p $accountNumber $amountToPay';
@@ -45,10 +42,21 @@ class _PaymentPageState extends State<PaymentPage> {
     _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
   }
 
+  Future<void> updateQrDataWithFreeAmount() async {
+    setState(() {
+      amountToPay = -1;
+      qrData = 'p $accountNumber $amountToPay';
+    });
 
+    String encryptedData = MyEncryptionDecryption.encryptAES(qrData);
+    setState(() {
+      qrData = encryptedData;
+    });
+    _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
+  }
 
   void _showQrDialog() {
-    const duration = const Duration(seconds: 10);
+    const duration = Duration(seconds: 10);
     isDialogOpen = true; // Indicar que el AlertDialog está abierto
 
     showDialog(
@@ -158,9 +166,18 @@ class _PaymentPageState extends State<PaymentPage> {
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: updateQrData,
-                  child: Text('Validar import'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: updateQrData,
+                      child: Text('Validar import'),
+                    ),
+                    ElevatedButton(
+                      onPressed: updateQrDataWithFreeAmount,
+                      child: Text('Importe libre'),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 20),
               ],

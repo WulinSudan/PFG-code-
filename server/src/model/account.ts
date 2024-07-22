@@ -15,10 +15,11 @@ interface IAccount extends Document {
   number_account: string; // Debe ser un string de 10 caracteres numéricos no repetitivos
   balance: number; // Puede ser un número decimal
   active: boolean;
-  key: string;
-  qr_create_date: Date
-  maximum_amount_once: number
-  maximun_amount_day: number
+  key_to_charge: string;
+  key_to_pay: string;
+  qr_pay_create_date: Date;
+  maximum_amount_once: number;
+  maximun_amount_day: number;
 }
 
 // Account Schema
@@ -46,10 +47,11 @@ const AccountSchema: Schema = new Schema({
     set: (value: number) => parseFloat(value.toFixed(2)),
   },
   active: { type: Boolean, required: true },
-  key: { type: String, required: true, unique: true, default: "dddddddddsakjas_"},
-  qr_create_date: { type: Date, default: getUtcPlusTwoDate },
-  maximum_amount_once: { type: Number, requered:true, default:50},
-  maximum_amount_day: { type: Number, requered:true, default:500},
+  key_to_charge: { type: String, required: true},
+  key_to_pay: { type: String, required: true},
+  qr_pay_create_date: { type: Date },
+  maximum_amount_once: { type: Number, requered:true },
+  maximum_amount_day: { type: Number, requered:true },
 });
 
 // Account Model

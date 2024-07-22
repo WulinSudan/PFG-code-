@@ -49,6 +49,40 @@ interface AddAccountInput {
 export const userResolvers = {
     Query: {
 
+      //seria mejor dejar en account
+      getAccountPayKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
+        const { accountNumber } = args;
+  
+        const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+  
+        const account = await Account.findOne({ accountNumber, userId: new Types.ObjectId(userId) });
+        if (!account) {
+          throw new Error('Account not found');
+        }
+  
+        return account.key_to_pay;
+      },
+
+
+      getAccountChargeKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
+        const { accountNumber } = args;
+  
+        const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+  
+        const account = await Account.findOne({ accountNumber, userId: new Types.ObjectId(userId) });
+        if (!account) {
+          throw new Error('Account not found');
+        }
+  
+        return account.key_to_charge;
+      },
+
         getUserAccountCount: async (_root: any, { dni }: { dni: string }) => {
             try {
               // Buscar al usuario por su DNI
@@ -68,10 +102,7 @@ export const userResolvers = {
         allUsers: async () => {
             const users = await User.find();
             return users.map((user) => {
-                return
-                 {
-                    name:user.name
-                };
+                return{name:user.name};
             });
         },
 
@@ -139,10 +170,11 @@ export const userResolvers = {
               number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
               balance: 10.5, // Saldo inicial de 10€
               active: true,
-              key:"dsdbcsjldh===",
+              key_to_charge:"1234567890123456",
+              key_to_pay:"1234567890123456",
               maximum_amount_once:50,
               maximun_amount_day:500,
-              qr_create_date: getUtcPlusTwoDate(),
+              qr_pay_create_date: getUtcPlusTwoDate(),
             });
       
             await newAccount.save();
