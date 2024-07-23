@@ -1,8 +1,8 @@
-import 'dart:async'; // Importar dart:async para usar Timer
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import '../functions/encrypt.dart';
+import '../functions/fetchPayKey.dart';
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -11,19 +11,21 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   late String accountNumber = '';
-  double amountToPay = -1; // Importe a pagar
-  String qrData = ''; // Datos para el código QR
+  double amountToPay = -1;
+  String qrData = '';
   TextEditingController amountController = TextEditingController();
-  bool isDialogOpen = false; // Para controlar si el AlertDialog está abierto
+  bool isDialogOpen = false;
+  String? accessToken;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments as Map?;
-      if (args != null && args.containsKey('accountNumber')) {
+      if (args != null && args.containsKey('accountNumber') && args.containsKey('accessToken')) {
         setState(() {
-          accountNumber = args['accountNumber']!;
+          accountNumber = args['accountNumber'];
+          accessToken = args['accessToken'];
         });
       }
     });
@@ -32,42 +34,65 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> updateQrData() async {
     setState(() {
       amountToPay = double.tryParse(amountController.text) ?? -1;
-      qrData = 'p $accountNumber $amountToPay';
     });
 
-    String encryptedData = MyEncryptionDecryption.encryptAES(qrData);
-    setState(() {
-      qrData = encryptedData;
-    });
-    _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
+    try {
+      if (accessToken == null) {
+        throw Exception("Access token is null");
+      }
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
+      qrData = 'p $accountNumber $amountToPay';
+
+      String encryptedData = encryptAES(qrData, payKey);
+      setState(() {
+        qrData = encryptedData;
+      });
+      _showQrDialog();
+    } catch (e) {
+      // Manejo de errores
+      print('Error obteniendo la Pay Key: $e');
+    }
   }
 
   Future<void> updateQrDataWithFreeAmount() async {
     setState(() {
       amountToPay = -1;
-      qrData = 'p $accountNumber $amountToPay';
     });
 
-    String encryptedData = MyEncryptionDecryption.encryptAES(qrData);
-    setState(() {
-      qrData = encryptedData;
-    });
-    _showQrDialog(); // Mostrar el AlertDialog con el código QR generado
+    try {
+      if (accessToken == null) {
+        throw Exception("Access token is null");
+      }
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
+      qrData = 'p $accountNumber $amountToPay';
+
+      String encryptedData = encryptAES(qrData, payKey);
+      setState(() {
+        qrData = encryptedData;
+      });
+      _showQrDialog();
+    } catch (e) {
+      // Manejo de errores
+      print('Error obteniendo la Pay Key: $e');
+    }
   }
 
   void _showQrDialog() {
     const duration = Duration(seconds: 10);
-    isDialogOpen = true; // Indicar que el AlertDialog está abierto
+    if (isDialogOpen) return; // Evita abrir múltiples diálogos
+
+    isDialogOpen = true;
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Evitar que se cierre al tocar fuera
+      barrierDismissible: false,
       builder: (context) {
-        // Iniciar un Timer para cerrar automáticamente después de 10 segundos
         Timer(duration, () {
           if (isDialogOpen) {
-            Navigator.of(context).pop(); // Cerrar el AlertDialog
-            isDialogOpen = false; // Indicar que el AlertDialog está cerrado
+            Navigator.of(context).pop();
+            setState(() {
+              isDialogOpen = false;
+            });
           }
         });
 
@@ -82,7 +107,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   width: 200,
                   height: 200,
                   child: QrImageView(
-                    data: qrData, // Usar qrData que has actualizado
+                    data: qrData,
                     version: QrVersions.auto,
                     size: 200.0,
                   ),
@@ -101,7 +126,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       TextSpan(
-                        text: '€$amountToPay',
+                        text: amountToPay == -1 ? 'Libre' : '€$amountToPay',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -113,7 +138,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 SizedBox(height: 10),
                 Text('Aquest codi QR es caducarà en:'),
-                CountdownWidget(duration: duration), // Widget para mostrar el contador de tiempo
+                CountdownWidget(duration: duration),
               ],
             ),
           ),
@@ -121,7 +146,9 @@ class _PaymentPageState extends State<PaymentPage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                isDialogOpen = false; // Indicar que el AlertDialog está cerrado
+                setState(() {
+                  isDialogOpen = false;
+                });
               },
               child: Text('Tanca'),
             ),
@@ -136,8 +163,8 @@ class _PaymentPageState extends State<PaymentPage> {
       return 'Número de cuenta inválido';
     }
 
-    String visibleDigits = accountNumber.substring(accountNumber.length - 6); // Muestra los últimos 6 dígitos
-    String maskedDigits = accountNumber.substring(0, 4).replaceAll(RegExp(r'\d'), 'x'); // Oculta los primeros 4 dígitos
+    String visibleDigits = accountNumber.substring(accountNumber.length - 6);
+    String maskedDigits = accountNumber.substring(0, 4).replaceAll(RegExp(r'\d'), 'x');
     return '$maskedDigits$visibleDigits';
   }
 

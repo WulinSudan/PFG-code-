@@ -88,5 +88,19 @@ query(\$accountNumber: String!){
 
 
 
+final String addKeyToDictionaryMutation = """
+mutation(\$input: DictionaryInput!) {
+  addDictionary(input: \$input) {
+    encrypt_message
+    account
+    operation
+    create_date
+  }
+}
+""";
+
+
+
+
 
 

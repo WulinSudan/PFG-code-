@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
+import '../graphql_client.dart';
 import '../graphql_queries.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
-import 'package:flutter/material.dart';
 import '../functions/encrypt.dart';
+import '../functions/fetchPayKey.dart';
 
 // Función para realizar la transferencia
 Future<void> doQr(String accessToken, String origen, String desti, double import) async {
@@ -57,10 +57,8 @@ class _QrGestionState extends State<QrGestion> {
   String? typePart = '';
   String? accessToken;
 
-  //c 1234667 8.0,temsp
-
   @override
-  Future<void> didChangeDependencies() async{
+  Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
 
     // Recuperar los argumentos de la ruta
@@ -73,7 +71,8 @@ class _QrGestionState extends State<QrGestion> {
 
     // Descifrar el texto del código QR usando la función de desencriptación
     try {
-      qrText = MyEncryptionDecryption.decryptAES(qrText);
+      String payKey = await fetchPayKey(accessToken!, arguments?['accountNumber']);
+      qrText = decryptAES(qrText, payKey);
     } catch (e) {
       print('Error al descifrar el código QR: $e');
       // Manejar el error según sea necesario
@@ -126,18 +125,15 @@ class _QrGestionState extends State<QrGestion> {
     print("importe: $importe");
     print("accessToken: $accessToken");
 
-
     // Verificar si el importe es mayor a 0 o igual a -1
     if (importe == -1) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         _showInputDialog(context);
       });
-    }
-    else if (importe > 0){
+    } else if (importe > 0) {
       print("----------------------135------------------");
       doQr(accessToken.toString(), origen, destino, importe);
-    }
-    else{
+    } else {
       print("error!");
     }
   }
@@ -189,10 +185,7 @@ class _QrGestionState extends State<QrGestion> {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(
-                      context,
-                      '/mainpage',
-                      arguments: accessToken);
+                  Navigator.pushNamed(context, '/mainpage', arguments: accessToken);
                 },
                 child: Text('Volver a la página principal'),
               ),
@@ -221,11 +214,7 @@ class _QrGestionState extends State<QrGestion> {
               child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.pushNamed(
-                  context,
-                  '/mainpage',
-                  arguments: accessToken,
-                );
+                Navigator.pushNamed(context, '/mainpage', arguments: accessToken);
               },
             ),
             TextButton(
@@ -246,11 +235,7 @@ class _QrGestionState extends State<QrGestion> {
                       // Cerrar el diálogo automáticamente después de 3 segundos
                       Future.delayed(Duration(seconds: 3), () {
                         Navigator.of(context).pop(); // Cierra el diálogo de éxito
-                        Navigator.pushNamed(
-                          context,
-                          '/mainpage',
-                          arguments: accessToken,
-                        );
+                        Navigator.pushNamed(context, '/mainpage', arguments: accessToken);
                       });
 
                       return AlertDialog(

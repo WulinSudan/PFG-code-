@@ -20,9 +20,15 @@
       
     getAccountPayKey(accountNumber:String!): String!
     getAccountChargeKey(accountNumber:String!): String!
+
+  
   }
 
   type Mutation {
+
+    //logOut:Boolean!
+
+    addDictionary(input: DictionaryInput!): Dictionary!
 
     signUp(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
@@ -43,6 +49,25 @@
 
     
   }
+
+  scalar Date
+
+  input DictionaryInput {
+    encrypt_message: String!
+    account: String!
+    operation: String!
+    create_date: Date
+  }
+
+
+
+  type Dictionary {
+    encrypt_message: String!
+    account: String!
+    operation: String!
+    create_date: Date
+  }
+
 
   type Address {
     street: String!
@@ -123,6 +148,9 @@
   password: String!
   role: String
 }
+
+
+
 
 
 

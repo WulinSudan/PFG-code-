@@ -288,3 +288,7 @@ export const userResolvers = {
           },
     },
 };
+function invalidateToken(token: any) {
+  throw new Error("Function not implemented.");
+}
+

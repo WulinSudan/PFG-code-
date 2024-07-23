@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart'; // Asegúrate de tener esta dependencia
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import '../functions/encrypt.dart';
+import '../functions/fetchPayKey.dart';
+import '../functions/addKeyToDictionary.dart';
 
 class ChargePage extends StatefulWidget {
   @override
@@ -11,37 +13,80 @@ class ChargePage extends StatefulWidget {
 class _ChargePageState extends State<ChargePage> {
   late String accountNumber = '';
   double amountToCharge = -1; // Importe a pagar
-  String qrData = '';
+  String qrData = ''; // Inicialmente vacío
+  String? accessToken;
+  String operation = 'c';
   TextEditingController amountController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       final args = ModalRoute.of(context)?.settings.arguments as Map?;
-      if (args != null && args.containsKey('accountNumber')) {
+      if (args != null && args.containsKey('accountNumber') && args.containsKey('accessToken')) {
         setState(() {
           accountNumber = args['accountNumber']!;
-          updateQrData();
+          accessToken = args['accessToken'];
         });
+
+        // Inicializar qrData con un importe de -1 al cargar la página
+        await _initializeQrData();
       }
     });
   }
 
-  Future<void> updateQrData() async {
-    print("------------------32--------------------");
-    setState(() {
-      amountToCharge = double.tryParse(amountController.text) ?? -1;
-      qrData = 'c $accountNumber $amountToCharge';
-    });
+  Future<void> _initializeQrData() async {
+    if (accessToken == null) {
+      print("Access token is null");
+      return;
+    }
 
-    print("------------------38--------------------");
-    String encryptedData = MyEncryptionDecryption.encryptAES(qrData);
-    setState(() {
-      qrData = encryptedData;
-    });
+    try {
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
+      qrData = 'c $accountNumber $amountToCharge';
+      String encryptedData = encryptAES(qrData, payKey);
+      print("encryptedData..................................");
+      print(encryptedData);
+      // Guardar la clave en el diccionario
+      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, operation);
+
+      setState(() {
+        qrData = encryptedData;
+      });
+    } catch (e) {
+      print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
+      // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
+    }
   }
 
+  Future<void> updateQrData() async {
+    if (accessToken == null) {
+      print("Access token is null");
+      return;
+    }
+
+    setState(() {
+      amountToCharge = double.tryParse(amountController.text) ?? -1;
+    });
+
+    try {
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
+
+      qrData = 'c $accountNumber $amountToCharge';
+      String encryptedData = encryptAES(qrData, payKey);
+      print("encryptedData..................................");
+      print(encryptedData);
+      // Guardar la clave en el diccionario
+      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, operation);
+
+      setState(() {
+        qrData = encryptedData;
+      });
+    } catch (e) {
+      print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
+      // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
+    }
+  }
 
   String maskAccountNumber(String accountNumber) {
     if (accountNumber.length != 10) {
@@ -52,7 +97,6 @@ class _ChargePageState extends State<ChargePage> {
     String maskedDigits = accountNumber.substring(0, 4).replaceAll(RegExp(r'\d'), 'x'); // Oculta los primeros 4 dígitos
     return '$maskedDigits$visibleDigits';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -69,17 +113,19 @@ class _ChargePageState extends State<ChargePage> {
               children: [
                 SizedBox(height: 30.0),
                 QrImageView(
-                  data: qrData,
+                  data: qrData.isEmpty ? 'c $accountNumber $amountToCharge' : qrData, // Asegura que qrData tenga algún valor
                   version: QrVersions.auto,
                   size: 200.0,
                 ),
                 SizedBox(height: 20),
                 Text('Account Number: ${maskAccountNumber(accountNumber)}'),
-                Text('Import: ${amountController.text.isEmpty ? 'undefined' : amountController.text}'),
+                Text('Import: ${amountToCharge == -1 ? 'Libre' : amountToCharge}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
-                  onChanged: (_) => updateQrData(),
+                  onChanged: (_) {
+                    // Actualizar QR solo cuando se presione el botón
+                  },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Enter the amount',
@@ -87,6 +133,12 @@ class _ChargePageState extends State<ChargePage> {
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    updateQrData();
+                  },
+                  child: Text('Update QR Code'),
+                ),
               ],
             ),
           ),
