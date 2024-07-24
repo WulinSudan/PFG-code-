@@ -1,5 +1,9 @@
 import { Account, IAccount } from "../model/account";
 import { Types } from "mongoose";
+import { User } from "../model/user";
+import { getAccessToken, getUserId } from "../utils/jwt";
+import { Context } from "../utils/context";
+
 
 interface TransferInput {
   accountOrigen: string;
@@ -20,6 +24,40 @@ async function findAccount(accountNumber: string): Promise<IAccount | null> {
 
 export const accountResolvers = {
   Query: {
+
+    getAccountPayKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
+      const { accountNumber } = args;
+
+      const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const account = await Account.findOne({ accountNumber, userId: new Types.ObjectId(userId) });
+      if (!account) {
+        throw new Error('Account not found');
+      }
+
+      return account.key_to_pay;
+    },
+
+
+    getAccountChargeKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
+      const { accountNumber } = args;
+
+      const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const account = await Account.findOne({ accountNumber, userId: new Types.ObjectId(userId) });
+      if (!account) {
+        throw new Error('Account not found');
+      }
+
+      return account.key_to_charge;
+    },
+
     // Resolver para encontrar una cuenta por su número de cuenta
     findAccount: async (_root: any, args: any) => {
       try {

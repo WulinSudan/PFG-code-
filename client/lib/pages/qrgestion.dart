@@ -1,49 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../functions/fetchUserDate.dart';
-import '../functions/addAccount.dart';
-import '../functions/encrypt.dart';
+import '../functions/fetchChargeKey.dart';
 import '../functions/fetchPayKey.dart';
-
-// Función para realizar la transferencia
-Future<void> doQr(String accessToken, String origen, String desti, double import) async {
-  print("------------------------12-----doQR------------------------");
-  print('Origen: $origen');
-  print('Destino: $desti');
-  print('Importe: $import');
-
-  final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
-
-  try {
-    final QueryResult result = await client.mutate(
-      MutationOptions(
-        document: gql(makeTransferMutation),
-        variables: {
-          'input': {
-            'accountOrigen': desti,
-            'accountDestin': origen,
-            'import': import,
-          }
-        },
-      ),
-    );
-
-    if (result.hasException) {
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
-      // Manejo de error adicional según sea necesario
-    } else {
-      print('Mutación exitosa');
-      // Aquí puedes manejar la respuesta de la mutación si es necesario
-      // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
-      // O realizar alguna otra acción según tus necesidades
-    }
-  } catch (e) {
-    print('Error inesperado: $e');
-    // Manejo de error adicional según sea necesario
-  }
-}
+import '../functions/encrypt.dart';
+import '../functions/getOriginAccount.dart';
+import '../functions/getOperation.dart';
+import '../functions/makeTransfer.dart';
 
 class QrGestion extends StatefulWidget {
   @override
@@ -54,69 +17,67 @@ class _QrGestionState extends State<QrGestion> {
   String origen = '';
   String destino = '';
   double importe = 0.0;
-  String? typePart = '';
+  String? typePart;
   String? accessToken;
+  String? operation;
+  String? originAccount;
 
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
 
     // Recuperar los argumentos de la ruta
-    Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     // Obtener los datos de los argumentos
     accessToken = arguments?['accessToken'] as String?;
     String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
-    print("--------------------------70----------------- $qrText");
+    print("--------------------------35----------------- $qrText");
 
-    // Descifrar el texto del código QR usando la función de desencriptación
     try {
-      String payKey = await fetchPayKey(accessToken!, arguments?['accountNumber']);
-      qrText = decryptAES(qrText, payKey);
+      // Obtener la cuenta de origen y la operación
+      originAccount = await getOrigenAccount(accessToken!, qrText);
+      operation = await getOperation(accessToken!, qrText);
+      print(originAccount);
+      print(operation);
+
+      // Desencriptar el texto del QR usando la clave adecuada
+      if (operation == 'charge') {
+        origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+        destino = originAccount ?? 'Destino no disponible';
+        String chargeKey = await fetchChargeKey(accessToken!, originAccount!);
+        qrText = decryptAES(qrText, chargeKey);
+        typePart = 'Cargo'; // Asumimos que este es el tipo para 'charge'
+      } else if (operation == 'payment') {
+        origen = originAccount ?? 'Origen no disponible';
+        destino = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+        String payKey = await fetchPayKey(accessToken!, originAccount!);
+        qrText = decryptAES(qrText, payKey);
+        typePart = 'Pago'; // Asumimos que este es el tipo para 'payment'
+      } else {
+        throw Exception('Tipo de operación no válido');
+      }
+
+      print("50--------------------------------------------");
+      print(qrText);
+
+      // Extraer el importe del texto desencriptado
+      List<String> parts = qrText.split(' ');
+      if (parts.length >= 3) {
+        String amountPart = parts.last; // Asumimos que el importe está al final
+        importe = double.tryParse(amountPart) ?? 0.0;
+      } else {
+        print('Formato de texto QR inválido');
+        importe = 0.0;
+      }
+
+      // Actualizar el estado para reflejar los cambios en la UI
+      setState(() {});
+
     } catch (e) {
       print('Error al descifrar el código QR: $e');
       // Manejar el error según sea necesario
       return;
-    }
-
-    String accountNumber = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-    print("----------------------------75----------------------$accountNumber");
-
-    // Verificar si el código QR comienza con 'c' o 'p' y extraer los datos
-    if (qrText.startsWith('c') || qrText.startsWith('p')) {
-      // Obtener partes del qrText
-      List<String> parts = qrText.split(' ');
-      typePart = parts.isNotEmpty ? parts[0] : null;
-      String? accountPart = parts.length > 1 ? parts[1] : null;
-      String? amountPart = parts.length > 2 ? parts[2] : null;
-
-      print("-----------------------------68---------------------------");
-      print("info QR: $parts");
-      print("tipo:  $typePart");
-      print("cuenta que genera codi qr: $accountPart");
-      print("importe: $amountPart");
-
-      // Asignar origen, destino e importe
-      if (typePart == 'p') {
-        setState(() {
-          origen = accountPart ?? 'Origen no disponible';
-          destino = accountNumber; // Usar el número de cuenta como destino
-        });
-      } else if (typePart == 'c') {
-        setState(() {
-          origen = accountNumber; // Usar el número de cuenta como origen
-          destino = accountPart ?? 'Destino no disponible';
-        });
-      }
-      setState(() {
-        importe = double.tryParse(amountPart?.replaceAll(',', '.') ?? '0') ?? 0.0; // Parsear importe como double
-      });
-    } else {
-      setState(() {
-        origen = accountNumber; // Usar el número de cuenta como origen
-        destino = qrText; // Usar el código QR como destino
-        importe = 2.0; // Ejemplo de importe, ajustar según tu lógica
-      });
     }
 
     print("------------------------113---------------------------");
@@ -132,7 +93,7 @@ class _QrGestionState extends State<QrGestion> {
       });
     } else if (importe > 0) {
       print("----------------------135------------------");
-      doQr(accessToken.toString(), origen, destino, importe);
+      doQr(accessToken!, origen, destino, importe);
     } else {
       print("error!");
     }
