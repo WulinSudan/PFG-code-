@@ -26,7 +26,6 @@
 
   type Mutation {
 
-    //logOut:Boolean!
 
     addDictionary(input: DictionaryInput!): Dictionary!
 
