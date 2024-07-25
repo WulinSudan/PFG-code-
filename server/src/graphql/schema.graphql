@@ -17,7 +17,9 @@
     getUserAccountsInfoByDni(dni: String!): [Account]
     findAccount(accountNumber:String!):Account
      
-      
+    getOriginAccount(qrtext:String!):String
+    getOperation(qrtext:String!):String
+
     getAccountPayKey(accountNumber:String!): String!
     getAccountChargeKey(accountNumber:String!): String!
 
@@ -26,7 +28,9 @@
 
   type Mutation {
 
+    logOut:Boolean!
 
+    setNewKey(accountNumber:String!): String!
     addDictionary(input: DictionaryInput!): Dictionary!
 
     signUp(input: SignUpInput!): User!
@@ -52,11 +56,11 @@
   scalar Date
 
   input DictionaryInput {
-    encrypt_message: String!
-    account: String!
-    operation: String!
-    create_date: Date
-  }
+  encrypt_message: String!
+  account: String!
+  operation: String!
+  create_date: Date
+}
 
 
 

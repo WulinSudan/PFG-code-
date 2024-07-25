@@ -7,10 +7,14 @@ Future<void> addKeyToDictionary(
     String accessToken,
     String encrypttext,
     String accountNumber,
-    String operation, // Cambiado a String
+    String operation // Asegúrate de que este campo se pase correctamente
     ) async {
 
   print("en la operacion de addkeytodictionary-------------------------------------------");
+  print(accessToken);
+  print(encrypttext);
+  print(accountNumber);
+  print(operation);
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -21,7 +25,7 @@ Future<void> addKeyToDictionary(
           'input': {
             'encrypt_message': encrypttext,
             'account': accountNumber,
-            'pay': operation, // Asegúrate de que esto sea una cadena en la mutación
+            'operation': operation, // Asegúrate de que este campo coincida con el nombre esperado
           },
         },
       ),
@@ -38,8 +42,8 @@ Future<void> addKeyToDictionary(
       if (data != null) {
         print('Encrypt message: ${data['encrypt_message']}');
         print('Account: ${data['account']}');
-        print('Operation: ${data['pay']}'); // Asume que 'pay' es la cadena 'operation'
-        print('Create date: ${data['last_pay_create_date']}'); // Asume que 'last_pay_create_date' es el campo correcto
+        print('Operation: ${data['operation']}'); // Usa el nombre correcto del campo
+        print('Create date: ${data['create_date']}'); // Usa el nombre correcto del campo
       } else {
         print('No se recibieron datos en la respuesta.');
       }

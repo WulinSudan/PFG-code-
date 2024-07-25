@@ -1,49 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../functions/fetchUserDate.dart';
-import '../functions/addAccount.dart';
-import '../functions/encrypt.dart';
+import '../functions/fetchChargeKey.dart';
 import '../functions/fetchPayKey.dart';
-
-// Función para realizar la transferencia
-Future<void> doQr(String accessToken, String origen, String desti, double import) async {
-  print("------------------------12-----doQR------------------------");
-  print('Origen: $origen');
-  print('Destino: $desti');
-  print('Importe: $import');
-
-  final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
-
-  try {
-    final QueryResult result = await client.mutate(
-      MutationOptions(
-        document: gql(makeTransferMutation),
-        variables: {
-          'input': {
-            'accountOrigen': desti,
-            'accountDestin': origen,
-            'import': import,
-          }
-        },
-      ),
-    );
-
-    if (result.hasException) {
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
-      // Manejo de error adicional según sea necesario
-    } else {
-      print('Mutación exitosa');
-      // Aquí puedes manejar la respuesta de la mutación si es necesario
-      // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
-      // O realizar alguna otra acción según tus necesidades
-    }
-  } catch (e) {
-    print('Error inesperado: $e');
-    // Manejo de error adicional según sea necesario
-  }
-}
+import '../functions/encrypt.dart';
+import '../functions/getOriginAccount.dart';
+import '../functions/getOperation.dart';
+import '../functions/makeTransfer.dart';
+import '../dialogs/showHelloDialog.dart'; // Importa la función correcta
 
 class QrGestion extends StatefulWidget {
   @override
@@ -54,69 +18,77 @@ class _QrGestionState extends State<QrGestion> {
   String origen = '';
   String destino = '';
   double importe = 0.0;
-  String? typePart = '';
+  String? typePart;
   String? accessToken;
+  String? operation;
+  String? originAccount;
 
   @override
-  Future<void> didChangeDependencies() async {
+  void didChangeDependencies() {
     super.didChangeDependencies();
+    // Llamar solo si accessToken es null (esto asegura que processQr solo se llame una vez)
+    if (accessToken == null) {
+      final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      accessToken = arguments?['accessToken'] as String?;
+      String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
+      print("-----------------En qrgestion, mensaje cifrado: $qrText");
+      processQr(qrText, arguments);
+    }
+  }
 
-    // Recuperar los argumentos de la ruta
-    Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-
-    // Obtener los datos de los argumentos
-    accessToken = arguments?['accessToken'] as String?;
-    String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
-    print("--------------------------70----------------- $qrText");
-
-    // Descifrar el texto del código QR usando la función de desencriptación
+  Future<void> processQr(String qrText, Map<String, dynamic>? arguments) async {
     try {
-      String payKey = await fetchPayKey(accessToken!, arguments?['accountNumber']);
-      qrText = decryptAES(qrText, payKey);
+      // Obtener la cuenta de origen y la operación
+      originAccount = await getOrigenAccount(accessToken!, qrText);
+      operation = await getOperation(accessToken!, qrText);
+      print("-----------------En processQr, qr generado por: $originAccount, tipo de operación: $operation");
+
+      String cuentaEscaneadora = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+      print("-----------------En processQr, qr escaneada por: $cuentaEscaneadora");
+
+      // Desencriptar el texto del QR usando la clave adecuada
+      if (operation == 'charge') {
+        origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+        destino = originAccount ?? 'Destino no disponible';
+        String chargeKey = await fetchChargeKey(accessToken!, originAccount!);
+        qrText = decryptAES(qrText, chargeKey);
+        typePart = 'Cargo'; // Asumimos que este es el tipo para 'charge'
+      } else if (operation == 'payment') {
+        origen = originAccount ?? 'Origen no disponible';
+        destino = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+        String payKey = await fetchPayKey(accessToken!, originAccount!);
+        qrText = decryptAES(qrText, payKey);
+        typePart = 'Pago'; // Asumimos que este es el tipo para 'payment'
+      } else {
+        throw Exception('Tipo de operación no válido');
+      }
+
+      // Extraer el importe del texto desencriptado
+      List<String> parts = qrText.split(' ');
+      if (parts.length >= 3) {
+        String amountPart = parts.last; // Asumimos que el importe está al final
+        importe = double.tryParse(amountPart) ?? 0.0;
+      } else {
+        print('Formato de texto QR inválido');
+        importe = 0.0;
+      }
+
+      // Verificar si el importe es mayor a 0
+      if (importe <= 0) {
+        String? nuevoImporte = await showImporteDialog(context);
+        if (nuevoImporte != null && nuevoImporte.isNotEmpty) {
+          importe = double.tryParse(nuevoImporte) ?? 0.0;
+        }
+      }
+
+      doQr(accessToken!, origen, destino, importe);
+
+      // Actualizar el estado después de procesar los datos
+      setState(() {});
     } catch (e) {
       print('Error al descifrar el código QR: $e');
       // Manejar el error según sea necesario
       return;
-    }
-
-    String accountNumber = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-    print("----------------------------75----------------------$accountNumber");
-
-    // Verificar si el código QR comienza con 'c' o 'p' y extraer los datos
-    if (qrText.startsWith('c') || qrText.startsWith('p')) {
-      // Obtener partes del qrText
-      List<String> parts = qrText.split(' ');
-      typePart = parts.isNotEmpty ? parts[0] : null;
-      String? accountPart = parts.length > 1 ? parts[1] : null;
-      String? amountPart = parts.length > 2 ? parts[2] : null;
-
-      print("-----------------------------68---------------------------");
-      print("info QR: $parts");
-      print("tipo:  $typePart");
-      print("cuenta que genera codi qr: $accountPart");
-      print("importe: $amountPart");
-
-      // Asignar origen, destino e importe
-      if (typePart == 'p') {
-        setState(() {
-          origen = accountPart ?? 'Origen no disponible';
-          destino = accountNumber; // Usar el número de cuenta como destino
-        });
-      } else if (typePart == 'c') {
-        setState(() {
-          origen = accountNumber; // Usar el número de cuenta como origen
-          destino = accountPart ?? 'Destino no disponible';
-        });
-      }
-      setState(() {
-        importe = double.tryParse(amountPart?.replaceAll(',', '.') ?? '0') ?? 0.0; // Parsear importe como double
-      });
-    } else {
-      setState(() {
-        origen = accountNumber; // Usar el número de cuenta como origen
-        destino = qrText; // Usar el código QR como destino
-        importe = 2.0; // Ejemplo de importe, ajustar según tu lógica
-      });
     }
 
     print("------------------------113---------------------------");
@@ -124,18 +96,6 @@ class _QrGestionState extends State<QrGestion> {
     print("destino: $destino");
     print("importe: $importe");
     print("accessToken: $accessToken");
-
-    // Verificar si el importe es mayor a 0 o igual a -1
-    if (importe == -1) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        _showInputDialog(context);
-      });
-    } else if (importe > 0) {
-      print("----------------------135------------------");
-      doQr(accessToken.toString(), origen, destino, importe);
-    } else {
-      print("error!");
-    }
   }
 
   @override
@@ -178,7 +138,7 @@ class _QrGestionState extends State<QrGestion> {
               ),
               SizedBox(height: 8),
               Text(
-                importe.toString(),
+                importe > 0 ? importe.toString() : 'Importe no disponible',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
@@ -193,74 +153,6 @@ class _QrGestionState extends State<QrGestion> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showInputDialog(BuildContext context) {
-    TextEditingController _controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Ingresar Importe'),
-          content: TextField(
-            controller: _controller,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: "Ingrese el importe"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/mainpage', arguments: accessToken);
-              },
-            ),
-            TextButton(
-              child: Text('Aceptar'),
-              onPressed: () {
-                double? inputImporte = double.tryParse(_controller.text.replaceAll(',', '.'));
-                if (inputImporte != null && inputImporte > 0) {
-                  print("--------------------------199-----------------------");
-                  print(inputImporte);
-                  Navigator.of(context).pop();
-                  doQr(accessToken!, origen, destino, inputImporte);
-
-                  // Mostrar el diálogo de éxito
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false, // Evita que se cierre al tocar fuera del diálogo
-                    builder: (BuildContext context) {
-                      // Cerrar el diálogo automáticamente después de 3 segundos
-                      Future.delayed(Duration(seconds: 3), () {
-                        Navigator.of(context).pop(); // Cierra el diálogo de éxito
-                        Navigator.pushNamed(context, '/mainpage', arguments: accessToken);
-                      });
-
-                      return AlertDialog(
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset('assets/exito.png'), // Ruta de la imagen de éxito
-                            SizedBox(height: 16),
-                            Text('Operación correcta'),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  // Mostrar un error si el importe no es válido
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Por favor, ingrese un importe válido.')),
-                  );
-                }
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../functions/encrypt.dart';
 import '../functions/fetchPayKey.dart';
+import '../functions/addKeyToDictionary.dart'; // Asegúrate de importar esta función
+import '../functions/setNewKey.dart';
+
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -40,17 +43,21 @@ class _PaymentPageState extends State<PaymentPage> {
       if (accessToken == null) {
         throw Exception("Access token is null");
       }
-      String payKey = await fetchPayKey(accessToken!, accountNumber);
-      qrData = 'p $accountNumber $amountToPay';
 
-      String encryptedData = encryptAES(qrData, payKey);
+      String? payKey = await setNewKey(accessToken!, accountNumber);
+      qrData = 'payment $accountNumber $amountToPay';
+      String encryptedData = encryptAES(qrData, payKey!);
+
+      // Guardar la clave en el diccionario
+      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "payment");
+
       setState(() {
         qrData = encryptedData;
       });
       _showQrDialog();
     } catch (e) {
       // Manejo de errores
-      print('Error obteniendo la Pay Key: $e');
+      print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
     }
   }
 
@@ -63,17 +70,21 @@ class _PaymentPageState extends State<PaymentPage> {
       if (accessToken == null) {
         throw Exception("Access token is null");
       }
-      String payKey = await fetchPayKey(accessToken!, accountNumber);
-      qrData = 'p $accountNumber $amountToPay';
 
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
+      qrData = 'payment $accountNumber $amountToPay';
       String encryptedData = encryptAES(qrData, payKey);
+
+      // Guardar la clave en el diccionario
+      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "payment");
+
       setState(() {
         qrData = encryptedData;
       });
       _showQrDialog();
     } catch (e) {
       // Manejo de errores
-      print('Error obteniendo la Pay Key: $e');
+      print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
     }
   }
 
