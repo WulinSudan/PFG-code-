@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import '../functions/encrypt.dart';
-import '../functions/fetchChargeKey.dart';
+import '../functions/fetchPayKey.dart';
 import '../functions/addKeyToDictionary.dart';
 
 class ChargePage extends StatefulWidget {
@@ -15,6 +15,7 @@ class _ChargePageState extends State<ChargePage> {
   double amountToCharge = -1; // Importe a pagar
   String qrData = ''; // Inicialmente vacío
   String? accessToken;
+  String operation = 'c';
   TextEditingController amountController = TextEditingController();
 
   @override
@@ -41,17 +42,13 @@ class _ChargePageState extends State<ChargePage> {
     }
 
     try {
-      String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
       qrData = 'c $accountNumber $amountToCharge';
-      String encryptedData = encryptAES(qrData, chargeKey);
+      String encryptedData = encryptAES(qrData, payKey);
       print("encryptedData..................................");
       print(encryptedData);
       // Guardar la clave en el diccionario
-      print("en la classe chargepage");
-      print(accessToken);
-      print(encryptedData);
-      print(accountNumber);
-      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "charge");
+      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, operation);
 
       setState(() {
         qrData = encryptedData;
@@ -73,15 +70,14 @@ class _ChargePageState extends State<ChargePage> {
     });
 
     try {
+      String payKey = await fetchPayKey(accessToken!, accountNumber);
 
-      String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
-
-      qrData = 'charge $accountNumber $amountToCharge';
-      String encryptedData = encryptAES(qrData, chargeKey);
+      qrData = 'c $accountNumber $amountToCharge';
+      String encryptedData = encryptAES(qrData, payKey);
       print("encryptedData..................................");
       print(encryptedData);
       // Guardar la clave en el diccionario
-      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "charge");
+      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, operation);
 
       setState(() {
         qrData = encryptedData;

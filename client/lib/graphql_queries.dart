@@ -87,6 +87,7 @@ query(\$accountNumber: String!){
 """;
 
 
+
 final String addKeyToDictionaryMutation = """
 mutation(\$input: DictionaryInput!) {
   addDictionary(input: \$input) {
@@ -95,27 +96,6 @@ mutation(\$input: DictionaryInput!) {
     operation
     create_date
   }
-}
-""";
-
-
-final String setNewKeyMutation = """
-mutation setNewKey(\$accountNumber: String!) {
-  setNewKey(accountNumber: \$accountNumber)
-}
-""";
-
-
-final String getOrigenAccountQuery = """
-query(\$qrtext: String!){
-  getOriginAccount(qrtext: \$qrtext)
-}
-""";
-
-
-final String getOperationQuery = """
-query(\$qrtext: String!){
-  getOperation(qrtext: \$qrtext)
 }
 """;
 
