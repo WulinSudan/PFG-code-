@@ -7,7 +7,7 @@ import '../graphql_queries.dart';
 
 Future<String?> getOperation(String accessToken, String qrtext) async {
 
-  print("---------------En la operacion getOperation");
+
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -28,6 +28,7 @@ Future<String?> getOperation(String accessToken, String qrtext) async {
 
       // Extraer la cuenta de la respuesta
       final String? operation = result.data?['getOperation'] as String?;
+      print("---------------En la operacion getOperation, operacio es: $operation");
       return operation;
     }
   } catch (e) {

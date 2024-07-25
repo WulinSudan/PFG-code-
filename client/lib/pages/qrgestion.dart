@@ -17,7 +17,7 @@ class QrGestion extends StatefulWidget {
 class _QrGestionState extends State<QrGestion> {
   String origen = '';
   String destino = '';
-  double importe = 0.0;
+  double importe = -1;
   String? typePart;
   String? accessToken;
   String? operation;
@@ -68,23 +68,21 @@ class _QrGestionState extends State<QrGestion> {
       if (parts.length >= 3) {
         String amountPart = parts.last; // Asumimos que el importe está al final
         importe = double.tryParse(amountPart) ?? 0.0;
-      } else {
-        print('Formato de texto QR inválido');
-        importe = 0.0;
       }
 
       // Verificar si el importe es mayor a 0
-      if (importe <= 0) {
+      if (importe == -1) {
+        print("--------------------importe -1");
         String? nuevoImporte = await showImporteDialog(context);
         if (nuevoImporte != null && nuevoImporte.isNotEmpty) {
-          importe = double.tryParse(nuevoImporte) ?? 0.0;
+          importe = double.tryParse(nuevoImporte) ?? -1;
         }
       }
 
+      print("ya tenemos todos los datos");
+
       doQr(accessToken!, origen, destino, importe);
 
-      // Actualizar el estado después de procesar los datos
-      setState(() {});
     } catch (e) {
       print('Error al descifrar el código QR: $e');
       // Manejar el error según sea necesario
