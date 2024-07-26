@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
 import '../functions/removeAccount.dart';
+import '../dialogs/logoutDialog.dart'; // Asegúrate de que esta ruta sea correcta
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -79,7 +81,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               );
 
-              Navigator.pushNamed(
+              Navigator.pushReplacementNamed(
                 context,
                 '/mainpage',
                 arguments: widget.accessToken,
@@ -89,7 +91,7 @@ class _MainPageState extends State<MainPage> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
+              showLogoutConfirmationDialog(context);
             },
           ),
         ],

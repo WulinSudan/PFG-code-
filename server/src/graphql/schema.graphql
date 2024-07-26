@@ -23,12 +23,11 @@
     getAccountPayKey(accountNumber:String!): String!
     getAccountChargeKey(accountNumber:String!): String!
 
-  
   }
 
   type Mutation {
 
-    logOut:Boolean!
+     logoutUser: LogoutResponse!
 
     setNewKey(accountNumber:String!): String!
     addDictionary(input: DictionaryInput!): Dictionary!
@@ -52,6 +51,11 @@
 
     
   }
+
+  type LogoutResponse {
+    message: String!  
+  }
+
 
   scalar Date
 

@@ -1,10 +1,11 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { Context } from "../utils/context";
 import { getAccessToken, getUserId } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/crypt";
 import { User } from "../model/user";
 import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
+import { Request, Response } from 'express';
 
 
 
@@ -133,6 +134,8 @@ export const userResolvers = {
         
             // Buscar las cuentas por sus IDs
             const accounts = await Account.find({ _id: { $in: accountIds } });
+
+            
         
             // Filtrar cuentas que tienen owner_name no nulo
             const validAccounts = accounts.filter(account => account.owner_name !== null && account.owner_name !== undefined);
@@ -148,6 +151,20 @@ export const userResolvers = {
         
     },
     Mutation: {
+
+      logoutUser: async (_parent: any, _args: any, context: Context) => {
+        try {
+          // Aquí puedes manejar cualquier lógica adicional que necesites para el logout
+          // Por ejemplo, invalidar el token en una lista negra si es necesario
+  
+          // Enviar una respuesta de éxito
+          return { message: 'Logout successful' };
+        } catch (error) {
+          // Lanza el error para que GraphQL lo maneje
+          throw new Error('Error during logout');
+        }
+      },
+    
 
         addAccountByAccessToken: async (_root: any, _args: any, context: Context): Promise<IAccount> => {
           try {

@@ -1,5 +1,11 @@
 import { Account, IAccount } from "../model/account";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
+import { Context } from "../utils/context";
+import { getAccessToken, getUserId } from "../utils/jwt";
+import { comparePassword, hashPassword } from "../utils/crypt";
+import { User } from "../model/user";
+
+import { print } from "graphql";
 
 interface TransferInput {
   accountOrigen: string;
@@ -83,35 +89,50 @@ export const accountResolvers = {
       }
     },
 
-    // Resolver para eliminar una cuenta por su número de cuenta
-    removeAccount: async (_root: any, args: any) => {
-      try {
-        // Encuentra la cuenta por su número de cuenta para verificar el saldo
-        //const account = await Account.findOne({ number_account: args.number_account });
-        const account = await findAccount(args.number_account);
-
-        if (!account) {
-          throw new Error(`No se encontró la cuenta con el número de cuenta ${args.number_account}`);
-        }
-
-        // Verifica si el saldo es mayor que 0
-        if (account.balance > 0) {
-          throw new Error('No se puede eliminar la cuenta porque el saldo es mayor que 0.');
-        }
-
-        // Si el saldo es 0, procede con la eliminación de la cuenta
-        const deletionResult = await Account.deleteOne({ number_account: args.number_account });
-
-        if (deletionResult.deletedCount > 0) {
-          console.log('Cuenta eliminada exitosamente');
-        }
-
-        return deletionResult.deletedCount;
-      } catch (error) {
-        console.error("Error removing account:", error);
-        throw new Error('Error removing account: ');
+    removeAccount : async (_root: any, { number_account }: { number_account: string }, context: Context) => {
+      // Obtener el ID del usuario desde el contexto
+      const userId = getUserId(context);
+      if (!userId) {
+        throw new Error('User not authenticated');
       }
+    
+      // Buscar al usuario por su ID
+      const user = await User.findById(new mongoose.Types.ObjectId(userId));
+      if (!user) {
+        throw new Error('User not found');
+      }
+    
+      // Buscar la cuenta por su número
+      const account = await Account.findOne({ accountNumber: number_account });
+      if (!account) {
+        throw new Error('Account not found');
+      }
+
+      console.log(`Importe de la cuenta: ${account.balance}`);
+    
+      // Verifica si el saldo es mayor que 0
+      if (account.balance > 0) {
+        throw new Error('Cannot delete the account because the balance is greater than 0.');
+      }
+    
+      // Eliminar la cuenta de la colección de cuentas
+      const deletionResult = await Account.deleteOne({ _id: account._id });
+    
+      // Verificar si la eliminación fue exitosa
+      if (deletionResult.deletedCount === 0) {
+        throw new Error('Failed to delete the account.');
+      }
+    
+      // Eliminar la cuenta de la lista de cuentas del usuario
+      user.accounts = user.accounts.filter(accountId => !accountId.equals(account._id));
+    
+      // Guardar el usuario actualizado
+      await user.save();
+    
+      console.log('Account deleted successfully');
+      return deletionResult.deletedCount;
     },
+
 
     // Resolver para realizar una transferencia entre cuentas
     makeTransfer: async (_root: any, { input }: { input: TransferInput }): Promise<any> => {
