@@ -14,6 +14,46 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordConfirmationController = TextEditingController();
+
+  bool _isDniValid = false;
+  bool _isUsernameValid = false;
+  bool _isPasswordValid = false;
+  bool _isPasswordConfirmationValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _dniController.addListener(_validateDni);
+    _usernameController.addListener(_validateUsername);
+    _passwordController.addListener(_validatePassword);
+    _passwordConfirmationController.addListener(_validatePasswordConfirmation);
+  }
+
+  void _validateDni() {
+    setState(() {
+      _isDniValid = _dniController.text.length == 9;
+    });
+  }
+
+  void _validateUsername() {
+    final username = _usernameController.text;
+    setState(() {
+      _isUsernameValid = RegExp(r'^[a-zA-Z]{3,}$').hasMatch(username); // Solo caracteres alfabéticos y más de 2 caracteres
+    });
+  }
+
+  void _validatePassword() {
+    setState(() {
+      _isPasswordValid = _passwordController.text.length >= 3;
+    });
+  }
+
+  void _validatePasswordConfirmation() {
+    setState(() {
+      _isPasswordConfirmationValid = _passwordController.text == _passwordConfirmationController.text;
+    });
+  }
 
   void _showSuccessDialog(BuildContext context) {
     showDialog(
@@ -27,7 +67,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
     Timer(Duration(seconds: 2), () {
       Navigator.pop(context); // Cierra el diálogo
-      Navigator.pushNamed(context, '/login');
+      Navigator.pushNamed(context, '/login'); // Navega a la página de login
     });
   }
 
@@ -37,7 +77,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       appBar: AppBar(
         title: Text('Registro'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -45,7 +85,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
             TextField(
               controller: _dniController,
               decoration: InputDecoration(
-                labelText: 'dni',
+                labelText: 'DNI',
+                suffixIcon: _isDniValid ? Icon(Icons.check_circle, color: Colors.green) : null,
               ),
             ),
             SizedBox(height: 12.0),
@@ -53,6 +94,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Username',
+                suffixIcon: _isUsernameValid ? Icon(Icons.check_circle, color: Colors.green) : null,
               ),
             ),
             SizedBox(height: 12.0),
@@ -61,11 +103,31 @@ class _RegistrationPageState extends State<RegistrationPage> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
+                suffixIcon: _isPasswordValid ? Icon(Icons.check_circle, color: Colors.green) : null,
+              ),
+            ),
+            SizedBox(height: 12.0),
+            TextField(
+              controller: _passwordConfirmationController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Confirm Password',
+                suffixIcon: _isPasswordConfirmationValid ? Icon(Icons.check_circle, color: Colors.green) : null,
               ),
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () async {
+                if (!_isDniValid || !_isUsernameValid || !_isPasswordValid || !_isPasswordConfirmationValid) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Por favor, corrija los errores antes de enviar el formulario.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return; // No hacer nada más si hay errores de validación
+                }
+
                 final String dni = _dniController.text.trim();
                 final String username = _usernameController.text.trim();
                 final String password = _passwordController.text.trim();
@@ -86,7 +148,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 );
 
                 if (result.hasException) {
-                  print("Error en el registro: ${result.exception}");
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Error en el registro: ${result.exception.toString()}'),
@@ -94,7 +155,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   );
                 } else {
-                  print("Registro exitoso: ${result.data!['signup']['name']}");
                   _showSuccessDialog(context);
                 }
               },
