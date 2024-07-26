@@ -3,9 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
 import '../functions/fetchUserDate.dart';
-import '../functions/addAccount.dart';
-import '../functions/removeAccount.dart';
+import '../addAccount.dart';
 import '../dialogs/logoutDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../dialogs/showDeletedConfirmationDialog.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -30,7 +30,6 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> fetchData() async {
     await fetchUserData(widget.accessToken, updateUserData);
-    //await checkAndAddAccount();
   }
 
   void updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) {
@@ -45,20 +44,6 @@ class _MainPageState extends State<MainPage> {
     print('Cuentas actualizadas: $accounts');
   }
 
-  /*
-  Future<void> checkAndAddAccount() async {
-    if (accounts.isEmpty) {
-      await addAccount(widget.accessToken);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Bienvenida!!!'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-      // Refresca la lista de cuentas después de añadir una nueva
-      await fetchData();
-    }
-  }*/
 
   @override
   Widget build(BuildContext context) {

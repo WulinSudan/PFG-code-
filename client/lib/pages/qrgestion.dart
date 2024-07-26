@@ -6,7 +6,7 @@ import '../functions/fetchPayKey.dart';
 import '../functions/encrypt.dart';
 import '../functions/getOriginAccount.dart';
 import '../functions/getOperation.dart';
-import '../functions/makeTransfer.dart';
+import '../functions/doQr.dart';
 import '../dialogs/showHelloDialog.dart'; // Importa la función correcta
 
 class QrGestion extends StatefulWidget {

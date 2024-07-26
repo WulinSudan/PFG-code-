@@ -4,6 +4,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import '../functions/encrypt.dart';
 import '../functions/fetchChargeKey.dart';
 import '../functions/addKeyToDictionary.dart';
+import '../internal_functions/maskAccountNumber.dart';
 
 class ChargePage extends StatefulWidget {
   @override
@@ -92,15 +93,7 @@ class _ChargePageState extends State<ChargePage> {
     }
   }
 
-  String maskAccountNumber(String accountNumber) {
-    if (accountNumber.length != 10) {
-      return 'Número de cuenta inválido';
-    }
 
-    String visibleDigits = accountNumber.substring(accountNumber.length - 6); // Muestra los últimos 6 dígitos
-    String maskedDigits = accountNumber.substring(0, 4).replaceAll(RegExp(r'\d'), 'x'); // Oculta los primeros 4 dígitos
-    return '$maskedDigits$visibleDigits';
-  }
 
   @override
   Widget build(BuildContext context) {
