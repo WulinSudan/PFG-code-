@@ -10,10 +10,8 @@ import '../functions/fetchUserDate.dart';
 import '../addAccount.dart';
 import 'removeUserAccount.dart';
 
-
-
-
-Future<void> makeTransfer(BuildContext context, String accessToken,Account currentAccount, Account selectedAccount) async {
+// Función para realizar la transferencia
+Future<bool> makeTransfer(BuildContext context, String accessToken, Account currentAccount, Account selectedAccount) async {
   print("-------------------------------108-------------------------------");
   print(currentAccount.numberAccount);
   print(selectedAccount.numberAccount);
@@ -37,17 +35,26 @@ Future<void> makeTransfer(BuildContext context, String accessToken,Account curre
 
     if (result.hasException) {
       print('Error al ejecutar la mutación: ${result.exception.toString()}');
+      return false; // Indica que la transferencia no fue exitosa
     } else {
-      print('Mutación exitosa');
+      // Extraer el campo 'success' de la respuesta
+      final bool success = result.data?['makeTransfer']['success'] ?? false;
+      if (success) {
+        print('Mutación exitosa');
 
-      removeAccount(context, accessToken, currentAccount.numberAccount);
+        // Llama a la función para eliminar la cuenta si es necesario
+        await removeAccount(context, accessToken, currentAccount.numberAccount);
 
-      // Aquí puedes manejar la respuesta de la mutación si es necesario
-      // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
-      // O realizar alguna otra acción según tus necesidades
+        // Aquí puedes manejar la respuesta de la mutación si es necesario
+        // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
+        // O realizar alguna otra acción según tus necesidades
+      } else {
+        print('La mutación falló: ${result.data?['makeTransfer']['message']}');
+      }
+      return success; // Indica si la transferencia fue exitosa o no
     }
   } catch (e) {
     print('Error inesperado: $e');
+    return false; // Indica que la transferencia no fue exitosa
   }
 }
-

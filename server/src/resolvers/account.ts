@@ -7,6 +7,22 @@ import { User } from "../model/user";
 
 import { print } from "graphql";
 
+
+function generateUniqueAccountNumber(): string {
+  const now = new Date();
+  //const year = String(now.getFullYear()).slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = String(now.getMinutes()).padStart(2, '0');
+  const second = String(now.getSeconds()).padStart(2,'0');
+  
+  const aux = `${month}${day}${hour}${minute}${second}`;
+  console.log(aux);
+  return aux;
+}
+
+
 interface TransferInput {
   accountOrigen: string;
   accountDestin: string;
@@ -68,24 +84,43 @@ export const accountResolvers = {
   },
   Mutation: {
 
-    
-    // Resolver para agregar una cuenta nueva
-    addAccount: async (_root: any, { input }: { input: IAccount }): Promise<IAccount> => {
-      try {
-        const { owner_dni, owner_name, number_account, balance, active } = input;
-        const account = new Account({
-          owner_dni,
-          owner_name,
-          number_account,
-          balance,
-          active,
-        });
 
-        const savedAccount = await account.save();
-        return savedAccount;
+    addAccountByAccessToken: async (_root: any, _args: any, context: Context): Promise<IAccount> => {
+      try {
+
+        const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+
+        const user = await User.findById(new Types.ObjectId(userId));
+        if (!user) {
+            throw new Error("User not found");
+        }
+  
+
+        // Crear una nueva cuenta con saldo inicial de 10€
+        const newAccount = new Account({
+          owner_dni: user.dni,
+          owner_name: user.name,
+          number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
+          balance: 10.5, // Saldo inicial de 10€
+          active: true,
+          key_to_charge:"1234567890123456",
+          key_to_pay:"1234567890123456",
+          maximum_amount_once:50,
+          maximun_amount_day:500,
+        });
+  
+        await newAccount.save();
+
+        // Asociar la cuenta al usuario
+        user.accounts.push(newAccount._id);
+        await user.save();
+
+        return newAccount;
       } catch (error) {
-        console.error("Error adding account:", error);
-        throw new Error('Error adding account: ');
+        throw new Error(`Error al crear cuenta para el usuario`);
       }
     },
 
@@ -151,6 +186,14 @@ export const accountResolvers = {
           };
         }
 
+        if (accountOrigenDoc == accountDestinDoc) {
+          return {
+            success: false,
+            message: 'No se puede realizar transferencia en la misma cuenta',
+          };
+        }
+
+
         const importNumber = Number(input.import);
 
         if (isNaN(importNumber) || importNumber <= 0) {
@@ -167,9 +210,18 @@ export const accountResolvers = {
         console.log("Importe de la transacción a realizar:", importNumber);
 
         if (accountOrigenDoc.balance < importNumber) {
+          console.log(`quiero que se entre en aqui`);
           return {
             success: false,
             message: 'Saldo insuficiente en la cuenta de origen.',
+          };
+        }
+
+
+        if (accountOrigenDoc.balance > accountOrigenDoc.maximum_amount_once) {
+          return {
+            success: false,
+            message: 'Supera el màximo establecido del dia',
           };
         }
 

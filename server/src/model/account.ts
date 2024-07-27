@@ -17,7 +17,6 @@ interface IAccount extends Document {
   active: boolean;
   key_to_charge: string;
   key_to_pay: string;
-  qr_pay_create_date: Date;
   maximum_amount_once: number;
   maximun_amount_day: number;
 }
@@ -49,7 +48,6 @@ const AccountSchema: Schema = new Schema({
   active: { type: Boolean, required: true },
   key_to_charge: { type: String, required: true},
   key_to_pay: { type: String, required: true},
-  qr_pay_create_date: { type: Date },
   maximum_amount_once: { type: Number, requered:true },
   maximum_amount_day: { type: Number, requered:true },
 });

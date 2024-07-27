@@ -7,6 +7,7 @@ import '../functions/encrypt.dart';
 import '../functions/getOriginAccount.dart';
 import '../functions/getOperation.dart';
 import '../functions/doQr.dart';
+import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/showHelloDialog.dart'; // Importa la función correcta
 
 class QrGestion extends StatefulWidget {
@@ -22,6 +23,7 @@ class _QrGestionState extends State<QrGestion> {
   String? accessToken;
   String? operation;
   String? originAccount;
+  bool? transferSuccess; // Para rastrear el resultado de la transferencia
 
   @override
   void didChangeDependencies() {
@@ -79,14 +81,33 @@ class _QrGestionState extends State<QrGestion> {
         }
       }
 
-      print("ya tenemos todos los datos");
+      // Actualizar el estado después de obtener los datos
+      setState(() {
+        this.origen = origen;
+        this.destino = destino;
+        this.importe = importe;
+        this.typePart = typePart;
+      });
 
-      doQr(accessToken!, origen, destino, importe);
+      // Realizar la operación doQr y actualizar el estado basado en el resultado
+      bool success;
+      try {
+        success = await doQr(accessToken!, origen, destino, importe);
+      } catch (e) {
+        print('Error al realizar la transferencia: $e');
+        success = false; // Error en la transferencia
+      }
+
+      setState(() {
+        transferSuccess = success; // Transferencia exitosa o fallida
+      });
 
     } catch (e) {
       print('Error al descifrar el código QR: $e');
       // Manejar el error según sea necesario
-      return;
+      setState(() {
+        transferSuccess = false; // Error al procesar el QR
+      });
     }
 
     print("------------------------113---------------------------");
@@ -114,7 +135,7 @@ class _QrGestionState extends State<QrGestion> {
               ),
               SizedBox(height: 8),
               Text(
-                origen.isNotEmpty ? origen : 'Origen no disponible',
+                origen.isNotEmpty ? maskAccountNumber(origen) : 'Origen no disponible',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
@@ -130,7 +151,7 @@ class _QrGestionState extends State<QrGestion> {
               ),
               SizedBox(height: 8),
               Text(
-                destino.isNotEmpty ? destino : 'Destino no disponible',
+                destino.isNotEmpty ? maskAccountNumber(destino) : 'Destino no disponible',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
@@ -140,6 +161,12 @@ class _QrGestionState extends State<QrGestion> {
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: 16),
+              // Mostrar ícono basado en el resultado de la transferencia
+              if (transferSuccess == true)
+                Icon(Icons.check_circle, color: Colors.green, size: 50)
+              else if (transferSuccess == false)
+                Icon(Icons.error, color: Colors.red, size: 50),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {

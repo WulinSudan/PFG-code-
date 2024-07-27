@@ -8,6 +8,7 @@ import 'account.dart';
 class QrScanner extends StatefulWidget {
   final String accessToken;
   final Account account;
+
   QrScanner({required this.accessToken, required this.account});
 
   @override
@@ -23,9 +24,9 @@ class _QRViewExampleState extends State<QrScanner> {
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!.pauseCamera();
+      controller?.pauseCamera();
     }
-    controller!.resumeCamera();
+    controller?.resumeCamera();
   }
 
   @override
@@ -154,12 +155,12 @@ class _QRViewExampleState extends State<QrScanner> {
     setState(() {
       this.controller = controller;
     });
+
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
       });
 
-      // Navegar a otra página cuando se escanea un código QR
       if (result != null) {
         controller.pauseCamera();
         Navigator.pushNamed(
@@ -170,12 +171,12 @@ class _QRViewExampleState extends State<QrScanner> {
             'qrCode': result!.code,
             'accountNumber': widget.account.numberAccount,
           },
-        );
+        ).then((_) {
+          // No reanudes la cámara aquí. Maneja la cámara en el método dispose.
+        });
       }
     });
   }
-
-
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
@@ -188,7 +189,7 @@ class _QRViewExampleState extends State<QrScanner> {
 
   @override
   void dispose() {
-    controller?.dispose();
+    controller?.dispose(); // Asegurarse de liberar el controlador de la cámara
     super.dispose();
   }
 }

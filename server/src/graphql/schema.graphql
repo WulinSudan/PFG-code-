@@ -27,7 +27,7 @@
 
   type Mutation {
 
-     logoutUser: LogoutResponse!
+    logoutUser: LogoutResponse!
 
     setNewKey(accountNumber:String!): String!
     addDictionary(input: DictionaryInput!): Dictionary!
@@ -41,10 +41,8 @@
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
 
-    addAccount(input:addAccountInput):Account!
     removeAccount(number_account:String!):Int!
 
-    addAccountByUser(input: addAccountInput): Account!
     addAccountByAccessToken: Account!
 
     makeTransfer(input: TransferInput!): TransferResult!

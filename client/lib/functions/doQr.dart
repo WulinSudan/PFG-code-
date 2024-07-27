@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../functions/fetchUserDate.dart';
-import '../addAccount.dart';
-import '../functions/encrypt.dart';
-import '../functions/fetchPayKey.dart';// Función para realizar la transferencia
+import '../functions/encrypt.dart'; // Asegúrate de que esta función se está usando correctamente
+import '../functions/fetchPayKey.dart';
 
-
-
-Future<void> doQr(String accessToken, String origen, String desti, double import) async {
+Future<bool> doQr(String accessToken, String origen, String desti, double import) async {
   print("------------------------12-----doQR------------------------");
   print('Origen: $origen');
   print('Destino: $desti');
@@ -33,15 +29,20 @@ Future<void> doQr(String accessToken, String origen, String desti, double import
 
     if (result.hasException) {
       print('Error al ejecutar la mutación: ${result.exception.toString()}');
-      // Manejo de error adicional según sea necesario
+      return false; // Indica que la transferencia no fue exitosa
     } else {
-      print('Mutación exitosa');
-      // Aquí puedes manejar la respuesta de la mutación si es necesario
-      // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
-      // O realizar alguna otra acción según tus necesidades
+      // Extraer el campo 'success' de la respuesta
+      final bool success = result.data?['makeTransfer']['success'] ?? false;
+      if (success) {
+        print('Mutación exitosa');
+        return true; // Indica que la transferencia fue exitosa
+      } else {
+        print('La mutación falló: ${result.data?['makeTransfer']['message']}');
+        return false; // Indica que la transferencia no fue exitosa
+      }
     }
   } catch (e) {
     print('Error inesperado: $e');
-    // Manejo de error adicional según sea necesario
+    return false; // Indica que la transferencia no fue exitosa
   }
 }

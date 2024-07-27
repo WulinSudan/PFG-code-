@@ -7,6 +7,7 @@ import '../addAccount.dart';
 import '../dialogs/logoutDialog.dart'; // Asegúrate de que esta ruta sea correcta
 import '../dialogs/showDeletedConfirmationDialog.dart';
 
+
 class MainPage extends StatefulWidget {
   final String accessToken;
 
@@ -21,6 +22,7 @@ class _MainPageState extends State<MainPage> {
   String? dni;
   List<Account> accounts = [];
   int? selectedAccountIndex;
+  bool isCreatingAccount = false; // Indicador para evitar la creación repetida de cuentas
 
   @override
   void initState() {
@@ -32,18 +34,35 @@ class _MainPageState extends State<MainPage> {
     await fetchUserData(widget.accessToken, updateUserData);
   }
 
-  void updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) {
+  Future<void> updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) async {
     setState(() {
       userName = name;
       dni = id;
       accounts = fetchedAccounts.map((accountData) => Account.fromJson(accountData)).toList();
     });
 
+    if (accounts.isEmpty && !isCreatingAccount) {
+      setState(() {
+        isCreatingAccount = true; // Marca que estamos creando una cuenta
+      });
+
+      try {
+        await addAccount(widget.accessToken); // Agrega la cuenta
+        await fetchData(); // Vuelve a cargar los datos después de agregar la cuenta
+      } catch (e) {
+        // Manejo de errores en la creación de cuentas
+        print('Error al agregar cuenta: $e');
+      } finally {
+        setState(() {
+          isCreatingAccount = false; // Marca que hemos terminado de intentar agregar una cuenta
+        });
+      }
+    }
+
     print('UserName actualizado: $userName');
     print('DNI actualizado: $dni');
     print('Cuentas actualizadas: $accounts');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,20 +76,20 @@ class _MainPageState extends State<MainPage> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () async {
-              await addAccount(widget.accessToken);
+              // Añade una cuenta solo si no estamos en medio de una creación de cuenta
+              if (!isCreatingAccount) {
+                await addAccount(widget.accessToken);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Cuenta añadida correctamente'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Cuenta añadida correctamente'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
 
-              Navigator.pushReplacementNamed(
-                context,
-                '/mainpage',
-                arguments: widget.accessToken,
-              );
+                // Recargar los datos después de agregar una cuenta
+                await fetchData();
+              }
             },
           ),
           IconButton(
@@ -134,7 +153,12 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: selectedAccountIndex != null
           ? FloatingActionButton(
         onPressed: () async {
-          await showDeleteConfirmationDialog(context, widget.accessToken, accounts, accounts[selectedAccountIndex!]);
+          await showDeleteConfirmationDialog(
+            context,
+            widget.accessToken,
+            accounts,
+            accounts[selectedAccountIndex!],
+          );
         },
         tooltip: 'Eliminar cuenta',
         child: Icon(Icons.delete),
@@ -169,7 +193,7 @@ class _MainPageState extends State<MainPage> {
                   '/paymentpage',
                   arguments: {
                     'accessToken': widget.accessToken,
-                    'accountNumber': accounts[selectedAccountIndex!].numberAccount
+                    'accountNumber': accounts[selectedAccountIndex!].numberAccount,
                   },
                 );
               }
