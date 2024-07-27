@@ -91,6 +91,7 @@ export const accountResolvers = {
 
     removeAccount : async (_root: any, { number_account }: { number_account: string }, context: Context) => {
       // Obtener el ID del usuario desde el contexto
+
       const userId = getUserId(context);
       if (!userId) {
         throw new Error('User not authenticated');
@@ -103,12 +104,11 @@ export const accountResolvers = {
       }
     
       // Buscar la cuenta por su número
-      const account = await Account.findOne({ accountNumber: number_account });
+      const account = await Account.findOne({ number_account: number_account });
       if (!account) {
         throw new Error('Account not found');
       }
-
-      console.log(`Importe de la cuenta: ${account.balance}`);
+    
     
       // Verifica si el saldo es mayor que 0
       if (account.balance > 0) {
