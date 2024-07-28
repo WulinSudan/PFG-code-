@@ -147,6 +147,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ),
                 );
 
+
                 if (result.hasException) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

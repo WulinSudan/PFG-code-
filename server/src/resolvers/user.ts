@@ -19,8 +19,19 @@ function getUtcPlusTwoDate() {
 
 
 
-
-
+function generateUniqueAccountNumber(): string {
+  const now = new Date();
+  //const year = String(now.getFullYear()).slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = String(now.getMinutes()).padStart(2, '0');
+  const second = String(now.getSeconds()).padStart(2,'0');
+  
+  const aux = `${month}${day}${hour}${minute}${second}`;
+  console.log(aux);
+  return aux;
+}
 
 
 interface AddAccountInput {
@@ -152,9 +163,6 @@ export const userResolvers = {
           throw new Error('Error during logout');
         }
       },
-  
-
-
 
         removeUser: async (_root: any, args: any) => {
             const deletionResult = await User.deleteOne({ name: args.name });
@@ -162,6 +170,8 @@ export const userResolvers = {
         },
 
         signUp: async (_root: any, { input: {dni,name, password} }: any ) => {
+
+          console.log("En proceso de registrar y crear una nuava cuenta");
             try {
                 const userInput = {
                     dni:dni,
@@ -170,6 +180,26 @@ export const userResolvers = {
                 };
 
                 const user = new User(userInput);
+
+                // Create a new account for the user
+                const newAccount = new Account({
+                  owner_dni: dni,
+                  owner_name: name,
+                  number_account: generateUniqueAccountNumber(), // Generate a unique account number
+                  balance: 10.5, // Initial balance
+                  active: true,
+                  key_to_charge: "1234567890123456",
+                  key_to_pay: "1234567890123456",
+                  maximum_amount_once: 50,
+                  maximum_amount_day: 500,
+              });
+
+                // Save the new account
+                await newAccount.save();
+
+                // Add the new account to the user's accounts array
+                user.accounts.push(newAccount._id);
+
                 await user.save();
                 return user;
             } catch (error: any) {
