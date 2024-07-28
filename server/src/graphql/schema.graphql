@@ -44,6 +44,7 @@
     removeAccount(number_account:String!):Int!
 
     addAccountByAccessToken: Account!
+    addAccountByUser(input: addAccountInput): Account!
 
     makeTransfer(input: TransferInput!): TransferResult!
 
@@ -126,9 +127,6 @@
   input addAccountInput{
     owner_dni: String!
     owner_name: String!
-    number_account: String!
-    balance: Float!
-    active: Boolean!
   }
   
   input RegisterInput{

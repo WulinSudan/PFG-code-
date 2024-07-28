@@ -16,7 +16,12 @@ const dictionarySchema = new Schema({
   },
   create_date: {
     type: Date,
-    required: false,
+    required: true,
+  },
+  enable: {
+    type: Boolean,
+    requered: true,
+    default: true,
   }
 
 });

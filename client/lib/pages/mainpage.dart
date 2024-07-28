@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
 import '../functions/fetchUserDate.dart';
-import '../addAccount.dart';
+import '../functions/addAccount.dart';
 import '../dialogs/logoutDialog.dart'; // Asegúrate de que esta ruta sea correcta
 import '../dialogs/showDeletedConfirmationDialog.dart';
 
@@ -39,25 +39,8 @@ class _MainPageState extends State<MainPage> {
       userName = name;
       dni = id;
       accounts = fetchedAccounts.map((accountData) => Account.fromJson(accountData)).toList();
+
     });
-
-    if (accounts.isEmpty && !isCreatingAccount) {
-      setState(() {
-        isCreatingAccount = true; // Marca que estamos creando una cuenta
-      });
-
-      try {
-        await addAccount(widget.accessToken); // Agrega la cuenta
-        await fetchData(); // Vuelve a cargar los datos después de agregar la cuenta
-      } catch (e) {
-        // Manejo de errores en la creación de cuentas
-        print('Error al agregar cuenta: $e');
-      } finally {
-        setState(() {
-          isCreatingAccount = false; // Marca que hemos terminado de intentar agregar una cuenta
-        });
-      }
-    }
 
     print('UserName actualizado: $userName');
     print('DNI actualizado: $dni');

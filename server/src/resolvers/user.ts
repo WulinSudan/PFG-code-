@@ -201,30 +201,44 @@ export const userResolvers = {
       },
 
 
-        loginUser: async (_root: any, { input: { name, password } }: any) => {
-            const user = await User.findOne({ name }).select("password");
-            console.log(user);
-            if (!user || !(await comparePassword(user.password, password))) {
-                throw new Error("Invalid email or password");
+      loginUser : async (_root: any, { input: { name, password } }: any, context: Context) => {
+        try {
+          // Buscar el usuario por nombre
+          const user = await User.findOne({ name }).select("password accounts");
+          
+          if (!user) {
+            throw new Error("Usuario no encontrado");
+          }
+      
+          // Verificar la contraseña del usuario
+          const isPasswordValid = await comparePassword(user.password, password);
+          if (!isPasswordValid) {
+            throw new Error("Usuario o contraseña inválidos");
+          }
+      
+          // Obtener el token de acceso
+          const accessToken = getAccessToken(
+            {
+              user: user.id.toString(),
+            },
+            {
+              expiresIn: "1d",
             }
+          );
+      
+          // Retornar el token de acceso y el usuario
+          return {
+            access_token: accessToken,
+            user: user,
+          };
+      
+        } catch (error) {
+          console.error(error); // Loguear el error para depuración
+          //throw new Error(`Error al iniciar sesión: ${error.message}`);
+        }
+      },
 
-            console.log(user.id);
-
-            return {
-                access_token: getAccessToken(
-                    {
-                        user: user.id.toString(),
-                    },
-                    {
-                        expiresIn: "1d",
-                    }
-                ),
-                user: await User.findById(user.id),
-            };
-        },
     },
 };
-function invalidateToken(token: any) {
-  throw new Error("Function not implemented.");
-}
+
 

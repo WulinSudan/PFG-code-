@@ -22,6 +22,15 @@ function generateUniqueAccountNumber(): string {
   return aux;
 }
 
+interface AddAccountInput {
+  owner_dni: string;
+  owner_name: string;
+}
+
+interface AddAccountArgs {
+  input: AddAccountInput;
+}
+
 
 interface TransferInput {
   accountOrigen: string;
@@ -83,6 +92,40 @@ export const accountResolvers = {
     },
   },
   Mutation: {
+
+    addAccountByUser: async (_root: any, { input: { owner_dni, owner_name } }: AddAccountArgs): Promise<IAccount> => {
+      try {
+        // Create a new account
+        const newAccount = new Account({
+          owner_dni: owner_dni,
+          owner_name: owner_name,
+          number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
+          balance: 10.5, // Saldo inicial de 10€
+          active: true,
+          key_to_charge:"1234567890123456",
+          key_to_pay:"1234567890123456",
+          maximum_amount_once:50,
+          maximun_amount_day:500,
+        });
+
+        // Save the new account
+        await newAccount.save();
+
+        // Find the user by dni
+        const user = await User.findOne({ dni: owner_dni });
+        if (!user) {
+          throw new Error('User not found');
+        }
+
+        // Add the new account to the user's accounts array
+        user.accounts.push(newAccount._id);
+        await user.save();
+
+        return newAccount;
+      } catch (error) {
+        throw new Error('Error creating account: ');
+      }
+    },
 
 
     addAccountByAccessToken: async (_root: any, _args: any, context: Context): Promise<IAccount> => {

@@ -121,6 +121,15 @@ query(\$qrtext: String!){
 """;
 
 
+const String addAccountByUserMutation =""""
+mutation AddAccount(\$input: addAccountInput!) {
+  addAccountByUser(input: \$input) {
+    owner_name
+    balance
+  }
+}
+"""; 
+
 
 
 

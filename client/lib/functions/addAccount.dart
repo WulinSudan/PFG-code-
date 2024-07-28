@@ -1,6 +1,6 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'graphql_client.dart';
-import 'graphql_queries.dart';
+import '../graphql_client.dart';
+import '../graphql_queries.dart';
 import 'dart:async';
 
 
