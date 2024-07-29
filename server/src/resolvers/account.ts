@@ -6,6 +6,7 @@ import { comparePassword, hashPassword } from "../utils/crypt";
 import { User } from "../model/user";
 
 import { print } from "graphql";
+import { UpdateResult } from "mongodb";
 
 
 function generateUniqueAccountNumber(): string {
@@ -93,6 +94,40 @@ export const accountResolvers = {
   },
   Mutation: {
 
+    // Resolver de GraphQL para establecer el máximo importe de pago
+    setMaxPayImport : async (_root: any, { accountNumber, maxImport }: { accountNumber: string, maxImport: number }): Promise<number> => {
+      try {
+
+        /*
+        const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+        if (!userId) {
+          throw new Error('User not authenticated');
+        }
+
+        const user = await User.findById(new Types.ObjectId(userId));
+        if (!user) {
+            throw new Error("User not found");
+        }*/
+        
+
+        // Buscar la cuenta
+        const account = await Account.findOne({ number_account:accountNumber });
+        if (!account) {
+          throw new Error("Account does not exist");
+        }
+        // Actualizar el campo key_to_pay
+        await Account.updateOne(
+          { number_account: accountNumber },
+          { $set: { maximum_amount_once: maxImport} }
+        );
+
+        return maxImport;
+      } catch (error) {
+        console.error("Error setting new maxPayImport:", error);
+        throw new Error("Failed to set max pay import");
+      }
+    },
+
     addAccountByUser: async (_root: any, { input: { owner_dni, owner_name } }: AddAccountArgs): Promise<IAccount> => {
       try {
         // Create a new account
@@ -106,6 +141,7 @@ export const accountResolvers = {
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
           maximun_amount_day:500,
+          description:"cuenta nomina",
         });
 
         // Save the new account
@@ -153,6 +189,7 @@ export const accountResolvers = {
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
           maximun_amount_day:500,
+          description:"cuenta nomina",
         });
   
         await newAccount.save();

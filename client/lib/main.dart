@@ -9,6 +9,7 @@ import 'pages/paymentpage.dart';
 import 'pages/qrscanner.dart';
 import 'pages/qrgestion.dart';
 import 'pages/account.dart';
+import 'pages/setMaxPayImport.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,6 +28,10 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
+        '/setMaxPayImport': (context) {
+          final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
+          return SetMaxPayImport(accessToken: accessToken!);
+        },
         '/qrgestion': (context) => QrGestion(),
         '/qrscanner': (context) {
           // Extraer los argumentos de la ruta

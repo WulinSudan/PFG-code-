@@ -41,11 +41,10 @@ const String getAccountsQuery = """
       number_account
       balance
       active
+      maximum_amount_once
     }
   }
 """;
-
-
 
 final String addAccountMutation = """
   mutation {
@@ -128,7 +127,18 @@ mutation AddAccount(\$input: addAccountInput!) {
     balance
   }
 }
-"""; 
+""";
+
+
+const String setMaxPayImportMutation = """
+mutation(\$accountNumber: String!, \$maxImport: Float!){
+  setMaxPayImport(accountNumber: \$accountNumber, maxImport: \$maxImport)
+}
+""";
+
+
+
+
 
 
 

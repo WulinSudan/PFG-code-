@@ -19,6 +19,7 @@ interface IAccount extends Document {
   key_to_pay: string;
   maximum_amount_once: number;
   maximun_amount_day: number;
+  description:string;
 }
 
 // Account Schema
@@ -50,6 +51,7 @@ const AccountSchema: Schema = new Schema({
   key_to_pay: { type: String, required: true},
   maximum_amount_once: { type: Number, requered:true },
   maximum_amount_day: { type: Number, requered:true },
+  description: { type: String, requered:false },
 });
 
 // Account Model

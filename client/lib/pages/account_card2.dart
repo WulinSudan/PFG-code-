@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'account.dart';
 
-class AccountCard extends StatelessWidget {
+class AccountCard2 extends StatelessWidget {
   final Account account;
 
-  const AccountCard({Key? key, required this.account}) : super(key: key);
+  const AccountCard2({Key? key, required this.account}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +15,8 @@ class AccountCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Saldo: ${account.balance}'),
+            Text('max pay: ${account.maxPay}'),
             Text('Activa: ${account.active}'),
-            Text('max pay: ${account.maxPay}')
           ],
         ),
       ),
@@ -25,5 +25,5 @@ class AccountCard extends StatelessWidget {
 }
 
 Widget accountCard(Account account) {
-  return AccountCard(account: account);
+  return AccountCard2(account: account);
 }

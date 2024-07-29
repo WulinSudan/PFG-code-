@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
-import '../dialogs/logoutDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../dialogs/logoutDialog.dart';
 import '../dialogs/showDeletedConfirmationDialog.dart';
-
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -22,7 +20,7 @@ class _MainPageState extends State<MainPage> {
   String? dni;
   List<Account> accounts = [];
   int? selectedAccountIndex;
-  bool isCreatingAccount = false; // Indicador para evitar la creación repetida de cuentas
+  bool isCreatingAccount = false;
 
   @override
   void initState() {
@@ -39,12 +37,17 @@ class _MainPageState extends State<MainPage> {
       userName = name;
       dni = id;
       accounts = fetchedAccounts.map((accountData) => Account.fromJson(accountData)).toList();
-
     });
 
     print('UserName actualizado: $userName');
     print('DNI actualizado: $dni');
     print('Cuentas actualizadas: $accounts');
+  }
+
+  void _onAccountSelected(int index) {
+    setState(() {
+      selectedAccountIndex = index;
+    });
   }
 
   @override
@@ -59,8 +62,11 @@ class _MainPageState extends State<MainPage> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () async {
-              // Añade una cuenta solo si no estamos en medio de una creación de cuenta
               if (!isCreatingAccount) {
+                setState(() {
+                  isCreatingAccount = true;
+                });
+
                 await addAccount(widget.accessToken);
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -70,8 +76,11 @@ class _MainPageState extends State<MainPage> {
                   ),
                 );
 
-                // Recargar los datos después de agregar una cuenta
                 await fetchData();
+
+                setState(() {
+                  isCreatingAccount = false;
+                });
               }
             },
           ),
@@ -94,44 +103,69 @@ class _MainPageState extends State<MainPage> {
               child: Text('Navegación'),
             ),
             ListTile(
-              title: Text('Opción 1'),
+              title: Text('Modificar el máximo importe de pago'),
               onTap: () {
-                // Implementa la navegación deseada
+                Navigator.pushNamed(
+                  context,
+                  '/setMaxPayImport',
+                  arguments: widget.accessToken,
+                );
               },
             ),
             ListTile(
-              title: Text('Opción 2'),
+              title: Text('Cambiar color de fondo'),
               onTap: () {
                 // Implementa la navegación deseada
               },
             ),
-            // Agrega más elementos de lista según sea necesario
           ],
         ),
       ),
-      body: ListView.builder(
-        itemCount: accounts.length,
-        itemBuilder: (context, index) {
-          final account = accounts[index];
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedAccountIndex = index;
-              });
-            },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0), // Ajusta el valor según sea necesario
             child: Container(
-              color: selectedAccountIndex == index ? Colors.blue : Colors.transparent,
-              padding: EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AccountCard(account: account),
-                  ),
-                ],
+              height: 150.0, // Ajusta la altura según sea necesario
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: accounts.length,
+                itemBuilder: (context, index) {
+                  final account = accounts[index];
+                  return GestureDetector(
+                    onTap: () {
+                      _onAccountSelected(index);
+                    },
+                    child: Container(
+                      width: 150.0, // Ajusta el ancho según sea necesario
+                      margin: EdgeInsets.symmetric(horizontal: 8.0),
+                      decoration: BoxDecoration(
+                        color: selectedAccountIndex == index ? Colors.blue : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4.0,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: AccountCard(account: account),
+                    ),
+                  );
+                },
               ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              child: ListView(
+                // Lista de otros widgets o contenido adicional aquí
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: selectedAccountIndex != null
           ? FloatingActionButton(

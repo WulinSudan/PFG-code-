@@ -27,6 +27,8 @@
 
   type Mutation {
 
+    setMaxPayImport(accountNumber:String!, maxImport:Float!): Float!
+
     logoutUser: LogoutResponse!
 
     setNewKey(accountNumber:String!): String!
@@ -92,7 +94,14 @@
     number_account: String!
     balance: Float!
     active: Boolean!
-  }
+    key_to_charge: String!
+    key_to_pay: String!
+    maximum_amount_once: Float!
+    maximun_amount_day: Float!
+    description: String!
+}
+    
+  
 
 
   type User {
