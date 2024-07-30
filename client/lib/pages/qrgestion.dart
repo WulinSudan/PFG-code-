@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
-import '../graphql_client.dart';
-import '../graphql_queries.dart';
-import '../functions/fetchChargeKey.dart';
-import '../functions/fetchPayKey.dart';
-import '../functions/encrypt.dart';
-import '../functions/getOriginAccount.dart';
-import '../functions/getOperation.dart';
-import '../functions/doQr.dart';
+import '../functions/doQr.dart'; // Asegúrate de que la ruta sea correcta
 import '../internal_functions/maskAccountNumber.dart';
-import '../dialogs/showHelloDialog.dart'; // Importa la función correcta
-import '../functions/setQrUsed.dart';
-import '../functions/checkEnable.dart';
-import '../dialogs/warning.dart';
+import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
 
 class QrGestion extends StatefulWidget {
   @override
@@ -24,133 +14,78 @@ class _QrGestionState extends State<QrGestion> {
   double importe = -1;
   String? typePart;
   String? accessToken;
-  String? operation;
-  String? originAccount;
   bool? transferSuccess; // Para rastrear el resultado de la transferencia
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Llamar solo si accessToken es null (esto asegura que processQr solo se llame una vez)
     if (accessToken == null) {
       final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       accessToken = arguments?['accessToken'] as String?;
       String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
-      print("-----------------En qrgestion, mensaje cifrado: $qrText");
-      processQr(qrText, arguments);
 
+      if (qrText.startsWith("charge")) {
+        // Llama a processQrCharge solo si el QR tiene un prefijo válido
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          processQrCharge(qrText, arguments);
+        });
+      } else {
+        print("El texto del QR no comienza con 'charge'");
+      }
     }
   }
 
-  Future<void> processQr(String qrText, Map<String, dynamic>? arguments) async {
-
-
+  Future<void> processQrCharge(String qrText, Map<String, dynamic>? arguments) async {
     try {
-      operation = await getOperation(accessToken!, qrText);
+      // Asumimos que qrText comienza con 'charge', por lo que eliminamos ese prefijo
+      String remainingText = qrText.substring("charge".length).trim();
 
-      bool result = true;
+      // Separar el número de cuenta y el importe
+      List<String> parts = remainingText.split(' ');
+      if (parts.length == 2) {
+        String accountNumber = parts[0]; // Número de cuenta
+        double? amount = double.tryParse(parts[1]); // Importe
 
-
-      if(operation=="payment"){
-        result = await checkEnable(accessToken!, qrText);
-        print("-----------55-----------------------");
-        print(result);
-      }
-      // Obtener la cuenta de origen y la operación
-
-      if(!result){
-        showWarningDialog(context,"qr usado o caducado");
-        print("-------------------------------Not avaliable");
-        throw Exception("QR code not available");
-      }
-
-      print("Qr avaliable");
-
-      originAccount = await getOrigenAccount(accessToken!, qrText);
-
-
-
-      print("-----------------En processQr, qr generado por: $originAccount, tipo de operación: $operation");
-
-      String cuentaEscaneadora = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-      print("-----------------En processQr, qr escaneada por: $cuentaEscaneadora");
-
-      // Desencriptar el texto del QR usando la clave adecuada
-      if (operation == 'charge') {
-        origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-        destino = originAccount ?? 'Destino no disponible';
-        String chargeKey = await fetchChargeKey(accessToken!, originAccount!);
-        qrText = decryptAES(qrText, chargeKey);
-        typePart = 'Cargo'; // Asumimos que este es el tipo para 'charge'
-      }
-
-      else if (operation == 'payment') {
-        print("...........................88.....................");
-        origen = originAccount ?? 'Origen no disponible';
-        destino = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-        String payKey = await fetchPayKey(accessToken!, originAccount!);
-        qrText = decryptAES(qrText, payKey);
-        typePart = 'Pago'; // Asumimos que este es el tipo para 'payment'
-      } else {
-        throw Exception('Tipo de operación no válido');
-      }
-
-      // Extraer el importe del texto desencriptado
-      List<String> parts = qrText.split(' ');
-      if (parts.length >= 3) {
-        String amountPart = parts.last; // Asumimos que el importe está al final
-        importe = double.tryParse(amountPart) ?? 0.0;
-      }
-
-      // Verificar si el importe es mayor a 0
-      if (importe == -1) {
-        print("--------------------importe -1");
-        String? nuevoImporte = await showImporteDialog(context);
-        if (nuevoImporte != null && nuevoImporte.isNotEmpty) {
-          importe = double.tryParse(nuevoImporte) ?? -1;
+        if (amount == null || amount <= 0) {
+          // Si el importe no es válido o es <= 0, pedimos al usuario que lo ingrese
+          amount = await getImportDialog(context) ?? 0.0;
         }
+
+        // Obtener el número de cuenta de origen desde los argumentos
+        origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
+        destino = accountNumber;
+        importe = amount; // No es necesario usar importe ?? 0.0 aquí porque amount no será null aquí
+        typePart = 'Cargo'; // Tipo de operación
+
+        // Realizar la operación doQr y actualizar el estado basado en el resultado
+        bool success = await doQr(accessToken!, origen, destino, importe);
+
+        // Usa addPostFrameCallback para asegurarte de que setState se llama después de que la construcción se haya completado
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() {
+            this.origen = origen;
+            this.destino = destino;
+            this.importe = importe;
+            this.typePart = typePart;
+            this.transferSuccess = success; // Transferencia exitosa o fallida
+          });
+        });
+      } else {
+        print("El texto del QR no tiene el formato esperado.");
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() {
+            transferSuccess = false; // Error al procesar el QR
+          });
+        });
       }
-
-      // Actualizar el estado después de obtener los datos
-      setState(() {
-        this.origen = origen;
-        this.destino = destino;
-        this.importe = importe;
-        this.typePart = typePart;
-      });
-
-      // Realizar la operación doQr y actualizar el estado basado en el resultado
-      bool success;
-      try {
-        success = await doQr(accessToken!, origen, destino, importe);
-      } catch (e) {
-        print('Error al realizar la transferencia: $e');
-        success = false; // Error en la transferencia
-      }
-
-      setState(() {
-        transferSuccess = success; // Transferencia exitosa o fallida
-      });
-
     } catch (e) {
-      print('Error al descifrar el código QR: $e');
-      // Manejar el error según sea necesario
-      setState(() {
-        transferSuccess = false; // Error al procesar el QR
+      print('Error al procesar el código QR: $e');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          transferSuccess = false; // Error al procesar el QR
+        });
       });
     }
-
-    print("------------------------113---------------------------");
-    print("origen: $origen");
-    print("destino: $destino");
-    print("importe: $importe");
-    print("accessToken: $accessToken");
-
-
-    //dictionary used
-    //print(qrText);
-    //print("transferencia realizada------------hacer desenable la cuenta------------");
-    //await setQrUsed(accessToken!, qrText);
   }
 
   @override

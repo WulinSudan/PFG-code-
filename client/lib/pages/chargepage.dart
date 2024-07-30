@@ -42,21 +42,17 @@ class _ChargePageState extends State<ChargePage> {
     }
 
     try {
-      String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
+      //String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
       qrData = 'charge $accountNumber $amountToCharge';
-      String encryptedData = encryptAES(qrData, chargeKey);
+      //String encryptedData = encryptAES(qrData, chargeKey);
       print("encryptedData..................................");
-      print(encryptedData);
+      print(qrData);
       // Guardar la clave en el diccionario
       print("en la classe chargepage");
       print(accessToken);
-      print(encryptedData);
       print(accountNumber);
-      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "charge");
 
-      setState(() {
-        qrData = encryptedData;
-      });
+
     } catch (e) {
       print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
       // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
@@ -75,18 +71,15 @@ class _ChargePageState extends State<ChargePage> {
 
     try {
 
-      String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
+      //String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
 
       qrData = 'charge $accountNumber $amountToCharge';
-      String encryptedData = encryptAES(qrData, chargeKey);
+      //String encryptedData = encryptAES(qrData, chargeKey);
       print("encryptedData..................................");
-      print(encryptedData);
+      print(qrData);
       // Guardar la clave en el diccionario
-      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "charge");
+      //await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "charge");
 
-      setState(() {
-        qrData = encryptedData;
-      });
     } catch (e) {
       print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
       // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
