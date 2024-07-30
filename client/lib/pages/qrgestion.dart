@@ -9,6 +9,9 @@ import '../functions/getOperation.dart';
 import '../functions/doQr.dart';
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/showHelloDialog.dart'; // Importa la función correcta
+import '../functions/setQrUsed.dart';
+import '../functions/checkEnable.dart';
+import '../dialogs/warning.dart';
 
 class QrGestion extends StatefulWidget {
   @override
@@ -35,14 +38,38 @@ class _QrGestionState extends State<QrGestion> {
       String qrText = arguments?['qrCode'] as String? ?? 'Código QR no disponible';
       print("-----------------En qrgestion, mensaje cifrado: $qrText");
       processQr(qrText, arguments);
+
     }
   }
 
   Future<void> processQr(String qrText, Map<String, dynamic>? arguments) async {
+
+
     try {
-      // Obtener la cuenta de origen y la operación
-      originAccount = await getOrigenAccount(accessToken!, qrText);
       operation = await getOperation(accessToken!, qrText);
+
+      bool result = true;
+
+
+      if(operation=="payment"){
+        result = await checkEnable(accessToken!, qrText);
+        print("-----------55-----------------------");
+        print(result);
+      }
+      // Obtener la cuenta de origen y la operación
+
+      if(!result){
+        showWarningDialog(context,"qr usado o caducado");
+        print("-------------------------------Not avaliable");
+        throw Exception("QR code not available");
+      }
+
+      print("Qr avaliable");
+
+      originAccount = await getOrigenAccount(accessToken!, qrText);
+
+
+
       print("-----------------En processQr, qr generado por: $originAccount, tipo de operación: $operation");
 
       String cuentaEscaneadora = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
@@ -55,7 +82,10 @@ class _QrGestionState extends State<QrGestion> {
         String chargeKey = await fetchChargeKey(accessToken!, originAccount!);
         qrText = decryptAES(qrText, chargeKey);
         typePart = 'Cargo'; // Asumimos que este es el tipo para 'charge'
-      } else if (operation == 'payment') {
+      }
+
+      else if (operation == 'payment') {
+        print("...........................88.....................");
         origen = originAccount ?? 'Origen no disponible';
         destino = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
         String payKey = await fetchPayKey(accessToken!, originAccount!);
@@ -115,6 +145,12 @@ class _QrGestionState extends State<QrGestion> {
     print("destino: $destino");
     print("importe: $importe");
     print("accessToken: $accessToken");
+
+
+    //dictionary used
+    //print(qrText);
+    //print("transferencia realizada------------hacer desenable la cuenta------------");
+    //await setQrUsed(accessToken!, qrText);
   }
 
   @override

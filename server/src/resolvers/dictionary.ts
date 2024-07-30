@@ -1,5 +1,5 @@
 import Dictionary from "../model/dictionary";
-import { Types } from "mongoose";
+import { Types, UpdateWriteOpResult } from "mongoose";
 import { Context } from "../utils/context";
 import { getAccessToken, getUserId } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/crypt";
@@ -9,6 +9,9 @@ import { print } from "graphql";
 import { UUID } from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { BlobOptions } from "buffer";
+import { UpdateResult } from 'mongodb'; // Import MongoDB native types
+
 
 
 export const dictionaryResolvers = {
@@ -62,6 +65,124 @@ export const dictionaryResolvers = {
   },
 
   Mutation: {
+
+    checkEnable: async (_root: any, args: { qrtext: string }, context: Context): Promise<boolean> => {
+
+      console.log("En la funcion checkEnable............");
+      const { qrtext } = args;
+    
+      // Asegúrate de que qrtext sea válido y no esté vacío
+      if (!qrtext) {
+        throw new Error('QR text is required');
+      }
+    
+      try {
+        // Buscar en la base de datos el diccionario por qrtext
+        const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
+    
+        // Si no se encuentra el diccionario, lanzar un error
+        if (!dictionary) {
+          throw new Error('Dictionary entry not found');
+        }
+    
+        // Verificar si la operación es 'payment'
+        if (dictionary.operation !== 'payment') {
+          // Si no es 'payment', simplemente devuelve el valor actual de 'enable'
+          return dictionary.enable;
+        }
+    
+        // Verificar el valor actual de 'enable'
+        if (!dictionary.enable) {
+          return false; // No es necesario hacer más comprobaciones si 'enable' ya es false
+        }
+    
+        // Verificar la fecha de creación
+        const createDate = dictionary.create_date;
+        if (!createDate) {
+          throw new Error('Create date not found in dictionary entry');
+        }
+    
+        // Obtener la fecha actual
+        const now = new Date();
+        const expirationTime = new Date(createDate);
+        expirationTime.setMinutes(expirationTime.getMinutes() + 2); // Agregar 2 minutos a la fecha de creación
+    
+        // Comprobar si ha pasado más de 2 minutos
+        if (now > expirationTime) {
+          // Actualizar el campo 'enable' a false
+          const updateResult = await Dictionary.updateOne(
+            { encrypt_message: qrtext },
+            { $set: { enable: false } }
+          );
+    
+          // Verificar si se actualizó algún documento
+          if (updateResult.modifiedCount > 0) {
+            return false; // Se actualizó, así que el valor de 'enable' es ahora false
+          } else {
+            throw new Error('Failed to update dictionary entry');
+          }
+        } else {
+          // No se ha pasado el tiempo de expiración
+          return dictionary.enable; // Devolver el valor actual de 'enable'
+        }
+      } catch (error) {
+        //console.error('Error en checkEnable:', error.message);
+        return false; // Manejar el error y devolver false
+      }
+    },
+    
+
+setQrUsed : async (
+  _root: any,
+  args: { qrtext: string },
+  context: Context
+): Promise<boolean> => {
+  console.log("En la función setQrUsed...");
+
+  const { qrtext } = args;
+
+  // Asegúrate de que qrtext sea válido y no esté vacío
+  if (!qrtext) {
+    throw new Error('QR text is required');
+  }
+
+  try {
+    // Buscar en la base de datos solo por qrtext y actualizar enable a false
+    const updateResult: UpdateWriteOpResult = await Dictionary.updateOne(
+      { encrypt_message: qrtext },
+      { $set: { enable: false } }
+    );
+
+    console.log(`QR text: ${qrtext}`);
+    console.log(`Update result: ${JSON.stringify(updateResult)}`);
+
+    // Verificar si se encontró y actualizó la entrada
+    if (updateResult.matchedCount === 0) {
+      console.error('No documents matched the query. Check if the qrtext exists.');
+      throw new Error('Dictionary entry not found');
+    }
+
+    if (updateResult.modifiedCount === 0) {
+      console.log('Dictionary entry was already disabled or not modified');
+    }
+
+    const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
+
+    if (!dictionary) {
+      throw new Error('Dictionary entry not found after update');
+    }
+
+    console.log("Cuenta deshabilitada exitosamente.");
+    console.log(`Estado de habilitación: ${dictionary.enable}`);
+
+    // Verificar si la actualización fue exitosa y devolver true si enable fue actualizado a false
+    return !dictionary.enable;
+  } catch (error) {
+    console.error('Error updating dictionary entry:', error);
+    throw new Error('Error updating dictionary entry');
+  }
+},
+
 
     setNewKey: async (_root: any, { accountNumber }: { accountNumber: string }): Promise<string> => {
       try {

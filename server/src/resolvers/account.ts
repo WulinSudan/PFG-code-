@@ -298,7 +298,7 @@ export const accountResolvers = {
         }
 
 
-        if (accountOrigenDoc.balance > accountOrigenDoc.maximum_amount_once) {
+        if (importNumber > accountOrigenDoc.maximum_amount_once) {
           return {
             success: false,
             message: 'Supera el màximo establecido del dia',

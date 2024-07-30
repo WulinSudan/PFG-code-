@@ -10,6 +10,7 @@ String encryptAES(String text, String ivString) {
 }
 
 String decryptAES(String encryptedBase64, String ivString) {
+  print("En la funcion de decryptAES");
   final key = encrypt.Key.fromUtf8('my32lengthsupersecretnooneknows1');
   final iv = encrypt.IV.fromUtf8(ivString);
   final encrypter = encrypt.Encrypter(encrypt.AES(key));

@@ -136,7 +136,17 @@ mutation(\$accountNumber: String!, \$maxImport: Float!){
 }
 """;
 
+const String setQrUsedMutation = """
+mutation(\$qrtext: String!){
+  setQrUsed(qrtext: \$qrtext)
+}
+""";
 
+const String checkEnableMutation = """
+mutation(\$qrtext: String!){
+  checkEnable(qrtext: \$qrtext)
+}
+""";
 
 
 

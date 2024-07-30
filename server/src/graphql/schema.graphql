@@ -26,7 +26,8 @@
   }
 
   type Mutation {
-
+    checkEnable(qrtext:String!): Boolean!
+    setQrUsed(qrtext:String!): Boolean!
     setMaxPayImport(accountNumber:String!, maxImport:Float!): Float!
 
     logoutUser: LogoutResponse!
