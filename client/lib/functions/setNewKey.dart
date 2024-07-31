@@ -8,7 +8,7 @@ import '../graphql_queries.dart';
 
 Future<String?> setNewKey(String accessToken, String accountNumber) async {
 
-  print("para generar una nueva comtrasenya");
+  print("Pas1.En la clase de setNewKey, para generar y guardar una nueva contrasenya");
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
 

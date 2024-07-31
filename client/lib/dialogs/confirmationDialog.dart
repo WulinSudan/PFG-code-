@@ -13,7 +13,7 @@ Future<void> showConfirmationDialog(BuildContext context) async {
 
       return AlertDialog(
         title: Text('Confirmación'),
-        content: Text('Todo está bien.'),
+        content: Text('Identificando los datos'),
       );
     },
   );

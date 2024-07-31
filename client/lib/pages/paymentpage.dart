@@ -13,11 +13,12 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  late String accountNumber = '';
+  String accountNumber = '';
   double amountToPay = -1;
   String qrData = '';
   TextEditingController amountController = TextEditingController();
   String? accessToken;
+  String? payKey;
 
   @override
   void initState() {
@@ -34,8 +35,10 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Future<void> generateQrData({required bool isFreeAmount}) async {
+    double amount = double.tryParse(amountController.text) ?? -1;
+
     setState(() {
-      amountToPay = isFreeAmount ? -1 : (double.tryParse(amountController.text) ?? -1);
+      amountToPay = isFreeAmount ? -1 : amount;
     });
 
     try {
@@ -43,12 +46,12 @@ class _PaymentPageState extends State<PaymentPage> {
         throw Exception("Access token is null");
       }
 
-      String payKey = isFreeAmount
-          ? await fetchPayKey(accessToken!, accountNumber)
-          : (await setNewKey(accessToken!, accountNumber))!;
+      // Crear nueva key, haz uso, y pon en base de datos
+      payKey = await setNewKey(accessToken!, accountNumber);
+      print("********************En la clase paymentPage la clau de compte: $payKey");
 
       qrData = 'payment $accountNumber $amountToPay';
-      String encryptedData = encryptAES(qrData, payKey);
+      String encryptedData = encryptAES(qrData, payKey!);
 
       // Guardar la clave en el diccionario
       await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "payment");
@@ -56,6 +59,7 @@ class _PaymentPageState extends State<PaymentPage> {
       setState(() {
         qrData = encryptedData;
       });
+
       QrDialog.showQrDialog(context, qrData, amountToPay);
     } catch (e) {
       print('Error generando la clave de pago o añadiendo al diccionario: $e');

@@ -143,7 +143,7 @@ mutation(\$qrtext: String!){
 """;
 
 const String checkEnableMutation = """
-mutation(\$qrtext: String!){
+query(\$qrtext: String!){
   checkEnable(qrtext: \$qrtext)
 }
 """;

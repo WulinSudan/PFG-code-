@@ -6,6 +6,8 @@ import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
 Future<String?> getOrigenAccount(String accessToken, String qrtext) async {
+
+
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {

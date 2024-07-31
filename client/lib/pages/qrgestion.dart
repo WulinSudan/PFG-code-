@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
-import '../functions/doQr.dart'; // Asegúrate de que la ruta sea correcta
+import '../internal_functions/paymentGestion.dart'; // Asegúrate de que la ruta sea correcta
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
 import '../internal_functions/chargeGestion.dart'; // Importa el nuevo archivo
+import '../functions/getOriginAccount.dart'; // Asegúrate de que la ruta sea correcta
+import '../functions/fetchPayKey.dart';
+import '../functions/encrypt.dart';
+import '../dialogs/confirmationDialog.dart';
+import '../functions/setQrUsed.dart';
+import '../functions/checkEnable.dart';
 
 class QrGestion extends StatefulWidget {
   @override
@@ -31,7 +37,10 @@ class _QrGestionState extends State<QrGestion> {
           processQrCharge(context, qrText, arguments, accessToken!, updateState);
         });
       } else {
-        print("El texto del QR no comienza con 'charge'");
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          print('Iniciando processQrPayment...');
+          processQrPayment(context, qrText, arguments, accessToken!, updateState);
+        });
       }
     }
   }

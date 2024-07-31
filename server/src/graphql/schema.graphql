@@ -23,10 +23,12 @@
     getAccountPayKey(accountNumber:String!): String!
     getAccountChargeKey(accountNumber:String!): String!
 
+    checkEnable(qrtext:String!): Boolean!
+
   }
 
   type Mutation {
-    checkEnable(qrtext:String!): Boolean!
+    
     setQrUsed(qrtext:String!): Boolean!
     setMaxPayImport(accountNumber:String!, maxImport:Float!): Float!
 

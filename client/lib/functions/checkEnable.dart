@@ -21,11 +21,17 @@ Future<bool> checkEnable(String accessToken, String qrText) async {
     );
 
     if (result.hasException) {
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
+      print('Error al ejecutar la mutación checkEnable: ${result.exception.toString()}');
       return false;
     } else {
-      print('Mutación exitosa');
-      return true;
+      final data = result.data;
+      if (data != null && data['checkEnable'] == true) {
+        print('Mutación exitosa y el resultado es true');
+        return true;
+      } else {
+        print('Mutación exitosa pero el resultado no es true');
+        return false;
+      }
     }
   } catch (e) {
     print('Error inesperado: $e');

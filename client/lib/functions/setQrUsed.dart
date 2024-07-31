@@ -7,7 +7,7 @@ import '../graphql_queries.dart';
 
 // Ensure the function is exported correctly
 Future<bool> setQrUsed(String accessToken, String qrText) async {
-  print("En la clase setQrUsed-----------------------10");
+  print("ultimo paso, En la clase setQrUsed-----------------------10");
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {

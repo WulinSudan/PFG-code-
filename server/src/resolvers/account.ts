@@ -52,6 +52,27 @@ async function findAccount(accountNumber: string): Promise<IAccount | null> {
 
 export const accountResolvers = {
   Query: {
+
+          //seria mejor dejar en account
+          getAccountPayKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
+            const { accountNumber } = args;
+            
+            console.log(`En la funcion getAccountPaykay, buscar la llave de la cuenta: ${accountNumber}`);
+
+            const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
+            if (!userId) {
+              throw new Error('User not authenticated');
+            }
+      
+            const account = await Account.findOne({ number_account: accountNumber, userId: new Types.ObjectId(userId) });
+            if (!account) {
+              throw new Error('Account not found');
+            }
+            
+            console.log(`En la funcion getAccountPayKey, lleve encuentrada: ${account.key_to_pay}`);
+            return account.key_to_pay;
+          },
+
     // Resolver para encontrar una cuenta por su número de cuenta
     findAccount: async (_root: any, args: any) => {
       try {
