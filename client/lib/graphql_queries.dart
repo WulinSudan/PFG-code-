@@ -106,15 +106,6 @@ query(\$qrtext: String!) {
 }
 """;
 
-
-
-final String getOperationQuery = """
-query(\$qrtext: String!){
-  getOperation(qrtext: \$qrtext)
-}
-""";
-
-
 const String addAccountByUserMutation =""""
 mutation AddAccount(\$input: addAccountInput!) {
   addAccountByUser(input: \$input) {

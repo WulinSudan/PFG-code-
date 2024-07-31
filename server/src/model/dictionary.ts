@@ -10,10 +10,6 @@ const dictionarySchema = new Schema({
     type: String,
     required: true,
   },
-  operation: {
-    type: String,
-    required: true,
-  },
   create_date: {
     type: Date,
     required: true,

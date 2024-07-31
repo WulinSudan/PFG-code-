@@ -97,22 +97,6 @@ export const dictionaryResolvers = {
         throw new Error('Error al obtener la cuenta de origen');
       }
     },
-
-    getOperation: async (_root: any, args: { qrtext: string }, context: Context): Promise<string> => {
-      const { qrtext } = args;
-      
-      const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
-      const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
-      if (!dictionary) {
-        throw new Error('Account not found');
-      }
-      console.log(`En getOperation, el tipo de operacion es: ${dictionary.operation}`);
-      return dictionary.operation;
-    },
   },
 
   Mutation: {
@@ -225,7 +209,6 @@ setNewKey : async (_root: any, { accountNumber }: { accountNumber: string }): Pr
         const dictionaryInput = {
           encrypt_message,
           account,
-          operation,
           create_date: now, // Usar la fecha actual
         };
     

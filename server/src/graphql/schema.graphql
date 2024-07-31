@@ -18,8 +18,7 @@
     findAccount(accountNumber:String!):Account
      
     getOriginAccount(qrtext:String!):String
-    getOperation(qrtext:String!):String
-
+  
     getAccountPayKey(accountNumber:String!): String!
 
     checkEnable(qrtext:String!): Boolean!
@@ -65,7 +64,6 @@
   input DictionaryInput {
   encrypt_message: String!
   account: String!
-  operation: String!
   create_date: Date
 }
 
@@ -74,7 +72,6 @@
   type Dictionary {
     encrypt_message: String!
     account: String!
-    operation: String!
     create_date: Date
   }
 
@@ -96,7 +93,6 @@
     number_account: String!
     balance: Float!
     active: Boolean!
-    key_to_charge: String!
     key_to_pay: String!
     maximum_amount_once: Float!
     maximun_amount_day: Float!
