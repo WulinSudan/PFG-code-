@@ -42,6 +42,7 @@ const String getAccountsQuery = """
       balance
       active
       maximum_amount_once
+      maximum_amount_day
     }
   }
 """;
@@ -78,12 +79,6 @@ query(\$accountNumber: String!){
 }
 """;
 
-
-final String getChargeKeyQuery = """
-query(\$accountNumber: String!){
-  getAccountChargeKey(accountNumber: \$accountNumber)
-}
-""";
 
 
 final String addKeyToDictionaryMutation = """

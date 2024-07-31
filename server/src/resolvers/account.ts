@@ -158,7 +158,6 @@ export const accountResolvers = {
           number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
           balance: 10.5, // Saldo inicial de 10€
           active: true,
-          key_to_charge:"1234567890123456",
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
           maximun_amount_day:500,
@@ -206,7 +205,6 @@ export const accountResolvers = {
           number_account: generateUniqueAccountNumber(), // Genera un número de cuenta único
           balance: 10.5, // Saldo inicial de 10€
           active: true,
-          key_to_charge:"1234567890123456",
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
           maximun_amount_day:500,

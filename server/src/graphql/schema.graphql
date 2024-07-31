@@ -21,7 +21,6 @@
     getOperation(qrtext:String!):String
 
     getAccountPayKey(accountNumber:String!): String!
-    getAccountChargeKey(accountNumber:String!): String!
 
     checkEnable(qrtext:String!): Boolean!
 

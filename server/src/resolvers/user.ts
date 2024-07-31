@@ -50,22 +50,6 @@ export const userResolvers = {
     Query: {
 
 
-      getAccountChargeKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
-        const { accountNumber } = args;
-  
-        const userId = getUserId(context); // Función que obtiene el ID del usuario desde el contexto
-        if (!userId) {
-          throw new Error('User not authenticated');
-        }
-  
-        const account = await Account.findOne({ accountNumber, userId: new Types.ObjectId(userId) });
-        if (!account) {
-          throw new Error('Account not found');
-        }
-  
-        return account.key_to_charge;
-      },
-
         getUserAccountCount: async (_root: any, { dni }: { dni: string }) => {
             try {
               // Buscar al usuario por su DNI

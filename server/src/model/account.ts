@@ -15,7 +15,6 @@ interface IAccount extends Document {
   number_account: string; // Debe ser un string de 10 caracteres numéricos no repetitivos
   balance: number; // Puede ser un número decimal
   active: boolean;
-  key_to_charge: string;
   key_to_pay: string;
   maximum_amount_once: number;
   maximun_amount_day: number;
@@ -47,7 +46,6 @@ const AccountSchema: Schema = new Schema({
     set: (value: number) => parseFloat(value.toFixed(2)),
   },
   active: { type: Boolean, required: true },
-  key_to_charge: { type: String, required: true},
   key_to_pay: { type: String, required: true},
   maximum_amount_once: { type: Number, requered:true },
   maximum_amount_day: { type: Number, requered:true },

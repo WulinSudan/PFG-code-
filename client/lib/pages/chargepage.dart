@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import '../functions/encrypt.dart';
-import '../functions/fetchChargeKey.dart';
 import '../functions/addKeyToDictionary.dart';
 import '../internal_functions/maskAccountNumber.dart';
 
