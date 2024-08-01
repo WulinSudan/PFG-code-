@@ -1,24 +1,17 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
-
-function getUtcPlusTwoDate() {
-  const now = new Date();
-  // Obtener el tiempo en milisegundos y añadir dos horas (2 * 60 * 60 * 1000 milisegundos)
-  const utcPlusTwoTime = now.getTime() + (2 * 60 * 60 * 1000);
-  // Crear un nuevo objeto Date con el tiempo UTC+2
-  return new Date(utcPlusTwoTime);
-}
+import { ITransaction } from './transaction';
 
 // Interface for Account
 interface IAccount extends Document {
   owner_dni: string;
   owner_name: string;
-  number_account: string; // Debe ser un string de 10 caracteres numéricos no repetitivos
-  balance: number; // Puede ser un número decimal
+  number_account: string;
+  balance: number;
   active: boolean;
   key_to_pay: string;
   maximum_amount_once: number;
-  maximun_amount_day: number;
-  description:string;
+  description: string;
+  transactions: mongoose.Types.ObjectId[]; // Array de ObjectId
 }
 
 // Account Schema
@@ -40,16 +33,14 @@ const AccountSchema: Schema = new Schema({
     type: Number,
     required: true,
     default: 0,
-    // Getter para formatear el balance a 2 decimales al obtenerlo del modelo
     get: (value: number) => parseFloat(value.toFixed(2)),
-    // Setter para asegurar que se almacene con 2 decimales
     set: (value: number) => parseFloat(value.toFixed(2)),
   },
   active: { type: Boolean, required: true },
-  key_to_pay: { type: String, required: true},
-  maximum_amount_once: { type: Number, requered:true },
-  maximum_amount_day: { type: Number, requered:true },
-  description: { type: String, requered:false },
+  key_to_pay: { type: String, required: true },
+  maximum_amount_once: { type: Number, required: true },
+  description: { type: String, required: false },
+  transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }], // Lista de referencias a transacciones
 });
 
 // Account Model

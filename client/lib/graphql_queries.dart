@@ -42,7 +42,6 @@ const String getAccountsQuery = """
       balance
       active
       maximum_amount_once
-      maximum_amount_day
     }
   }
 """;
@@ -131,6 +130,17 @@ mutation(\$qrtext: String!){
 const String checkEnableMutation = """
 query(\$qrtext: String!){
   checkEnable(qrtext: \$qrtext)
+}
+""";
+
+
+const String addTransactionMutation = """
+mutation(\$input: TransactionInput!) {
+    addTransaction(input: \$input) {
+       operation
+       import
+       create_date
+   } 
 }
 """;
 

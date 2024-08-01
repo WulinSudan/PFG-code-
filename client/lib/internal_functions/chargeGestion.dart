@@ -1,3 +1,4 @@
+import 'package:client/functions/addTransaction.dart';
 import 'package:flutter/material.dart';
 import '../functions/doQr.dart'; // Asegúrate de que la ruta sea correcta
 import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
@@ -36,8 +37,13 @@ Future<void> processQrCharge(
       print('Importe: $importe');
 
       bool success = await doQr(accessToken, origen, destino, importe);
-
       print('doQr completado con éxito: $success');
+
+      print("Estoy en chargeGestion...................");
+      if(success){
+        await addTransaction(accessToken, accountNumber, "add", importe);
+        await addTransaction(accessToken, origen, "subtract", importe);
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         updateState(origen, destino, importe, typePart, success);

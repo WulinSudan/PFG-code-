@@ -160,7 +160,6 @@ export const accountResolvers = {
           active: true,
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
-          maximun_amount_day:500,
           description:"cuenta nomina",
         });
 
@@ -207,7 +206,6 @@ export const accountResolvers = {
           active: true,
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
-          maximun_amount_day:500,
           description:"cuenta nomina",
         });
   
