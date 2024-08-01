@@ -133,7 +133,6 @@ query(\$qrtext: String!){
 }
 """;
 
-
 const String addTransactionMutation = """
 mutation(\$input: TransactionInput!) {
     addTransaction(input: \$input) {
@@ -143,6 +142,7 @@ mutation(\$input: TransactionInput!) {
    } 
 }
 """;
+
 
 
 

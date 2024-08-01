@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tus consultas/mutaciones GraphQL aquí
 import '../graphql_queries.dart';
+import '../dialogs/errorConnectionDialog.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -43,7 +44,7 @@ class _LoginState extends State<Login> {
                 final String username = _usernameController.text.trim();
                 final String password = _passwordController.text.trim();
 
-                final GraphQLClient client = GraphQLService.createGraphQLClient('Bearer YourAuthToken');
+                final GraphQLClient client = GraphQLService.createGraphQLClient('');
 
                 // Envío de la mutación al servidor GraphQL
                 final QueryResult result = await client.mutate(
@@ -60,11 +61,10 @@ class _LoginState extends State<Login> {
 
                 // Manejo del resultado de la mutación
                 if (result.hasException) {
-                  print("++++++++++++++++++++++++++++++++++++++++++++");
+                  await errorConnectionDialog(context);
                   // Manejar errores de autenticación
                   print("Error en la autenticación: ${result.exception}");
                 } else {
-                  print("************************************************");
                   // Autenticación exitosa, obtener el token de acceso y navegar a la siguiente pantalla
                   final String accessToken = result.data!['loginUser']['access_token'];
                   print(accessToken);

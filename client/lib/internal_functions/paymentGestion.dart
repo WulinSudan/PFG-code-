@@ -1,4 +1,5 @@
 // paymentGestion.dart
+import 'package:client/functions/addTransaction.dart';
 import 'package:flutter/material.dart';
 import '../functions/checkEnable.dart';
 import '../functions/getOriginAccount.dart';
@@ -8,7 +9,7 @@ import '../functions/doQr.dart';
 import '../functions/setQrUsed.dart';
 import '../dialogs/confirmationDialog.dart';
 import '../dialogs/getImportDialog.dart';
-import '../functions/addTransaction.dart';
+
 
 Future<void> processQrPayment(
     BuildContext context,
@@ -70,13 +71,12 @@ Future<void> processQrPayment(
         success = await doQr(accessToken, origen, destino, importe);
         print('doQr completado con éxito: $success');
         print("Estoy en chargeGestion...................");
-        if(success) await addTransaction(accessToken, accountNumber, "add", importe);
 
         // Deshabilitar el QR solo si la transferencia fue exitosa
         if (success) {
           print("Estoy en la funcion paymentGestion");
-          await addTransaction(accessToken, accountNumber, "subtract", importe);
-          await addTransaction(accessToken, origen, "add", importe);
+          await addTransaction(accessToken, accountNumber, "add", importe);
+          await addTransaction(accessToken, origen, "subtract", importe);
           await setQrUsed(accessToken, qrText);
         }
       } else {

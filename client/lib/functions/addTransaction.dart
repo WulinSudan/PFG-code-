@@ -1,5 +1,3 @@
-import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
-
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
