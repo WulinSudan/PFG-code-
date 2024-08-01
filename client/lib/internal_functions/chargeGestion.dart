@@ -10,7 +10,8 @@ Future<void> processQrCharge(
     String qrText,
     Map<String, dynamic>? arguments,
     String accessToken,
-    Function(String, String, double, String, bool) updateState) async {
+    Function(String, String, double, String, bool) updateState,
+    ) async {
   try {
     print('Iniciando processQrCharge con qrText: $qrText');
     String remainingText = qrText.substring("charge".length).trim();
@@ -21,9 +22,10 @@ Future<void> processQrCharge(
 
       if (amount == null || amount <= 0) {
         amount = await getImportDialog(context) ?? 0.0;
-      }
-      else{
-        showConfirmationDialog(context);
+        await showConfirmationDialog(context);
+        print("En la pagina de chargeGestion.dart, el importe recogido: ${amount}");
+      } else {
+        await showConfirmationDialog(context);
       }
 
       String origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
@@ -37,12 +39,9 @@ Future<void> processQrCharge(
       print('Importe: $importe');
 
       bool success = await doQr(accessToken, origen, destino, importe);
-      if(success) await addTransaction(accessToken, accountNumber, "add", importe);
-      if(success) await addTransaction(accessToken, origen, "subtract", importe);
+      if (success) await addTransaction(accessToken, accountNumber, "add", importe);
+      if (success) await addTransaction(accessToken, origen, "subtract", importe);
       print('doQr completado con éxito: $success');
-
-      print("Estoy en chargeGestion...................");
-
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         updateState(origen, destino, importe, typePart, success);
