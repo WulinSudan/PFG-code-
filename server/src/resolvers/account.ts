@@ -7,6 +7,7 @@ import { User } from "../model/user";
 
 import { print } from "graphql";
 import { UpdateResult } from "mongodb";
+import { Transaction } from "../model/transaction";
 
 
 function generateUniqueAccountNumber(): string {
@@ -53,6 +54,37 @@ async function findAccount(accountNumber: string): Promise<IAccount | null> {
 export const accountResolvers = {
   Query: {
 
+    getAccountTransactions: async (_root: any, { account_number }: { account_number: string }) => {
+      try {
+        // Buscar la cuenta por su número de cuenta
+        const account = await Account.findOne({ account_number });
+        if (!account) {
+          throw new Error('Account not found');
+        }
+    
+        // Obtener los IDs de las transacciones asociadas a la cuenta
+        const transactionIds = account.transactions;
+    
+        // Buscar las transacciones por sus IDs
+        const transactions = await Transaction.find({ _id: { $in: transactionIds } });
+    
+        // Filtrar transacciones que tienen campos no nulos
+        const validTransactions = transactions.filter(transaction => 
+          transaction.operation !== null && 
+          transaction.create_date !== undefined && 
+          transaction.import !== undefined
+        );
+    
+        // Devolver la información detallada de las transacciones válidas
+        return validTransactions;
+      } catch (error) {
+        console.error('Error fetching transactions info by account number:', error);
+        throw new Error('Error fetching transactions info by account number');
+      }
+    },
+    
+
+          
           //seria mejor dejar en account
           getAccountPayKey: async (_root: any, args: { accountNumber: string }, context: Context): Promise<string> => {
             const { accountNumber } = args;

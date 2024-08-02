@@ -1,9 +1,19 @@
 import { Account } from '../model/account';
-import { Transaction } from '../model/transaction';
+import { ITransaction, Transaction } from '../model/transaction';
 
 export const transactionResolvers = {
   Query: {
     // Aquí puedes definir tus resolvers de consulta
+    getTransactions: async (): Promise<ITransaction[]> => {
+      try {
+        const transactions = await Transaction.find();
+        return transactions;
+      } catch (error) {
+        console.error('Error fetching transaction:', error);
+        throw new Error('Error fetching transaction: ');
+      }
+    },
+
   },
   Mutation: {
     addTransaction: async (_root: any, args: { input: { operation: string; import: number; accountNumber: string } }) => {
