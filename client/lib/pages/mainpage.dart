@@ -175,7 +175,10 @@ class _MainPageState extends State<MainPage> {
           ),
           Expanded(
             child: selectedAccountIndex != null
-                ? TransactionsList(transactions: transactions)
+                ? TransactionsList(
+              transactions: transactions,
+              currentBalance: accounts[selectedAccountIndex!].balance, // Pasar el saldo actual
+            )
                 : Center(child: Text('Selecciona una cuenta')),
           ),
         ],
@@ -254,8 +257,13 @@ class _MainPageState extends State<MainPage> {
 
 class TransactionsList extends StatelessWidget {
   final List<Transaction> transactions;
+  final double currentBalance;
 
-  const TransactionsList({Key? key, required this.transactions}) : super(key: key);
+  const TransactionsList({
+    Key? key,
+    required this.transactions,
+    required this.currentBalance, // Añadido: importe actual de la cuenta
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +273,10 @@ class TransactionsList extends StatelessWidget {
       itemCount: transactions.length,
       itemBuilder: (context, index) {
         final transaction = transactions[index];
-        return TransactionCard(transaction: transaction);
+        return TransactionCard(
+          transaction: transaction,
+          currentBalance: currentBalance,
+        );
       },
     );
   }

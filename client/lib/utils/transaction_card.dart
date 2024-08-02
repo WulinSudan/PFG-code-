@@ -3,29 +3,22 @@ import 'transaction.dart'; // Asegúrate de importar tu modelo de transacción
 
 class TransactionCard extends StatelessWidget {
   final Transaction transaction;
+  final double? currentBalance; // Asegúrate de que currentBalance sea opcional
 
-  const TransactionCard({Key? key, required this.transaction}) : super(key: key);
+  const TransactionCard({Key? key, required this.transaction, this.currentBalance}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    String formattedImport = transaction.import.toStringAsFixed(2);
-    IconData icon;
-    Color iconColor;
-    String sign;
+    // Determina el icono y el color basado en el tipo de operación
+    final IconData iconData;
+    final Color color;
 
-    // Determina el icono y color basado en la operación
-    if (transaction.operation.toLowerCase() == 'add') {
-      icon = Icons.monetization_on; // Ícono para cobrar (añadir)
-      iconColor = Colors.green;
-      sign = '+';
-    } else if (transaction.operation.toLowerCase() == 'subtract') {
-      icon = Icons.payment; // Ícono para pagar (restar)
-      iconColor = Colors.red;
-      sign = '-';
+    if (transaction.operation == "add") {
+      iconData = Icons.payment; // Icono para importes positivos
+      color = Colors.green;
     } else {
-      icon = Icons.help; // Ícono de ayuda en caso de operación desconocida
-      iconColor = Colors.grey;
-      sign = '';
+      iconData = Icons.remove; // Icono para importes negativos
+      color = Colors.red;
     }
 
     return Card(
@@ -34,26 +27,43 @@ class TransactionCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: iconColor), // Icono de la transacción
-            SizedBox(width: 16.0), // Espaciado entre el icono y el texto
+            Icon(
+              iconData,
+              color: color,
+            ),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: 4.0),
                   Text(
-                    transaction.createDate,
-                    style: Theme.of(context).textTheme.headlineSmall, // Fecha en un tamaño más pequeño
+                    '${transaction.import >= 0 ? '+' : ''}${transaction.import.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: color,
+                    ),
                   ),
-                  SizedBox(height: 8.0), // Espaciado entre la fecha y el resto
+                  SizedBox(height: 4.0),
                   Text(
-                    '$sign${formattedImport}',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    transaction.getFormattedDate(),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
             ),
+            if (currentBalance != null) ...[
+              SizedBox(width: 16),
+              Text(
+                'Saldo: ${currentBalance!.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ],
         ),
       ),

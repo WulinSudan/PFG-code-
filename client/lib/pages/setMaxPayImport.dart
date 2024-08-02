@@ -9,7 +9,7 @@ import '../dialogs/showDeletedConfirmationDialog.dart'; // Asegúrate de que est
 import '../dialogs/showHelloDialog.dart'; // Asegúrate de que esta ruta sea correcta
 import '../dialogs/getImportDialog.dart'; // Asegúrate de que esta ruta sea correcta
 import '../functions/setNewMax.dart'; // Asegúrate de que esta ruta sea correcta
-
+import '../dialogs/confirmationDialog.dart';
 class SetMaxPayImport extends StatefulWidget {
   final String accessToken;
 
@@ -76,6 +76,7 @@ class SetMaxPayImportState extends State<SetMaxPayImport> {
 
         // Actualizar los datos después de configurar el máximo
         await fetchData(); // Actualiza los datos
+
       } catch (e) {
         print('Error al configurar MaxPay: $e');
       }

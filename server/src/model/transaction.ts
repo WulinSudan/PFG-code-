@@ -5,6 +5,7 @@ interface ITransaction extends Document {
   operation: string;
   import: number;
   create_date: Date; // Asegúrate de que este campo es de tipo Date
+  
 }
 
 // Transaction Schema
