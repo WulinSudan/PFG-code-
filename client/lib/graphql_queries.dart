@@ -80,12 +80,11 @@ query(\$accountNumber: String!){
 
 
 
-final String addKeyToDictionaryMutation = """
+final String addDictionaryMutation = """
 mutation(\$input: DictionaryInput!) {
   addDictionary(input: \$input) {
     encrypt_message
     account
-    operation
     create_date
   }
 }
@@ -101,7 +100,7 @@ mutation setNewKey(\$accountNumber: String!) {
 
 const String getOrigenAccountQuery = """
 query(\$qrtext: String!) {
-  getOriginAccount(qrtext: \$qrtext)
+  getOrigenAccount(qrtext: \$qrtext)
 }
 """;
 

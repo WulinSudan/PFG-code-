@@ -3,29 +3,26 @@ import '../graphql_client.dart';
 import '../graphql_queries.dart';
 import 'dart:async';
 
-Future<void> addKeyToDictionary(
+Future<void> addDictionary(
     String accessToken,
     String encrypttext,
-    String accountNumber,
-    String operation // Asegúrate de que este campo se pase correctamente
+    String accountNumber// Asegúrate de que este campo se pase correctamente
     ) async {
 
   print("Pas 3 en la operacion de addtodictionary-------------------------------------------");
   print(accessToken);
   print(encrypttext);
   print(accountNumber);
-  print(operation);
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
     final QueryResult result = await client.mutate(
       MutationOptions(
-        document: gql(addKeyToDictionaryMutation),
+        document: gql(addDictionaryMutation),
         variables: {
           'input': {
             'encrypt_message': encrypttext,
             'account': accountNumber,
-            'operation': operation, // Asegúrate de que este campo coincida con el nombre esperado
           },
         },
       ),

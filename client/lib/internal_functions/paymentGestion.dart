@@ -2,7 +2,7 @@
 import 'package:client/functions/addTransaction.dart';
 import 'package:flutter/material.dart';
 import '../functions/checkEnable.dart';
-import '../functions/getOriginAccount.dart';
+import '../functions/getOrigenAccount.dart';
 import '../functions/fetchPayKey.dart';
 import '../functions/encrypt.dart';
 import '../functions/doQr.dart';
@@ -51,6 +51,7 @@ Future<void> processQrPayment(
 
       if (amount == null || amount <= 0) {
         amount = await getImportDialog(context) ?? 0.0;
+        await showConfirmationDialog(context);
       } else {
         await showConfirmationDialog(context);
       }

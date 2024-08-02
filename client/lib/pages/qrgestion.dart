@@ -3,7 +3,7 @@ import '../internal_functions/paymentGestion.dart'; // Asegúrate de que la ruta
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
 import '../internal_functions/chargeGestion.dart'; // Importa el nuevo archivo
-import '../functions/getOriginAccount.dart'; // Asegúrate de que la ruta sea correcta
+import '../functions/getOrigenAccount.dart'; // Asegúrate de que la ruta sea correcta
 import '../functions/fetchPayKey.dart';
 import '../functions/encrypt.dart';
 import '../dialogs/confirmationDialog.dart';

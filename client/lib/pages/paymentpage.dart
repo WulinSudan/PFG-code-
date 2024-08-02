@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../functions/encrypt.dart';
 import '../functions/fetchPayKey.dart';
-import '../functions/addKeyToDictionary.dart';
+import '../functions/addDictionary.dart';
 import '../functions/setNewKey.dart';
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/qr_dialog.dart'; // Importa el nuevo archivo
@@ -54,7 +54,8 @@ class _PaymentPageState extends State<PaymentPage> {
       String encryptedData = encryptAES(qrData, payKey!);
 
       // Guardar la clave en el diccionario
-      await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "payment");
+      print("Añadir al diccionario--------------------------------");
+      await addDictionary(accessToken!, encryptedData, accountNumber);
 
       setState(() {
         qrData = encryptedData;

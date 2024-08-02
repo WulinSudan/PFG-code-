@@ -17,7 +17,7 @@
     getUserAccountsInfoByDni(dni: String!): [Account]
     findAccount(accountNumber:String!):Account
      
-    getOriginAccount(qrtext:String!):String
+    getOrigenAccount(qrtext:String!):String
   
     getAccountPayKey(accountNumber:String!): String!
 

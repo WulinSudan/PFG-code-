@@ -68,7 +68,7 @@ export const dictionaryResolvers = {
     
 
     // Define tus resolvers de Query aquí, si tienes alguno
-    getOriginAccount: async (_root: any, args: { qrtext: string }, context: Context): Promise<string> => {
+    getOrigenAccount: async (_root: any, args: { qrtext: string }, context: Context): Promise<string> => {
       const { qrtext } = args;
 
       // Asegúrate de que qrtext sea válido y no esté vacío
@@ -189,34 +189,30 @@ setNewKey : async (_root: any, { accountNumber }: { accountNumber: string }): Pr
 
 
 
-    addDictionary:async (_root: any, { input: { encrypt_message, account, operation } }: any) => {
+    addDictionary:async (_root: any, { input: { encrypt_message, account } }: any) => {
+
       try {
         // Verificar que encrypt_message no es null o vacío
         if (!encrypt_message) {
           throw new Error("Encrypt message cannot be null or empty");
         }
-    
-        // Verificar si encrypt_message ya existe en la base de datos
-        const existingEntry = await Dictionary.findOne({ encrypt_message });
-        if (existingEntry) {
-          console.log("Encrypt message already exists, no action taken");
-          return existingEntry;
-        }
+
+        console.log("En la funcion de addDictionary");
+
     
         // Obtener la fecha y hora actuales
         const now = new Date(); 
     
-        const dictionaryInput = {
-          encrypt_message,
-          account,
+        const newDictionary = new Dictionary({
+          encrypt_message: encrypt_message,
+          account: account,
           create_date: now, // Usar la fecha actual
-        };
+        });
     
-        const dictionary = new Dictionary(dictionaryInput);
-        await dictionary.save();
+        await newDictionary.save();
     
         console.log("En la función addDictionary: generado un código QR");
-        return dictionary;
+        return newDictionary;
       } catch (error: any) {
         console.error("Error details:", error);
         throw new Error("An unexpected error occurred: " + error.message);
