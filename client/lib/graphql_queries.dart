@@ -148,6 +148,7 @@ query(\$accountNumber: String!){
   getAccountTransactions(n_account: \$accountNumber) {
     operation
     import
+    create_date
   }
 }
 """;

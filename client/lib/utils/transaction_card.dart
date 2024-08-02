@@ -8,30 +8,49 @@ class TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String formattedImport = transaction.import.toStringAsFixed(2);
+    IconData icon;
+    Color iconColor;
+    String sign;
+
+    // Determina el icono y color basado en la operación
+    if (transaction.operation.toLowerCase() == 'add') {
+      icon = Icons.monetization_on; // Ícono para cobrar (añadir)
+      iconColor = Colors.green;
+      sign = '+';
+    } else if (transaction.operation.toLowerCase() == 'subtract') {
+      icon = Icons.payment; // Ícono para pagar (restar)
+      iconColor = Colors.red;
+      sign = '-';
+    } else {
+      icon = Icons.help; // Ícono de ayuda en caso de operación desconocida
+      iconColor = Colors.grey;
+      sign = '';
+    }
+
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       elevation: 5,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            Icon(icon, color: iconColor), // Icono de la transacción
+            SizedBox(width: 16.0), // Espaciado entre el icono y el texto
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    transaction.operation,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    overflow: TextOverflow.ellipsis,
+                    transaction.createDate,
+                    style: Theme.of(context).textTheme.headlineSmall, // Fecha en un tamaño más pequeño
                   ),
-                  SizedBox(height: 4.0),
+                  SizedBox(height: 8.0), // Espaciado entre la fecha y el resto
                   Text(
-                    'Importe: ${transaction.import.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    '$sign${formattedImport}',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-
-
                 ],
               ),
             ),

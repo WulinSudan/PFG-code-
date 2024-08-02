@@ -4,13 +4,14 @@ import { ITransaction, Transaction } from '../model/transaction';
 export const transactionResolvers = {
   Query: {
     // Aquí puedes definir tus resolvers de consulta
-    getTransactions: async (): Promise<ITransaction[]> => {
+    getTransactions : async (): Promise<ITransaction[]> => {
       try {
-        const transactions = await Transaction.find();
+        // Ordena las transacciones por fecha de creación en orden descendente
+        const transactions = await Transaction.find().sort({ createDate: -1 });
         return transactions;
       } catch (error) {
-        console.error('Error fetching transaction:', error);
-        throw new Error('Error fetching transaction: ');
+        console.error('Error fetching transactions:', error);
+        throw new Error('Error fetching transactions');
       }
     },
 
@@ -25,12 +26,11 @@ export const transactionResolvers = {
          throw new Error('Account not found');
        }
 
-      const now = new Date(); 
       // Crea y guarda la nueva transacción
       const transaction = new Transaction({
         operation,
         import: importAmount,
-        //create_date: now,
+        create_date: new Date(),
       });
       const savedTransaction = await transaction.save();
 

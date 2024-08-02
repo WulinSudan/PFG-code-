@@ -69,15 +69,15 @@ Future<void> processQrPayment(
       // Verificar si el QR está habilitado antes de llamar a doQr
       bool enable = await checkEnable(accessToken, qrText);
       if (enable) {
-        success = await doQr(accessToken, origen, destino, importe);
+        success = await doQr(accessToken, destino, origen, importe);
         print('doQr completado con éxito: $success');
         print("Estoy en chargeGestion...................");
 
         // Deshabilitar el QR solo si la transferencia fue exitosa
         if (success) {
           print("Estoy en la funcion paymentGestion");
-          await addTransaction(accessToken, accountNumber, "add", importe);
-          await addTransaction(accessToken, origen, "subtract", importe);
+          await addTransaction(accessToken, accountNumber, "subtract", importe);
+          await addTransaction(accessToken, origen, "add", importe);
           await setQrUsed(accessToken, qrText);
         }
       } else {

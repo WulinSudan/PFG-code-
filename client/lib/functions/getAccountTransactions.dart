@@ -1,4 +1,3 @@
-// functions/getAccountTransactions.dart
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
@@ -26,8 +25,13 @@ Future<List<Transaction>> getAccountTransactions(String accessToken, String acco
     return [];
   }
 
-  return transactionsJson.map((json) {
+  List<Transaction> transactions = transactionsJson.map((json) {
     print('Datos de transacción: $json'); // Imprime cada transacción
     return Transaction.fromJson(json as Map<String, dynamic>);
   }).toList();
+
+  // Ordena las transacciones en orden descendente por fecha de creación
+  transactions.sort((a, b) => b.createDate.compareTo(a.createDate));
+
+  return transactions;
 }

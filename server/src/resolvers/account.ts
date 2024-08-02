@@ -71,7 +71,7 @@ export const accountResolvers = {
         // Filtrar transacciones que tienen campos no nulos
         const validTransactions = transactions.filter(transaction => 
           transaction.operation !== null && 
-          //transaction.create_date !== undefined && 
+          transaction.create_date !== undefined && 
           transaction.import !== undefined
         );
     
