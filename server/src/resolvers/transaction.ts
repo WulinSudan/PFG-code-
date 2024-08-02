@@ -30,7 +30,7 @@ export const transactionResolvers = {
       const transaction = new Transaction({
         operation,
         import: importAmount,
-        create_date: now,
+        //create_date: now,
       });
       const savedTransaction = await transaction.save();
 

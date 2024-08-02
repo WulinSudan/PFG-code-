@@ -143,6 +143,15 @@ mutation(\$input: TransactionInput!) {
 """;
 
 
+const String getAccountTransactionsQuery = """
+query(\$accountNumber: String!){
+  getAccountTransactions(n_account: \$accountNumber) {
+    operation
+    import
+  }
+}
+""";
+
 
 
 

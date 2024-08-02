@@ -3,8 +3,11 @@ import 'account.dart';
 import 'account_card.dart';
 import '../functions/fetchUserDate.dart';
 import '../functions/addAccount.dart';
+import '../functions/getAccountTransactions.dart';
 import '../dialogs/logoutDialog.dart';
 import '../dialogs/showDeletedConfirmationDialog.dart';
+import '../utils/transaction_card.dart'; // Asegúrate de que TransactionCard esté importado
+import '../utils/transaction.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -19,6 +22,7 @@ class _MainPageState extends State<MainPage> {
   String? userName;
   String? dni;
   List<Account> accounts = [];
+  List<Transaction> transactions = [];
   int? selectedAccountIndex;
   bool isCreatingAccount = false;
 
@@ -44,10 +48,22 @@ class _MainPageState extends State<MainPage> {
     print('Cuentas actualizadas: $accounts');
   }
 
-  void _onAccountSelected(int index) {
+  void _onAccountSelected(int index) async {
     setState(() {
       selectedAccountIndex = index;
     });
+
+    if (selectedAccountIndex != null) {
+      final accountNumber = accounts[selectedAccountIndex!].numberAccount;
+      try {
+        final fetchedTransactions = await getAccountTransactions(widget.accessToken, accountNumber);
+        setState(() {
+          transactions = fetchedTransactions;
+        });
+      } catch (e) {
+        print('Error al obtener transacciones: $e');
+      }
+    }
   }
 
   @override
@@ -124,9 +140,9 @@ class _MainPageState extends State<MainPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 16.0), // Ajusta el valor según sea necesario
+            padding: const EdgeInsets.only(top: 16.0),
             child: Container(
-              height: 150.0, // Ajusta la altura según sea necesario
+              height: 150.0,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: accounts.length,
@@ -137,7 +153,7 @@ class _MainPageState extends State<MainPage> {
                       _onAccountSelected(index);
                     },
                     child: Container(
-                      width: 150.0, // Ajusta el ancho según sea necesario
+                      width: 150.0,
                       margin: EdgeInsets.symmetric(horizontal: 8.0),
                       decoration: BoxDecoration(
                         color: selectedAccountIndex == index ? Colors.blue : Colors.transparent,
@@ -158,12 +174,9 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           Expanded(
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              child: ListView(
-                // Lista de otros widgets o contenido adicional aquí
-              ),
-            ),
+            child: selectedAccountIndex != null
+                ? TransactionsList(transactions: transactions)
+                : Center(child: Text('Selecciona una cuenta')),
           ),
         ],
       ),
@@ -235,6 +248,25 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class TransactionsList extends StatelessWidget {
+  final List<Transaction> transactions;
+
+  const TransactionsList({Key? key, required this.transactions}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return transactions.isEmpty
+        ? Center(child: Text('No hay transacciones disponibles', style: TextStyle(fontSize: 16, color: Colors.grey)))
+        : ListView.builder(
+      itemCount: transactions.length,
+      itemBuilder: (context, index) {
+        final transaction = transactions[index];
+        return TransactionCard(transaction: transaction);
+      },
     );
   }
 }

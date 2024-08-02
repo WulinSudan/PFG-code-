@@ -54,10 +54,10 @@ async function findAccount(accountNumber: string): Promise<IAccount | null> {
 export const accountResolvers = {
   Query: {
 
-    getAccountTransactions: async (_root: any, { account_number }: { account_number: string }) => {
+    getAccountTransactions: async (_root: any, { n_account }: { n_account: string }) => {
       try {
         // Buscar la cuenta por su número de cuenta
-        const account = await Account.findOne({ account_number });
+        const account = await Account.findOne({ number_account: n_account });
         if (!account) {
           throw new Error('Account not found');
         }
@@ -71,7 +71,7 @@ export const accountResolvers = {
         // Filtrar transacciones que tienen campos no nulos
         const validTransactions = transactions.filter(transaction => 
           transaction.operation !== null && 
-          transaction.create_date !== undefined && 
+          //transaction.create_date !== undefined && 
           transaction.import !== undefined
         );
     

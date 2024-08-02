@@ -15,7 +15,7 @@
     getAllAccounts:[Account]
     getUserAccountCount(dni: String!): Int!
     getUserAccountsInfoByDni(dni: String!): [Account]
-    getAccountTransactions(accountNumber:String!):[Transaction]
+    getAccountTransactions(n_account:String!):[Transaction]
     getTransactions:[Transaction]
     findAccount(accountNumber:String!):Account
      
@@ -67,7 +67,6 @@
 type Transaction {
   operation: String!
   import: Float!
-  create_date: String!
 }
 
 
