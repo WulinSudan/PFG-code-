@@ -28,6 +28,7 @@ export const transactionResolvers = {
 
       // Crea y guarda la nueva transacción
       const transaction = new Transaction({
+        balance: account.balance,
         operation,
         import: importAmount,
         create_date: new Date(),

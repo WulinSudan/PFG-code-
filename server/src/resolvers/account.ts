@@ -54,6 +54,22 @@ async function findAccount(accountNumber: string): Promise<IAccount | null> {
 export const accountResolvers = {
   Query: {
 
+    getAccountBalance : async (_root: any, {accountNumber}: {accountNumber: String}) =>{
+      
+      const account = await Account.findOne({ number_account: accountNumber });
+
+      return account?.balance;
+
+    },
+
+    getMaxPayDay: async (_root: any, {accountNumber}: {accountNumber: String}) =>{
+      
+      const account = await Account.findOne({ number_account: accountNumber });
+
+      return account?.maximum_amount_day;
+
+    },
+
     getAccountTransactions: async (_root: any, { n_account }: { n_account: string }) => {
       try {
         // Buscar la cuenta por su número de cuenta
@@ -122,6 +138,8 @@ export const accountResolvers = {
           owner_name: account.owner_name,
           balance: account.balance,
           active: account.active,
+          maximum_amount_day: account.maximum_amount_day,
+          maximum_amount_once: account.maximum_amount_once,
         };
       } catch (error) {
         console.error('Error al buscar la cuenta:', error);
@@ -192,6 +210,7 @@ export const accountResolvers = {
           active: true,
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
+          maximum_amount_day:500,
           description:"cuenta nomina",
         });
 
@@ -238,6 +257,7 @@ export const accountResolvers = {
           active: true,
           key_to_pay:"1234567890123456",
           maximum_amount_once:50,
+          maximum_amount_day:500,
           description:"cuenta nomina",
         });
   

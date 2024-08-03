@@ -16,7 +16,8 @@ class AccountCard extends StatelessWidget {
           children: [
             Text('Saldo: ${account.balance}'),
             Text('Activa: ${account.active}'),
-            Text('max pay: ${account.maxPay}')
+            Text('max pay: ${account.maxPay}'),
+            Text('max pay day: ${account.maxPayDay}'),
           ],
         ),
       ),

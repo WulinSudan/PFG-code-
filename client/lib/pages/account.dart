@@ -5,7 +5,8 @@ class Account {
   final double balance;
   final bool active;
   bool isSelected; // Nuevo campo para indicar si la cuenta está seleccionada
-  final double maxPay; // Cambiado para ser un entero
+  final double maxPay;
+  final double maxPayDay;
 
   Account({
     required this.ownerDni,
@@ -15,6 +16,7 @@ class Account {
     required this.active,
     this.isSelected = false, // Por defecto, la cuenta no está seleccionada
     required this.maxPay,
+    required this.maxPayDay,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
@@ -25,7 +27,9 @@ class Account {
       numberAccount: json['number_account'] as String? ?? '', // Proporciona un valor predeterminado
       balance: (json['balance'] as num?)?.toDouble() ?? 0.0, // Proporciona un valor predeterminado
       active: json['active'] as bool? ?? false, // Proporciona un valor predeterminado
+      isSelected: json['is_selected'] as bool? ?? false, // Añadido para manejar el nuevo campo
       maxPay: (json['maximum_amount_once'] as num?)?.toDouble() ?? 0.0,
+      maxPayDay: (json['maximum_amount_day'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -36,7 +40,9 @@ class Account {
       'number_account': numberAccount,
       'balance': balance,
       'active': active,
+      'is_selected': isSelected, // Añadido para manejar el nuevo campo
       'maximum_amount_once': maxPay,
+      'maximum_amount_day': maxPayDay,
     };
   }
 }

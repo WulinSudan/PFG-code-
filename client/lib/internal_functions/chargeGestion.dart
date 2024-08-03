@@ -4,6 +4,7 @@ import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea corre
 import '../dialogs/logoutDialog.dart';
 import '../dialogs/confirmationDialog.dart';
 import '../functions/addTransaction.dart';
+import '../functions/getAccountBalance.dart';
 
 Future<void> processQrCharge(
     BuildContext context,
@@ -33,14 +34,18 @@ Future<void> processQrCharge(
       double importe = amount;
       String typePart = 'Cargo';
 
+      double balanceOrigen = await getAccountBalance(accessToken, origen);
+      double balanceDestino = await getAccountBalance(accessToken, destino);
+
+
       print('Llamando a doQr con:');
       print('Origen: $origen');
       print('Destino: $destino');
       print('Importe: $importe');
 
       bool success = await doQr(accessToken, origen, destino, importe);
-      if (success) await addTransaction(accessToken, accountNumber, "add", importe);
-      if (success) await addTransaction(accessToken, origen, "subtract", importe);
+      if (success) await addTransaction(accessToken, accountNumber, "add", importe,balanceOrigen);
+      if (success) await addTransaction(accessToken, origen, "subtract", importe,balanceDestino);
       print('doQr completado con éxito: $success');
 
       WidgetsBinding.instance.addPostFrameCallback((_) {

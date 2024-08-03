@@ -175,9 +175,14 @@ class _MainPageState extends State<MainPage> {
           ),
           Expanded(
             child: selectedAccountIndex != null
-                ? TransactionsList(
-              transactions: transactions,
-              currentBalance: accounts[selectedAccountIndex!].balance, // Pasar el saldo actual
+                ? ListView.builder(
+              itemCount: transactions.length,
+              itemBuilder: (context, index) {
+                final transaction = transactions[index];
+                return TransactionCard(
+                  transaction: transaction,
+                );
+              },
             )
                 : Center(child: Text('Selecciona una cuenta')),
           ),
@@ -251,33 +256,6 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class TransactionsList extends StatelessWidget {
-  final List<Transaction> transactions;
-  final double currentBalance;
-
-  const TransactionsList({
-    Key? key,
-    required this.transactions,
-    required this.currentBalance, // Añadido: importe actual de la cuenta
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return transactions.isEmpty
-        ? Center(child: Text('No hay transacciones disponibles', style: TextStyle(fontSize: 16, color: Colors.grey)))
-        : ListView.builder(
-      itemCount: transactions.length,
-      itemBuilder: (context, index) {
-        final transaction = transactions[index];
-        return TransactionCard(
-          transaction: transaction,
-          currentBalance: currentBalance,
-        );
-      },
     );
   }
 }

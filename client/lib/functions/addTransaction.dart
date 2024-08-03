@@ -3,7 +3,7 @@ import '../graphql_client.dart';
 import '../graphql_queries.dart';
 import 'dart:async';
 
-Future<void> addTransaction(String accessToken, String accountNumber, String operation, double importAmount) async {
+Future<void> addTransaction(String accessToken, String accountNumber, String operation, double importAmount, balance) async {
 
   print("En la funcion add Transaction--------------------------");
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
@@ -17,6 +17,7 @@ Future<void> addTransaction(String accessToken, String accountNumber, String ope
             'operation': operation,
             'accountNumber': accountNumber,
             'import': importAmount,
+            'balance': balance,
           }
         },
       ),

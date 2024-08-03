@@ -9,7 +9,7 @@ import '../functions/doQr.dart';
 import '../functions/setQrUsed.dart';
 import '../dialogs/confirmationDialog.dart';
 import '../dialogs/getImportDialog.dart';
-
+import '../functions/getAccountBalance.dart';
 
 Future<void> processQrPayment(
     BuildContext context,
@@ -65,6 +65,10 @@ Future<void> processQrPayment(
       print('Origen: $origen');
       print('Destino: $destino');
       print('Importe: $importe');
+      double balanceOrigen = await getAccountBalance(accessToken, origen);
+      double balanceDestino = await getAccountBalance(accessToken, destino);
+
+
 
       // Verificar si el QR está habilitado antes de llamar a doQr
       bool enable = await checkEnable(accessToken, qrText);
@@ -76,8 +80,8 @@ Future<void> processQrPayment(
         // Deshabilitar el QR solo si la transferencia fue exitosa
         if (success) {
           print("Estoy en la funcion paymentGestion");
-          await addTransaction(accessToken, accountNumber, "subtract", importe);
-          await addTransaction(accessToken, origen, "add", importe);
+          await addTransaction(accessToken, accountNumber, "subtract", importe,balanceOrigen);
+          await addTransaction(accessToken, origen, "add", importe, balanceDestino);
           await setQrUsed(accessToken, qrText);
         }
       } else {

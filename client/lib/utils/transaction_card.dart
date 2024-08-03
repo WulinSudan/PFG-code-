@@ -40,7 +40,7 @@ class TransactionCard extends StatelessWidget {
                 children: [
                   SizedBox(height: 4.0),
                   Text(
-                    '${transaction.import >= 0 ? '+' : ''}${transaction.import.toStringAsFixed(2)}',
+                    '${transaction.operation == "add" ? '+' : ''}${transaction.import.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: color,
                     ),
@@ -48,6 +48,13 @@ class TransactionCard extends StatelessWidget {
                   SizedBox(height: 4.0),
                   Text(
                     transaction.getFormattedDate(),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(height: 4.0),
+                  Text(
+                    'Balance: ${transaction.balance.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontSize: 12,
                     ),

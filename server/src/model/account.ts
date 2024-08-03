@@ -10,6 +10,7 @@ interface IAccount extends Document {
   active: boolean;
   key_to_pay: string;
   maximum_amount_once: number;
+  maximum_amount_day: number;
   description: string;
   transactions: mongoose.Types.ObjectId[]; // Array de ObjectId
 }
@@ -39,6 +40,7 @@ const AccountSchema: Schema = new Schema({
   active: { type: Boolean, required: true },
   key_to_pay: { type: String, required: true },
   maximum_amount_once: { type: Number, required: true },
+  maximum_amount_day: { type: Number, required: true },
   description: { type: String, required: false },
   transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }], // Lista de referencias a transacciones
 });

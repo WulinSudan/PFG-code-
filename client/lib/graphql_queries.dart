@@ -138,6 +138,7 @@ mutation(\$input: TransactionInput!) {
        operation
        import
        create_date
+       balance
    } 
 }
 """;
@@ -149,10 +150,17 @@ query(\$accountNumber: String!){
     operation
     import
     create_date
+    balance
   }
 }
 """;
 
+
+const String getAccountBalanceQuery = """
+query(\$accountNumber: String!){
+  getAccountBalance(accountNumber: \$accountNumber)
+}
+""";
 
 
 

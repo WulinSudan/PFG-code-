@@ -4,11 +4,13 @@ class Transaction {
   final String operation;
   final double import;
   final DateTime createDate; // Cambiado a DateTime para facilitar el formateo
+  final double balance;
 
   Transaction({
     required this.operation,
     required this.import,
     required this.createDate,
+    required this.balance,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -16,6 +18,7 @@ class Transaction {
       operation: json['operation'] as String? ?? '',
       import: (json['import'] as num? ?? 0).toDouble(),
       createDate: DateTime.parse(json['create_date'] as String),
+      balance: (json['balance'] as num? ?? 0).toDouble(),
     );
   }
 
