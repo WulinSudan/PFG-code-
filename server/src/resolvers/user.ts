@@ -42,13 +42,9 @@ interface AddAccountInput {
     active: boolean;
   }
   
-  interface AddAccountArgs {
-    input: AddAccountInput;
-  }
 
 export const userResolvers = {
     Query: {
-
 
         getUserAccountCount: async (_root: any, { dni }: { dni: string }) => {
             try {
@@ -85,33 +81,6 @@ export const userResolvers = {
                 throw new Error("User not found");
             }
             return user;
-        },
-
-        getUserAccountsInfoByDni: async (_root: any, { dni }: { dni: string }) => {
-          try {
-            // Buscar al usuario por su DNI
-            const user = await User.findOne({ dni });
-            if (!user) {
-              throw new Error('User not found');
-            }
-        
-            // Obtener los IDs de las cuentas asociadas al usuario
-            const accountIds = user.accounts;
-        
-            // Buscar las cuentas por sus IDs
-            const accounts = await Account.find({ _id: { $in: accountIds } });
-
-            
-        
-            // Filtrar cuentas que tienen owner_name no nulo
-            const validAccounts = accounts.filter(account => account.owner_name !== null && account.owner_name !== undefined);
-        
-            // Devolver la información detallada de las cuentas válidas
-            return validAccounts;
-          } catch (error) {
-            console.error('Error fetching user accounts info by DNI:', error);
-            throw new Error('Error fetching user accounts info by DNI');
-          }
         },
         
         

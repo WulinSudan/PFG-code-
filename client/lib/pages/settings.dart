@@ -1,3 +1,5 @@
+import 'package:client/dialogs/getDescriptionDialog.dart';
+import 'package:client/functions/setAccountDescription.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
@@ -9,17 +11,18 @@ import '../dialogs/showDeletedConfirmationDialog.dart'; // Asegúrate de que est
 import '../dialogs/showHelloDialog.dart'; // Asegúrate de que esta ruta sea correcta
 import '../dialogs/getImportDialog.dart'; // Asegúrate de que esta ruta sea correcta
 import '../functions/setNewMax.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/confirmationDialog.dart';
-class SetMaxPayImport extends StatefulWidget {
+import '../dialogs/confirmationDialog.dart'; // Asegúrate de que esta ruta sea correcta
+
+class Settings extends StatefulWidget {
   final String accessToken;
 
-  SetMaxPayImport({required this.accessToken});
+  Settings({required this.accessToken});
 
   @override
-  State<SetMaxPayImport> createState() => SetMaxPayImportState();
+  State<Settings> createState() => _SettingsState();
 }
 
-class SetMaxPayImportState extends State<SetMaxPayImport> {
+class _SettingsState extends State<Settings> {
   String? userName;
   String? dni;
   List<Account> accounts = [];
@@ -57,8 +60,7 @@ class SetMaxPayImportState extends State<SetMaxPayImport> {
     });
   }
 
-  void _onConfigureMaxPay() async {
-    // Lógica para configurar el maxPay por vez
+  Future<void> _onConfigureMaxPay() async {
     final selectedAccount = accounts[selectedAccountIndex!];
     print('Configurar maxPay para la cuenta ${selectedAccount.numberAccount}');
 
@@ -67,9 +69,7 @@ class SetMaxPayImportState extends State<SetMaxPayImport> {
 
     // Verificar si se obtuvo un importe válido
     if (import != null) {
-      // Lógica para usar el importe ingresado
       print('Importe ingresado: $import');
-
       try {
         await setNewMax(widget.accessToken, selectedAccount.numberAccount, import);
         print('MaxPay configurado exitosamente.');
@@ -85,10 +85,29 @@ class SetMaxPayImportState extends State<SetMaxPayImport> {
     }
   }
 
-  void _onConfigureMaxPayDay() {
-    // Lógica para configurar el maxPay diario
+  Future<void> _onConfigureDescription() async {
     final selectedAccount = accounts[selectedAccountIndex!];
-    print('Configurar maxPay diario para la cuenta ${selectedAccount.numberAccount}');
+    print('Configurar descripción para la cuenta ${selectedAccount.numberAccount}');
+
+    // Llamada asincrónica para obtener la descripción
+    final description = await getDescriptionDialog(context);
+
+    // Verificar si se obtuvo una descripción válida
+    if (description != null) {
+      print('Descripción ingresada: $description');
+      try {
+        await setAccountDescription(widget.accessToken, selectedAccount.numberAccount, description);
+        print('Descripción configurada exitosamente.');
+
+        // Actualizar los datos después de configurar la descripción
+        await fetchData(); // Actualiza los datos
+
+      } catch (e) {
+        print('Error al configurar la descripción: $e');
+      }
+    } else {
+      print('No se ingresó una descripción válida.');
+    }
   }
 
   @override
@@ -138,8 +157,8 @@ class SetMaxPayImportState extends State<SetMaxPayImport> {
                 SizedBox(width: 16.0), // Espacio entre los botones
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: selectedAccountIndex != null ? _onConfigureMaxPayDay : null,
-                    child: Text('Configurar maxPay diario'),
+                    onPressed: selectedAccountIndex != null ? _onConfigureDescription : null,
+                    child: Text('Configurar Descripción'),
                   ),
                 ),
               ],

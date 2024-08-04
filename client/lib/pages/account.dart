@@ -7,6 +7,7 @@ class Account {
   bool isSelected; // Nuevo campo para indicar si la cuenta está seleccionada
   final double maxPay;
   final double maxPayDay;
+  final String description; // Cambiado a String
 
   Account({
     required this.ownerDni,
@@ -17,19 +18,20 @@ class Account {
     this.isSelected = false, // Por defecto, la cuenta no está seleccionada
     required this.maxPay,
     required this.maxPayDay,
+    required this.description, // Cambiado a String
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
-    // Utiliza el operador de asignación condicional para manejar valores nulos
     return Account(
-      ownerDni: json['owner_dni'] as String? ?? '', // Proporciona un valor predeterminado
-      ownerName: json['owner_name'] as String? ?? '', // Proporciona un valor predeterminado
-      numberAccount: json['number_account'] as String? ?? '', // Proporciona un valor predeterminado
-      balance: (json['balance'] as num?)?.toDouble() ?? 0.0, // Proporciona un valor predeterminado
-      active: json['active'] as bool? ?? false, // Proporciona un valor predeterminado
-      isSelected: json['is_selected'] as bool? ?? false, // Añadido para manejar el nuevo campo
+      ownerDni: json['owner_dni'] as String? ?? '',
+      ownerName: json['owner_name'] as String? ?? '',
+      numberAccount: json['number_account'] as String? ?? '',
+      balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
+      active: json['active'] as bool? ?? false,
+      isSelected: json['is_selected'] as bool? ?? false,
       maxPay: (json['maximum_amount_once'] as num?)?.toDouble() ?? 0.0,
       maxPayDay: (json['maximum_amount_day'] as num?)?.toDouble() ?? 0.0,
+      description: json['description'] as String? ?? '', // Cambiado a String
     );
   }
 
@@ -40,9 +42,10 @@ class Account {
       'number_account': numberAccount,
       'balance': balance,
       'active': active,
-      'is_selected': isSelected, // Añadido para manejar el nuevo campo
+      'is_selected': isSelected,
       'maximum_amount_once': maxPay,
       'maximum_amount_day': maxPayDay,
+      'description': description, // Cambiado a String
     };
   }
 }

@@ -33,10 +33,13 @@
 
   type Mutation {
 
+   
+
     addTransaction(input: TransactionInput!): Transaction!
     
     setQrUsed(qrtext:String!): Boolean!
     setMaxPayImport(accountNumber:String!, maxImport:Float!): Float!
+    setAccountDescription(accountNumber:String!,description:String!): String!
 
     logoutUser: LogoutResponse!
 

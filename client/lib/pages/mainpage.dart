@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
 import '../functions/fetchUserDate.dart';
@@ -6,8 +7,9 @@ import '../functions/addAccount.dart';
 import '../functions/getAccountTransactions.dart';
 import '../dialogs/logoutDialog.dart';
 import '../dialogs/showDeletedConfirmationDialog.dart';
-import '../utils/transaction_card.dart'; // Asegúrate de que TransactionCard esté importado
+import '../utils/transaction_card.dart';
 import '../utils/transaction.dart';
+import 'color_selection_page.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -25,11 +27,47 @@ class _MainPageState extends State<MainPage> {
   List<Transaction> transactions = [];
   int? selectedAccountIndex;
   bool isCreatingAccount = false;
+  Color appBarColor = Colors.redAccent;
+  Color navigationDrawerColor = Colors.redAccent;
 
   @override
   void initState() {
     super.initState();
+    _loadAppBarColors();
     fetchData();
+  }
+
+  Future<void> _loadAppBarColors() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedColor = prefs.getString('appBarColor') ?? '#FF0000'; // Valor por defecto en hexadecimal
+    final savedNavigationColor = prefs.getString('navigationDrawerColor') ?? '#FF0000';
+    setState(() {
+      appBarColor = Color(int.parse(savedColor, radix: 16) + 0xFF000000); // Convertir a ARGB
+      navigationDrawerColor = Color(int.parse(savedNavigationColor, radix: 16) + 0xFF000000); // Convertir a ARGB
+    });
+  }
+
+  Future<void> _saveAppBarColors(Color appBarColor, Color navigationDrawerColor) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('appBarColor', appBarColor.value.toRadixString(16).toUpperCase());
+    await prefs.setString('navigationDrawerColor', navigationDrawerColor.value.toRadixString(16).toUpperCase());
+  }
+
+  void _navigateToColorSelection() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ColorSelectionPage(
+          onColorSelected: (color) {
+            setState(() {
+              appBarColor = color;
+              navigationDrawerColor = color;
+            });
+            _saveAppBarColors(appBarColor, navigationDrawerColor);
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> fetchData() async {
@@ -50,7 +88,12 @@ class _MainPageState extends State<MainPage> {
 
   void _onAccountSelected(int index) async {
     setState(() {
-      selectedAccountIndex = index;
+      // Toggle the selection state
+      if (selectedAccountIndex == index) {
+        selectedAccountIndex = null; // Deselect if already selected
+      } else {
+        selectedAccountIndex = index; // Select new account
+      }
     });
 
     if (selectedAccountIndex != null) {
@@ -73,8 +116,12 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(
         title: Text('Mis Cuentas - ${userName ?? ''}'),
         centerTitle: true,
-        backgroundColor: Colors.redAccent,
+        backgroundColor: appBarColor,
         actions: [
+          IconButton(
+            icon: Icon(Icons.color_lens),
+            onPressed: _navigateToColorSelection,
+          ),
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () async {
@@ -114,25 +161,23 @@ class _MainPageState extends State<MainPage> {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: navigationDrawerColor, // Cambiar el color del Drawer
               ),
-              child: Text('Navegación'),
+              child: Text('Navegación', style: TextStyle(color: Colors.white)),
             ),
             ListTile(
-              title: Text('Modificar el máximo importe de pago'),
+              title: Text('Settings'),
               onTap: () {
                 Navigator.pushNamed(
                   context,
-                  '/setMaxPayImport',
+                  '/settings',
                   arguments: widget.accessToken,
                 );
               },
             ),
             ListTile(
               title: Text('Cambiar color de fondo'),
-              onTap: () {
-                // Implementa la navegación deseada
-              },
+              onTap: _navigateToColorSelection,
             ),
           ],
         ),

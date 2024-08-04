@@ -42,6 +42,7 @@ const String getAccountsQuery = """
       balance
       active
       maximum_amount_once
+      description
     }
   }
 """;
@@ -162,6 +163,12 @@ query(\$accountNumber: String!){
 }
 """;
 
+
+const String setAccountDescriptionMutation = """
+mutation(\$accountNumber: String!, \$description: String!){
+  setAccountDescription(accountNumber: \$accountNumber, description: \$description)
+}
+""";
 
 
 
