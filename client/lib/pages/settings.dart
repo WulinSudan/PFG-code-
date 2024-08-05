@@ -1,17 +1,12 @@
-import 'package:client/dialogs/getDescriptionDialog.dart';
-import 'package:client/functions/setAccountDescription.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card2.dart';
 import '../functions/fetchUserDate.dart'; // Asegúrate de que esta ruta sea correcta
-import '../functions/addAccount.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/logoutDialog.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/showDeletedConfirmationDialog.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/showHelloDialog.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/getImportDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../functions/setAccountDescription.dart'; // Asegúrate de que esta ruta sea correcta
 import '../functions/setNewMax.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/confirmationDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../dialogs/getDescriptionDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../dialogs/getImportDialog.dart'; // Asegúrate de que esta ruta sea correcta
 
 class Settings extends StatefulWidget {
   final String accessToken;
@@ -27,11 +22,21 @@ class _SettingsState extends State<Settings> {
   String? dni;
   List<Account> accounts = [];
   int? selectedAccountIndex; // Índice de la cuenta seleccionada
+  Color appBarColor = Colors.redAccent; // Color por defecto
 
   @override
   void initState() {
     super.initState();
+    _loadAppBarColor();
     fetchData();
+  }
+
+  Future<void> _loadAppBarColor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedColor = prefs.getString('appBarColor') ?? '#FF0000'; // Valor por defecto en hexadecimal
+    setState(() {
+      appBarColor = Color(int.parse(savedColor, radix: 16) + 0xFF000000); // Convertir a ARGB
+    });
   }
 
   Future<void> fetchData() async {
@@ -117,7 +122,7 @@ class _SettingsState extends State<Settings> {
       appBar: AppBar(
         title: Text('Mis Cuentas - ${userName ?? ''}'),
         centerTitle: true,
-        backgroundColor: Colors.redAccent,
+        backgroundColor: appBarColor,
       ),
       body: Column(
         children: [
