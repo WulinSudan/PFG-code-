@@ -1,7 +1,9 @@
-const String allUsersGraphql = """
-  query allUsers {
-    allUsers {
+const String getUsersQuery = """
+  query getUsers {
+    getUsers {
       name
+      dni
+      active
     }
   }
 """;

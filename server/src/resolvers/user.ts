@@ -6,6 +6,8 @@ import { User } from "../model/user";
 import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
 import { Request, Response } from 'express';
+import { getActiveResourcesInfo } from "process";
+import { accountResolvers } from "./account";
 
 
 
@@ -62,12 +64,21 @@ export const userResolvers = {
             }
           },
 
-        allUsers: async () => {
-            const users = await User.find();
-            return users.map((user) => {
-                return{name:user.name};
-            });
-        },
+          getUsers: async (): Promise<{ name: string; dni: string }[]> => {
+            try {
+              // Obtener todos los usuarios, excluyendo al usuario con nombre 'admin'
+              const users = await User.find({ name: { $ne: 'Admin' } }).exec(); 
+      
+              // Mapear los resultados a un formato específico
+              return users.map(user => ({
+                name: user.name,
+                dni: user.dni,
+                active: user.active,
+              }));
+            } catch (error) {
+              throw new Error(`Error al obtener los usuarios`);
+            }
+          },
 
         
         me: async (_root: any, _args: any, context: Context) => {
@@ -101,6 +112,7 @@ export const userResolvers = {
       },
 
         removeUser: async (_root: any, args: any) => {
+            // no se puede esborrar el rol admin
             const deletionResult = await User.deleteOne({ name: args.name });
             return deletionResult.deletedCount;
         },
@@ -112,6 +124,7 @@ export const userResolvers = {
                 const userInput = {
                     dni:dni,
                     name: name,
+                    active: true,
                     password: await hashPassword(password),
                 };
 
@@ -124,10 +137,10 @@ export const userResolvers = {
                   number_account: generateUniqueAccountNumber(), // Generate a unique account number
                   balance: 10.5, // Initial balance
                   active: true,
-                  key_to_charge: "1234567890123456",
                   key_to_pay: "1234567890123456",
                   maximum_amount_once: 50,
                   maximum_amount_day: 500,
+                  description:"cuenta nomina",
               });
 
                 // Save the new account
@@ -146,13 +159,14 @@ export const userResolvers = {
             }
         },
 
-        addNewAdmin: async (_root: any, { input: {dni,name, password,role} }: any ) => {
+        addNewAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
           try {
               const userInput = {
                   dni:dni,
                   name: name,
                   password: await hashPassword(password),
-                  role: role,
+                  active: true,
+                  role: "admin",
               };
 
               const user = new User(userInput);

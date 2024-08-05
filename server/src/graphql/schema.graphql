@@ -7,7 +7,7 @@
     allPersons: [Person]!
     findPerson(name: String!): Person
 
-    allUsers: [User]!
+    getUsers: [User]!
     allAccount: [Account]!
     countAccount: Int!
     user(dni: String!): User
@@ -49,7 +49,7 @@
     signUp(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
     removeUser(name: String!): Int!
-    addNewAdmin(input: AddNewAdminInput!): User!
+    addNewAdmin(input: AddNewAdminInput!): Admin!
 
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person!
     editNumber(name: String!, phone: Int!): Person
@@ -121,11 +121,20 @@ type Transaction {
     
   
 
+   type Admin {
+    dni: String!
+    name: String!
+    password: String!
+    active: Boolean!
+  }
+
+
 
   type User {
     dni: String!
     name: String!
     password: String!
+    active: Boolean!
     accounts: [Account]
   }
 
@@ -176,7 +185,6 @@ type Transaction {
   dni: String!
   name: String!
   password: String!
-  role: String
 }
 
   input TransactionInput {

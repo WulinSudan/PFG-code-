@@ -6,6 +6,7 @@ interface IUser extends Document {
   name: string;
   password: string;
   role: string;
+  active: Boolean;
   accounts: mongoose.Types.ObjectId[]; // Array de referencias a objetos de tipo Account
 }
 
@@ -26,6 +27,7 @@ const UserSchema: Schema = new Schema({
   name: { type: String, required: true },
   password: { type: String, required: true },
   role: { type: String, default: "client" },
+  active: { type: Boolean, default: true },
   accounts: [{ type: Schema.Types.ObjectId, ref: 'Account' }],
 });
 

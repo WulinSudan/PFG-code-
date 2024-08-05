@@ -67,11 +67,23 @@ class _LoginState extends State<Login> {
                 } else {
                   // Autenticación exitosa, obtener el token de acceso y navegar a la siguiente pantalla
                   final String accessToken = result.data!['loginUser']['access_token'];
+
                   print(accessToken);
-                  Navigator.pushNamed(
-                      context,
-                      '/mainpage',
-                      arguments: accessToken);
+
+                  if(username!="Admin"){
+                    Navigator.pushNamed(
+                        context,
+                        '/mainpage',
+                        arguments: accessToken);
+                  }
+                  else {
+                    print("---------------------En un administrador");
+                    Navigator.pushNamed(
+                        context,
+                        '/admin',
+                        arguments: accessToken);
+                  }
+
                 }
               },
               child: Text('Login'),

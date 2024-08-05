@@ -42,6 +42,7 @@ const UserSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, default: "client" },
+    active: { type: Boolean, default: true },
     accounts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Account' }],
 });
 // User Model
