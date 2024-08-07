@@ -84,6 +84,15 @@ export const accountResolvers = {
         throw new Error(`Error fetching user accounts info by DNI`);
       }
     },
+
+    
+    getAccountStatus : async (_root: any, {accountNumber}: {accountNumber: String}) =>{
+      
+      const account = await Account.findOne({ number_account: accountNumber });
+
+      return account?.active;
+
+    },
     
 
 
@@ -232,6 +241,34 @@ export const accountResolvers = {
       }
 
     },
+
+    changeAccountStatus: async (_root: any, args: { accountNumber: string }, context: Context): Promise<boolean> => {
+      try {
+        // Buscar la cuenta por número
+        const account = await Account.findOne({ number_account: args.accountNumber });
+        if (!account) {
+          throw new Error("Account does not exist");
+        }
+    
+        // Alternar el estado de la cuenta
+        const newStatus = !account.active; // Cambia el estado actual
+        await Account.updateOne(
+          { number_account: args.accountNumber },
+          { $set: { active: newStatus } }
+        );
+    
+        // Verificar si la cuenta ha sido actualizada
+        const updatedAccount = await Account.findOne({ number_account: args.accountNumber });
+        return updatedAccount ? updatedAccount.active : false;
+      } catch (error) {
+        console.error("Error setting account active status:", error);
+        throw new Error("Failed to update account status");
+      }
+    },
+    
+    
+
+  
 
     // Resolver de GraphQL para establecer el máximo importe de pago
     setMaxPayImport : async (_root: any, { accountNumber, maxImport }: { accountNumber: string, maxImport: number }): Promise<number> => {

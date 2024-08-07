@@ -29,11 +29,15 @@
 
     getAccountBalance(accountNumber:String!):Float!
 
+    getAccountStatus(accountNumber:String!):Boolean!
+
   }
 
   type Mutation {
 
-   
+    changeUserStatus(dni:String!):Boolean!
+
+    changeAccountStatus(accountNumber:String!):Boolean!
 
     addTransaction(input: TransactionInput!): Transaction!
     

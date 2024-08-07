@@ -173,6 +173,28 @@ mutation(\$accountNumber: String!, \$description: String!){
 """;
 
 
+const String changeAccountStatusMutation = """
+mutation(\$accountNumber: String!){
+  changeAccountStatus(accountNumber: \$accountNumber)
+}
+""";
+
+
+const String changeUserStatusMutation = """
+mutation(\$dni: String!){
+  changeUserStatus(dni: \$dni)
+}
+""";
+
+const String getAccountStatusQuery = """
+query(\$accountNumber: String!){
+  getAccountStatus(accountNumber: ,\$accountNumber)
+}
+""";
+
+
+
+
 
 
 

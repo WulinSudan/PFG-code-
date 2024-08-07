@@ -6,7 +6,7 @@ import '../pages/account_card.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
-import '../functions/fetchUserDate.dart';
+import '../functions/fetchUserData.dart';
 import 'addAccount.dart';
 
 

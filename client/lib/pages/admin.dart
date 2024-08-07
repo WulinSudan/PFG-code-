@@ -4,6 +4,8 @@ import '../functions/getUsers.dart'; // Asegúrate de importar la función getUs
 import '../utils/user_card.dart';
 import '../dialogs/logoutDialog.dart';
 import '../dialogs/showAccountsDialog.dart'; // Asegúrate de importar la función para mostrar el diálogo
+import '../functions/changeUserStatus.dart'; // Asegúrate de importar la función para cambiar el estado del usuario
+import '../dialogs/confirmacionDialog2.dart';
 
 class AdminPage extends StatefulWidget {
   final String accessToken;
@@ -34,6 +36,31 @@ class _AdminPageState extends State<AdminPage> {
     if (_selectedUser != null) {
       // Muestra el diálogo con las cuentas del usuario seleccionado
       showAccountsDialog(context, widget.accessToken, _selectedUser!.dni);
+    } else {
+      // Muestra un mensaje si no hay usuario seleccionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor, selecciona un usuario primero.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onChangeUserStatus() async {
+    if (_selectedUser != null) {
+      try {
+        bool status = await changeUserStatus(widget.accessToken, _selectedUser!.dni);
+        await showConfirmationDialog2(context, _selectedUser!.name, status);
+        setState(() {
+          _futureUsers = getUsers(widget.accessToken); // Refresca la lista de usuarios
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cambiar el estado del usuario: $e'),
+          ),
+        );
+      }
     } else {
       // Muestra un mensaje si no hay usuario seleccionado
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,13 +121,37 @@ class _AdminPageState extends State<AdminPage> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _selectedUser != null ? _viewUserAccounts : null, // Desactiva el botón si no hay usuario seleccionado
-              child: Text('Ver sus cuentas'),
+          if (_selectedUser == null)
+            Expanded(
+              child: Center(
+                child: Text(
+                  'Selecciona una cuenta',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16.0),
+                ),
+              ),
             ),
-          ),
+          if (_selectedUser != null)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _viewUserAccounts,
+                      child: Text('Ver sus cuentas'),
+                    ),
+                  ),
+                  SizedBox(width: 16.0), // Espacio entre los botones
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _onChangeUserStatus,
+                      child: Text('Change Status'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card2.dart';
-import '../functions/fetchUserDate.dart'; // Asegúrate de que esta ruta sea correcta
+import '../functions/fetchUserData.dart'; // Asegúrate de que esta ruta sea correcta
 import '../functions/setAccountDescription.dart'; // Asegúrate de que esta ruta sea correcta
 import '../functions/setNewMax.dart'; // Asegúrate de que esta ruta sea correcta
 import '../dialogs/getDescriptionDialog.dart'; // Asegúrate de que esta ruta sea correcta

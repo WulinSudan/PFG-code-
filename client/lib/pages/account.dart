@@ -3,7 +3,7 @@ class Account {
   final String ownerName;
   final String numberAccount;
   final double balance;
-  final bool active;
+  bool active; // Ahora 'active' no es final, por lo que es mutable.
   bool isSelected; // Nuevo campo para indicar si la cuenta está seleccionada
   final double maxPay;
   final double maxPayDay;
@@ -14,11 +14,11 @@ class Account {
     required this.ownerName,
     required this.numberAccount,
     required this.balance,
-    required this.active,
+    required this.active, // Ya no es final, por lo que puede ser modificado
     this.isSelected = false, // Por defecto, la cuenta no está seleccionada
     required this.maxPay,
     required this.maxPayDay,
-    required this.description, // Cambiado a String
+    required this.description,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
@@ -31,7 +31,7 @@ class Account {
       isSelected: json['is_selected'] as bool? ?? false,
       maxPay: (json['maximum_amount_once'] as num?)?.toDouble() ?? 0.0,
       maxPayDay: (json['maximum_amount_day'] as num?)?.toDouble() ?? 0.0,
-      description: json['description'] as String? ?? '', // Cambiado a String
+      description: json['description'] as String? ?? '', // Asegúrate de que description sea un String
     );
   }
 
@@ -41,11 +41,11 @@ class Account {
       'owner_name': ownerName,
       'number_account': numberAccount,
       'balance': balance,
-      'active': active,
+      'active': active, // Ahora 'active' puede ser modificado
       'is_selected': isSelected,
       'maximum_amount_once': maxPay,
       'maximum_amount_day': maxPayDay,
-      'description': description, // Cambiado a String
+      'description': description,
     };
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
-import '../functions/fetchUserDate.dart';
+import '../functions/fetchUserData.dart'; // Corregido el nombre del archivo
 import '../functions/addAccount.dart';
 import '../functions/getAccountTransactions.dart';
 import '../dialogs/logoutDialog.dart';
@@ -10,6 +10,9 @@ import '../dialogs/showDeletedConfirmationDialog.dart';
 import '../utils/transaction_card.dart';
 import '../utils/transaction.dart';
 import 'color_selection_page.dart';
+import 'package:client/functions/changeAccountStatus.dart'; // Asegúrate de que esta importación sea correcta
+import 'package:client/functions/getAccountStatus.dart';
+import 'package:client/dialogs/confirmationOKdialog.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -88,11 +91,10 @@ class _MainPageState extends State<MainPage> {
 
   void _onAccountSelected(int index) async {
     setState(() {
-      // Toggle the selection state
       if (selectedAccountIndex == index) {
-        selectedAccountIndex = null; // Deselect if already selected
+        selectedAccountIndex = null; // Deseleccionar si ya está seleccionado
       } else {
-        selectedAccountIndex = index; // Select new account
+        selectedAccountIndex = index; // Seleccionar nueva cuenta
       }
     });
 
@@ -105,6 +107,24 @@ class _MainPageState extends State<MainPage> {
         });
       } catch (e) {
         print('Error al obtener transacciones: $e');
+      }
+    }
+  }
+
+  void _toggleAccountStatus() async {
+    if (selectedAccountIndex != null) {
+      final account = accounts[selectedAccountIndex!];
+      try {
+        // Cambia el estado de la cuenta en el servidor
+        bool status = await changeAccountStatus(widget.accessToken, account.numberAccount);
+
+        setState(() {
+          account.active = status; // Alternar el estado
+        });
+
+        showConfirmationOKDialog(context);
+      } catch (e) {
+        print('Error al cambiar el estado de la cuenta: $e');
       }
     }
   }
@@ -234,18 +254,38 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
       floatingActionButton: selectedAccountIndex != null
-          ? FloatingActionButton(
-        onPressed: () async {
-          await showDeleteConfirmationDialog(
-            context,
-            widget.accessToken,
-            accounts,
-            accounts[selectedAccountIndex!],
-          );
-        },
-        tooltip: 'Eliminar cuenta',
-        child: Icon(Icons.delete),
-        backgroundColor: Colors.red,
+          ? Stack(
+        children: [
+          Positioned(
+            bottom: 80.0,
+            right: 10.0,
+            child: FloatingActionButton(
+              onPressed: _toggleAccountStatus,
+              tooltip: 'Activar/Desactivar cuenta',
+              child: Icon(
+                accounts[selectedAccountIndex!].active ? Icons.lock : Icons.lock_open,
+              ),
+              backgroundColor: Colors.blue,
+            ),
+          ),
+          Positioned(
+            bottom: 10.0,
+            right: 10.0,
+            child: FloatingActionButton(
+              onPressed: () async {
+                await showDeleteConfirmationDialog(
+                  context,
+                  widget.accessToken,
+                  accounts,
+                  accounts[selectedAccountIndex!],
+                );
+              },
+              tooltip: 'Eliminar cuenta',
+              child: Icon(Icons.delete),
+              backgroundColor: Colors.red,
+            ),
+          ),
+        ],
       )
           : null,
       bottomNavigationBar: Padding(

@@ -98,6 +98,34 @@ export const userResolvers = {
     },
     Mutation: {
 
+      changeUserStatus: async (_root: any, args: { dni: string }, context: Context): Promise<boolean> => {
+        try {
+          // Buscar el usuario por DNI
+          const user = await User.findOne({ dni: args.dni });
+          if (!user) {
+            throw new Error("User does not exist");
+          }
+      
+          // Alternar el estado del usuario
+          const newStatus: boolean = !user.active; // Cambia el estado actual y asegura el tipo primitivo booleano
+          await User.updateOne(
+            { dni: args.dni },
+            { $set: { active: newStatus } }
+          );
+      
+          // Verificar si el usuario ha sido actualizado
+          const updatedUser = await User.findOne({ dni: args.dni });
+      
+          // Asegúrate de retornar un valor booleano
+          return updatedUser ? updatedUser.active === true : false; // Convierte explícitamente a booleano
+        } catch (error) {
+          console.error("Error setting user active status:", error);
+          throw new Error("Failed to update user status");
+        }
+      },
+      
+      
+
       logoutUser: async (_parent: any, _args: any, context: Context) => {
         try {
           // Aquí puedes manejar cualquier lógica adicional que necesites para el logout

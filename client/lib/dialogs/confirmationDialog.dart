@@ -7,7 +7,7 @@ Future<void> showConfirmationDialog(BuildContext context) async {
     barrierDismissible: false, // Evita que el diálogo se cierre al tocar fuera de él
     builder: (BuildContext context) {
       // Programa el cierre automático del diálogo después de 1 segundo
-      Timer(Duration(seconds: 1), () {
+      Timer(Duration(seconds: 2), () {
         Navigator.of(context).pop();
       });
 
