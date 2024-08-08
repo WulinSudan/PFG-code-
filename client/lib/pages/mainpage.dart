@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
 import 'account_card.dart';
-import '../functions/fetchUserData.dart'; // Corregido el nombre del archivo
+import '../functions/fetchUserData.dart';
 import '../functions/addAccount.dart';
 import '../functions/getAccountTransactions.dart';
 import '../dialogs/logoutDialog.dart';
@@ -10,7 +10,7 @@ import '../dialogs/showDeletedConfirmationDialog.dart';
 import '../utils/transaction_card.dart';
 import '../utils/transaction.dart';
 import 'color_selection_page.dart';
-import 'package:client/functions/changeAccountStatus.dart'; // Asegúrate de que esta importación sea correcta
+import 'package:client/functions/changeAccountStatus.dart';
 import 'package:client/functions/getAccountStatus.dart';
 import 'package:client/dialogs/confirmationOKdialog.dart';
 
@@ -98,7 +98,7 @@ class _MainPageState extends State<MainPage> {
       }
     });
 
-    if (selectedAccountIndex != null) {
+    if (selectedAccountIndex != null && selectedAccountIndex! < accounts.length) {
       final accountNumber = accounts[selectedAccountIndex!].numberAccount;
       try {
         final fetchedTransactions = await getAccountTransactions(widget.accessToken, accountNumber);
@@ -112,7 +112,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _toggleAccountStatus() async {
-    if (selectedAccountIndex != null) {
+    if (selectedAccountIndex != null && selectedAccountIndex! < accounts.length) {
       final account = accounts[selectedAccountIndex!];
       try {
         // Cambia el estado de la cuenta en el servidor
@@ -253,92 +253,107 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
-      floatingActionButton: selectedAccountIndex != null
-          ? Stack(
-        children: [
-          Positioned(
-            bottom: 80.0,
-            right: 10.0,
-            child: FloatingActionButton(
-              onPressed: _toggleAccountStatus,
-              tooltip: 'Activar/Desactivar cuenta',
-              child: Icon(
-                accounts[selectedAccountIndex!].active ? Icons.lock : Icons.lock_open,
+      bottomNavigationBar: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].balance > 0
+                    ? () {
+                  Navigator.pushNamed(
+                    context,
+                    '/qrscanner',
+                    arguments: {
+                      'accessToken': widget.accessToken,
+                      'account': accounts[selectedAccountIndex!],
+                    },
+                  );
+                }
+                    : null,
+                icon: Icon(
+                  Icons.camera_alt_outlined,
+                  color: Colors.green,
+                  size: 40.0,
+                ),
               ),
-              backgroundColor: Colors.blue,
-            ),
+              SizedBox(width: 8.0), // Espaciado entre íconos
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].balance > 0
+                    ? () {
+                  Navigator.pushNamed(
+                    context,
+                    '/paymentpage',
+                    arguments: {
+                      'accessToken': widget.accessToken,
+                      'accountNumber': accounts[selectedAccountIndex!].numberAccount,
+                    },
+                  );
+                }
+                    : null,
+                icon: Icon(
+                  Icons.payment_outlined,
+                  color: Colors.red,
+                  size: 40.0,
+                ),
+              ),
+              SizedBox(width: 8.0), // Espaciado entre íconos
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                    ? () {
+                  Navigator.pushNamed(
+                    context,
+                    '/chargepage',
+                    arguments: {
+                      'accessToken': widget.accessToken,
+                      'accountNumber': accounts[selectedAccountIndex!].numberAccount,
+                    },
+                  );
+                }
+                    : null,
+                icon: Icon(
+                  Icons.payment_outlined,
+                  color: Colors.green,
+                  size: 40.0,
+                ),
+              ),
+              SizedBox(width: 8.0), // Espaciado entre íconos
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                    ? () async {
+                  await showDeleteConfirmationDialog(
+                    context,
+                    widget.accessToken,
+                    accounts,
+                    accounts[selectedAccountIndex!],
+                  );
+                }
+                    : null,
+                icon: Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                  size: 40.0,
+                ),
+              ),
+              SizedBox(width: 8.0), // Espaciado entre íconos
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                    ? () async {
+                  _toggleAccountStatus();
+                }
+                    : null,
+                icon: Icon(
+                  accounts.isNotEmpty && selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].active
+                      ? Icons.lock
+                      : Icons.lock_open,
+                  color: Colors.red,
+                  size: 40.0,
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            bottom: 10.0,
-            right: 10.0,
-            child: FloatingActionButton(
-              onPressed: () async {
-                await showDeleteConfirmationDialog(
-                  context,
-                  widget.accessToken,
-                  accounts,
-                  accounts[selectedAccountIndex!],
-                );
-              },
-              tooltip: 'Eliminar cuenta',
-              child: Icon(Icons.delete),
-              backgroundColor: Colors.red,
-            ),
-          ),
-        ],
-      )
-          : null,
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0
-                  ? () {
-                Navigator.pushNamed(
-                  context,
-                  '/qrscanner',
-                  arguments: {
-                    'accessToken': widget.accessToken,
-                    'account': accounts[selectedAccountIndex!],
-                  },
-                );
-              }
-                  : null,
-              child: Text('Camera'),
-            ),
-            ElevatedButton(
-              onPressed: selectedAccountIndex != null && accounts[selectedAccountIndex!].balance > 0
-                  ? () {
-                Navigator.pushNamed(
-                  context,
-                  '/paymentpage',
-                  arguments: {
-                    'accessToken': widget.accessToken,
-                    'accountNumber': accounts[selectedAccountIndex!].numberAccount,
-                  },
-                );
-              }
-                  : null,
-              child: Text('A pagar'),
-            ),
-            ElevatedButton(
-              onPressed: selectedAccountIndex != null
-                  ? () {
-                Navigator.pushNamed(
-                  context,
-                  '/chargepage',
-                  arguments: {
-                    'accessToken': widget.accessToken,
-                    'accountNumber': accounts[selectedAccountIndex!].numberAccount,
-                  },
-                );
-              }
-                  : null,
-              child: Text('A cobrar'),
-            ),
-          ],
         ),
       ),
     );
