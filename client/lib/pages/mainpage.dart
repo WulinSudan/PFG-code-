@@ -275,7 +275,7 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.camera_alt_outlined,
-                  color: Colors.green,
+                  color: selectedAccountIndex != null ? Colors.green : Colors.grey, // Cambiar color basado en selección
                   size: 40.0,
                 ),
               ),
@@ -295,7 +295,7 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.payment_outlined,
-                  color: Colors.red,
+                  color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección
                   size: 40.0,
                 ),
               ),
@@ -315,7 +315,7 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.payment_outlined,
-                  color: Colors.green,
+                  color: selectedAccountIndex != null ? Colors.green : Colors.grey, // Cambiar color basado en selección
                   size: 40.0,
                 ),
               ),
@@ -333,7 +333,7 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.delete,
-                  color: Colors.red,
+                  color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección
                   size: 40.0,
                 ),
               ),
@@ -348,7 +348,7 @@ class _MainPageState extends State<MainPage> {
                   accounts.isNotEmpty && selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].active
                       ? Icons.lock
                       : Icons.lock_open,
-                  color: Colors.red,
+                  color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección
                   size: 40.0,
                 ),
               ),
