@@ -324,36 +324,49 @@ export const accountResolvers = {
 
     // Cambiar el estado de una cuenta
     // des de la cuenta, tengo que tener el usuario
+
     changeAccountStatus: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context): Promise<boolean> => {
       try {
-
+        // Obtener el usuario actual
         const currentUser = await me(context);
-        console.log(currentUser.name);
+    
+        // Verificar si el usuario actual tiene permisos de administrador
+        if (currentUser.role !== 'admin') {
+          throw new Error("Unauthorized: Only admins or account owner can change account status");
+        }
+    
+        // Buscar la cuenta por número
         const account = await Account.findOne({ number_account: accountNumber });
         if (!account) {
           throw new Error("Account does not exist");
         }
-
-        const newStatus = !account.active;
+    
+        // Alternar el estado de la cuenta
+        const newStatus = !account.active; // Cambia el estado actual
         await Account.updateOne(
           { number_account: accountNumber },
           { $set: { active: newStatus } }
         );
-
+    
+        // Verificar si la cuenta ha sido actualizada
         const updatedAccount = await Account.findOne({ number_account: accountNumber });
-
-        const logMessage = `${new Date().toISOString()} - Mutation operation: change accounts ${accountNumber} status in ${newStatus} by ${currentUser.name}`;
+        if (!updatedAccount) {
+          throw new Error("Failed to retrieve updated account status");
+        }
+    
+        // Registrar la operación en los logs del usuario actual
+        const logMessage = `${new Date().toISOString()} - Mutation operation: change account status to ${newStatus} by ${currentUser.name}`;
         currentUser.logs.push(logMessage);
         await currentUser.save();
-
-
-
-        return updatedAccount ? updatedAccount.active : false;
+    
+        // Retornar el estado actualizado
+        return updatedAccount.active;
       } catch (error) {
         console.error("Error setting account active status:", error);
         throw new Error("Failed to update account status");
       }
     },
+    
 
     // Establecer el máximo importe de pago permitido
     setMaxPayImport: async (_root: any, { accountNumber, maxImport }: { accountNumber: string, maxImport: number }, context:Context): Promise<number> => {
