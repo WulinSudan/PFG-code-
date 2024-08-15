@@ -7,6 +7,9 @@
     allPersons: [Person]!
     findPerson(name: String!): Person
 
+    getUserRole(name: String!): String
+
+    getAdmins:[User]!
     getUsers: [User]!
     allAccount: [Account]!
     countAccount: Int!
@@ -51,6 +54,7 @@
     addDictionary(input: DictionaryInput!): Dictionary!
 
     signUp(input: SignUpInput!): User!
+    signUpAdmin(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
     removeUser(name: String!): Int!
     addNewAdmin(input: AddNewAdminInput!): Admin!

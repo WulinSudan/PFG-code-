@@ -5,12 +5,12 @@ import '../graphql_client.dart';
 import '../graphql_queries.dart';
 import '../functions/addAccount.dart';
 
-class RegistrationPage extends StatefulWidget {
+class RegistrationAdminPage extends StatefulWidget {
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
+class _RegistrationPageState extends State<RegistrationAdminPage> {
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -39,7 +39,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   void _validateUsername() {
     final username = _usernameController.text;
     setState(() {
-      _isUsernameValid = RegExp(r'^[a-zA-Z]{3,}$').hasMatch(username); // Solo caracteres alfabéticos y más de 2 caracteres
+      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username); // Permite caracteres alfabéticos y números con más de 2 caracteres
     });
   }
 
@@ -47,11 +47,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
     setState(() {
       _isPasswordValid = _passwordController.text.length >= 3;
     });
+    _validatePasswordConfirmation(); // Revalidar confirmación si la contraseña cambia
   }
 
   void _validatePasswordConfirmation() {
     setState(() {
-      _isPasswordConfirmationValid = _passwordController.text == _passwordConfirmationController.text;
+      _isPasswordConfirmationValid = _passwordConfirmationController.text == _passwordController.text &&
+          _passwordConfirmationController.text.length >= 3;
     });
   }
 
@@ -67,7 +69,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
     Timer(Duration(seconds: 2), () {
       Navigator.pop(context); // Cierra el diálogo
-      Navigator.pushNamed(context, '/login'); // Navega a la página de login
+      Navigator.pop(context); // Vuelve a AdminPage
     });
   }
 
@@ -75,7 +77,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Registro'),
+        title: Text('Alta a un nuevo administrador'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -136,7 +138,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
                 final QueryResult result = await client.mutate(
                   MutationOptions(
-                    document: gql(signUpMutation),
+                    document: gql(signUpAdminMutation),
                     variables: {
                       'input': {
                         'dni': dni,
@@ -146,7 +148,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     },
                   ),
                 );
-
 
                 if (result.hasException) {
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -3,6 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tus consultas/mutaciones GraphQL aquí
 import '../graphql_queries.dart';
 import '../dialogs/errorConnectionDialog.dart';
+import '../functions/getUserRole.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -69,8 +70,10 @@ class _LoginState extends State<Login> {
                   final String accessToken = result.data!['loginUser']['access_token'];
 
                   print(accessToken);
+                  
+                  String role = await getUserRole(accessToken, username);
 
-                  if(username!="Admin"){
+                  if(role!="admin"){
                     Navigator.pushNamed(
                         context,
                         '/mainpage',
@@ -90,7 +93,7 @@ class _LoginState extends State<Login> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/registration');
+                Navigator.pushNamed(context, '/registrationUser');
               },
               child: Text('Register'),
             ),

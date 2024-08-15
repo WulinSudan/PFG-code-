@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'pages/welcomepage.dart';
 import 'pages/login.dart';
 import 'pages/mainpage.dart';
-import 'pages/registration.dart';
 import 'mutation.dart';
 import 'pages/chargepage.dart';
 import 'pages/paymentpage.dart';
@@ -11,6 +10,9 @@ import 'pages/qrgestion.dart';
 import 'pages/account.dart';
 import 'pages/settings.dart';
 import 'pages/admin.dart';
+import 'pages/registrationAdmin.dart';
+import 'pages/allAdmins.dart';
+import 'pages/registrationUser.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,6 +39,7 @@ class _MyAppState extends State<MyApp> {
           final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
           return AdminPage(accessToken: accessToken!);
         },
+        '/allAdmins': (context) => AllAdminsPage(accessToken: ModalRoute.of(context)!.settings.arguments as String),
         '/qrgestion': (context) => QrGestion(),
         '/qrscanner': (context) {
           // Extraer los argumentos de la ruta
@@ -53,7 +56,8 @@ class _MyAppState extends State<MyApp> {
           final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
           return MainPage(accessToken: accessToken!);
         },
-        '/registration': (context) => RegistrationPage(),
+        '/registrationAdmin': (context) => RegistrationAdminPage(),
+        '/registrationUser': (context) => RegistrationUserPage(),
         '/welcomepage': (context) => WelcomePage(),
         '/login': (context) => Login(), // Asumiendo que tienes una clase llamada Login para tu pantalla de inicio de sesión.
       },

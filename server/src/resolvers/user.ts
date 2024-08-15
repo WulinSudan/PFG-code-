@@ -48,6 +48,21 @@ interface AddAccountInput {
 export const userResolvers = {
     Query: {
 
+        getUserRole: async (_root: any, { name }: { name: string }): Promise<string> => {
+          try {
+            const user = await User.findOne({ name });
+        
+            if (!user) {
+              throw new Error('User not found');
+            }
+        
+            return user.role;
+          } catch (error) {
+            throw new Error(`Failed to get user role: ${(error as Error).message}`);
+          }
+        },
+        
+
         getUserAccountCount: async (_root: any, { dni }: { dni: string }) => {
             try {
               // Buscar al usuario por su DNI
@@ -64,11 +79,30 @@ export const userResolvers = {
             }
           },
 
+
+          getAdmins: async (): Promise<{ name: string; dni: string }[]> => {
+            try {
+              // Obtener todos los usuarios, excluyendo al usuario con nombre 'admin'
+              //const users = await User.find({ name: { $ne: 'Admin' } }).exec(); 
+              const users = await User.find({ role: { $ne: 'client' } }).exec();
+              
+              // Mapear los resultados a un formato específico
+              return users.map(user => ({
+                name: user.name,
+                dni: user.dni,
+                active: user.active,
+              }));
+            } catch (error) {
+              throw new Error(`Error al obtener los usuarios`);
+            }
+          },
+
           getUsers: async (): Promise<{ name: string; dni: string }[]> => {
             try {
               // Obtener todos los usuarios, excluyendo al usuario con nombre 'admin'
-              const users = await User.find({ name: { $ne: 'Admin' } }).exec(); 
-      
+              //const users = await User.find({ name: { $ne: 'Admin' } }).exec(); 
+              const users = await User.find({ role: { $ne: 'admin' } }).exec();
+              
               // Mapear los resultados a un formato específico
               return users.map(user => ({
                 name: user.name,
@@ -82,7 +116,8 @@ export const userResolvers = {
 
         
         me: async (_root: any, _args: any, context: Context) => {
-            const userId = getUserId(context);
+            
+          const userId = getUserId(context);
 
             if (!userId) {
                 throw new Error("User not authenticated");
@@ -145,37 +180,19 @@ export const userResolvers = {
             return deletionResult.deletedCount;
         },
 
-        signUp: async (_root: any, { input: {dni,name, password} }: any ) => {
+        signUpAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
 
-          console.log("En proceso de registrar y crear una nuava cuenta");
+          console.log("En proceso de registrar");
             try {
                 const userInput = {
                     dni:dni,
                     name: name,
                     active: true,
                     password: await hashPassword(password),
+                    role: "admin",
                 };
 
                 const user = new User(userInput);
-
-                // Create a new account for the user
-                const newAccount = new Account({
-                  owner_dni: dni,
-                  owner_name: name,
-                  number_account: generateUniqueAccountNumber(), // Generate a unique account number
-                  balance: 10.5, // Initial balance
-                  active: true,
-                  key_to_pay: "1234567890123456",
-                  maximum_amount_once: 50,
-                  maximum_amount_day: 500,
-                  description:"cuenta nomina",
-              });
-
-                // Save the new account
-                await newAccount.save();
-
-                // Add the new account to the user's accounts array
-                user.accounts.push(newAccount._id);
 
                 await user.save();
                 return user;
@@ -186,6 +203,71 @@ export const userResolvers = {
                 throw error;
             }
         },
+
+        signUp: async (_root: any, { input: { dni, name, password } }: any, context: Context) => {
+  
+          // Inicializar logMessage
+          let logMessage = '';
+        
+          try {
+            // Verificar si ya existe un usuario con el mismo DNI
+            const existingUser = await User.findOne({ dni });
+            if (existingUser) {
+              // Si el usuario ya existe, registrar el mensaje en los logs del usuario existente
+              logMessage = `${new Date().toISOString()} - Operación fallida: Usuario con DNI ${dni} ya existe.`;
+              existingUser.logs.push(logMessage);
+              await existingUser.save();
+              throw new Error("User already exists");
+            }
+        
+            // Crear nuevo usuario
+            const userInput = {
+              dni: dni,
+              name: name,
+              active: true,
+              password: await hashPassword(password),
+            };
+        
+            const user = new User(userInput);
+        
+            // Crear una nueva cuenta para el usuario
+            const newAccount = new Account({
+              owner_dni: dni,
+              owner_name: name,
+              number_account: generateUniqueAccountNumber(), // Generar un número de cuenta único
+              balance: 10.5, // Saldo inicial
+              active: true,
+              key_to_pay: "1234567890123456",
+              maximum_amount_once: 50,
+              maximum_amount_day: 500,
+              description: "cuenta nomina",
+            });
+        
+            // Guardar la nueva cuenta
+            await newAccount.save();
+        
+            // Añadir la nueva cuenta al array de cuentas del usuario
+            user.accounts.push(newAccount._id);
+
+            logMessage = `${new Date().toISOString()} - Operación: Usuario ${dni} registrado y cuenta ${newAccount.number_account} creada.`;
+            user.logs.push(logMessage);
+        
+            // Guardar el usuario con los logs actualizados
+            await user.save();
+        
+            return user;
+          } catch (error: any) {
+            if (error.code === 11000) {
+              throw new Error("User already exists");
+            }
+            throw error;
+          }
+        },
+        
+        
+        
+
+
 
         addNewAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
           try {

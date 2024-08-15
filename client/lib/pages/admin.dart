@@ -6,7 +6,7 @@ import '../dialogs/logoutDialog.dart';
 import '../dialogs/showAccountsDialog.dart'; // Asegúrate de importar la función para mostrar el diálogo
 import '../functions/changeUserStatus.dart'; // Asegúrate de importar la función para cambiar el estado del usuario
 import '../dialogs/confirmacionDialog2.dart';
-
+import '../dialogs/addUserAdminDialog.dart';
 class AdminPage extends StatefulWidget {
   final String accessToken;
 
@@ -81,6 +81,19 @@ class _AdminPageState extends State<AdminPage> {
         automaticallyImplyLeading: true, // Esto muestra el ícono de retroceso
         actions: [
           IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              showAddUserAdminDialog(context,widget.accessToken);
+              //Navigator.pushNamed(
+                //  context,
+                  //'/registrationAdmin',
+                  //arguments: widget.accessToken);
+              //showLogoutConfirmationDialog(context);
+              // Aquí puedes manejar la lógica para el logout
+              // Navigator.pushReplacementNamed(context, '/login'); // Ejemplo de redirección al login
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
               showLogoutConfirmationDialog(context);
@@ -89,6 +102,26 @@ class _AdminPageState extends State<AdminPage> {
             },
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              child: Text('Navegación', style: TextStyle(color: Colors.red)),
+            ),
+            ListTile(
+              title: Text('AllAdmins'),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/allAdmins',
+                  arguments: widget.accessToken,
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [

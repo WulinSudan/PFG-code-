@@ -8,6 +8,16 @@ const String getUsersQuery = """
   }
 """;
 
+const String getAdminsQuery = """
+  query getAdmins {
+    getAdmins {
+      name
+      dni
+      active
+    }
+  }
+""";
+
 
 const String loginUserMutation = """
   mutation LoginUser(\$input: LoginInput!) {
@@ -30,6 +40,15 @@ const String meQuery = """
 const String signUpMutation = """
   mutation signUp(\$input: SignUpInput!){
     signUp(input: \$input) {
+      dni
+    }
+  }          
+""";
+
+
+const String signUpAdminMutation = """
+  mutation signUpAdmin(\$input: SignUpInput!){
+    signUpAdmin(input: \$input) {
       dni
     }
   }          
@@ -189,6 +208,12 @@ mutation(\$dni: String!){
 const String getAccountStatusQuery = """
 query(\$accountNumber: String!){
   getAccountStatus(accountNumber: ,\$accountNumber)
+}
+""";
+
+const String getUserRoleQuery = """
+query(\$name: String!){
+  getUserRole(name: \$name)
 }
 """;
 
