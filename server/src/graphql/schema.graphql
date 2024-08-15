@@ -8,6 +8,7 @@
     findPerson(name: String!): Person
 
     getUserRole(name: String!): String
+    getRole: String!
 
     getAdmins:[User]!
     getUsers: [User]!
@@ -17,7 +18,10 @@
     users: [User]
     getAllAccounts:[Account]
     getUserAccountCount(dni: String!): Int!
+
+    getUserAccounts:[Account]
     getUserAccountsInfoByDni(dni: String!): [Account]
+
     getAccountTransactions(n_account:String!):[Transaction]
     getTransactions:[Transaction]
     findAccount(accountNumber:String!):Account
@@ -33,6 +37,8 @@
     getAccountBalance(accountNumber:String!):Float!
 
     getAccountStatus(accountNumber:String!):Boolean!
+
+    getUser(accountNumber:String!):User
 
   }
 

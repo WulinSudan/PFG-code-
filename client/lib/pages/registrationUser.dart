@@ -77,7 +77,7 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alta a un nuevo administrador'),
+        title: Text('Alta a un nuevo cliente'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
