@@ -127,7 +127,14 @@ class _SettingsState extends State<Settings> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: accounts.isEmpty
+                ? Center(
+              child: Text(
+                'No hay cuenta disponible',
+                style: TextStyle(fontSize: 18, color: Colors.black54),
+              ),
+            )
+                : ListView.builder(
               itemCount: accounts.length,
               itemBuilder: (context, index) {
                 final account = accounts[index];

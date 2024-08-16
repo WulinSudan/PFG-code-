@@ -13,6 +13,9 @@ import 'color_selection_page.dart';
 import 'package:client/functions/changeAccountStatus.dart';
 import 'package:client/functions/getAccountStatus.dart';
 import 'package:client/dialogs/confirmationOKdialog.dart';
+import 'package:client/dialogs/askconfirmacion.dart';
+import 'package:client/functions/removeUser.dart';
+import 'login.dart'; // Asegúrate de importar la página de login si no lo has hecho
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -42,18 +45,18 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _loadAppBarColors() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedColor = prefs.getString('appBarColor') ?? '#FF0000'; // Valor por defecto en hexadecimal
-    final savedNavigationColor = prefs.getString('navigationDrawerColor') ?? '#FF0000';
+    final savedColor = prefs.getString('appBarColor') ?? '0xFFFF0000'; // Valor por defecto en hexadecimal
+    final savedNavigationColor = prefs.getString('navigationDrawerColor') ?? '0xFFFF0000';
     setState(() {
-      appBarColor = Color(int.parse(savedColor, radix: 16) + 0xFF000000); // Convertir a ARGB
-      navigationDrawerColor = Color(int.parse(savedNavigationColor, radix: 16) + 0xFF000000); // Convertir a ARGB
+      appBarColor = Color(int.parse(savedColor));
+      navigationDrawerColor = Color(int.parse(savedNavigationColor));
     });
   }
 
   Future<void> _saveAppBarColors(Color appBarColor, Color navigationDrawerColor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('appBarColor', appBarColor.value.toRadixString(16).toUpperCase());
-    await prefs.setString('navigationDrawerColor', navigationDrawerColor.value.toRadixString(16).toUpperCase());
+    await prefs.setString('appBarColor', '0x${appBarColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}');
+    await prefs.setString('navigationDrawerColor', '0x${navigationDrawerColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}');
   }
 
   void _navigateToColorSelection() async {
@@ -139,8 +142,11 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: appBarColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.color_lens),
-            onPressed: _navigateToColorSelection,
+            icon: Icon(Icons.autorenew),
+            onPressed: () async {
+              await fetchData();
+              setState(() {}); // Asegúrate de que la UI se actualice
+            },
           ),
           IconButton(
             icon: Icon(Icons.add),
@@ -198,6 +204,17 @@ class _MainPageState extends State<MainPage> {
             ListTile(
               title: Text('Cambiar color de fondo'),
               onTap: _navigateToColorSelection,
+            ),
+            ListTile(
+              title: Text('Eliminar el usuario'),
+              onTap: () async {
+                final deleteConfirmed = await askConfirmation(context);
+                if (deleteConfirmed == true) {
+                  await removeUser(context, widget.accessToken, dni!);
+                  // Redirigir a la página de login después de la eliminación
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
+              },
             ),
           ],
         ),
@@ -329,6 +346,8 @@ class _MainPageState extends State<MainPage> {
                     accounts,
                     accounts[selectedAccountIndex!],
                   );
+                  await fetchData();
+                  setState(() {});
                 }
                     : null,
                 icon: Icon(
@@ -345,7 +364,10 @@ class _MainPageState extends State<MainPage> {
                 }
                     : null,
                 icon: Icon(
-                  accounts.isNotEmpty && selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].active
+                  accounts.isNotEmpty &&
+                      selectedAccountIndex != null &&
+                      selectedAccountIndex! < accounts.length &&
+                      accounts[selectedAccountIndex!].active
                       ? Icons.lock
                       : Icons.lock_open,
                   color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección

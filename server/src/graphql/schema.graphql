@@ -62,7 +62,9 @@
     signUp(input: SignUpInput!): User!
     signUpAdmin(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
-    removeUser(name: String!): Int!
+
+    removeUser(dni: String!): Int!
+
     addNewAdmin(input: AddNewAdminInput!): Admin!
 
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person!

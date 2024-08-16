@@ -28,7 +28,7 @@ Future<void> selectAccountDialog(BuildContext context, String accesToken, List<A
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return AlertDialog(
-            title: Text('Seleccionar una cuenta para vaciar el saldo'),
+            title: Text('Vaciar el saldo'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: filteredAccounts.map((account) {

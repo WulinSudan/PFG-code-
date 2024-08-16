@@ -118,11 +118,6 @@ export const accountResolvers = {
         const accounts = await Account.find({ _id: { $in: accountIds } });
         const validAccounts = accounts.filter(account => account.owner_name);
 
-        const logMessage = `${new Date().toISOString()} - Operación consulta: get user accounts info by dni`;
-        user.logs.push(logMessage);
-
-        await user.save();
-
         return validAccounts;
       } catch (error) {
         console.error('Error fetching user accounts info by DNI:', error);

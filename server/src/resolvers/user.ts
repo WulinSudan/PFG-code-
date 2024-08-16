@@ -43,6 +43,21 @@ interface AddAccountInput {
     balance: number;
     active: boolean;
   }
+
+  async function me(context: Context) {
+    const userId = getUserId(context);
+  
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+  
+    const user = await User.findById(new Types.ObjectId(userId));
+    if (!user) {
+      throw new Error("User not found");
+    }
+  
+    return user;
+  }
   
 
 export const userResolvers = {
@@ -174,11 +189,43 @@ export const userResolvers = {
         }
       },
 
-        removeUser: async (_root: any, args: any) => {
-            // no se puede esborrar el rol admin
-            const deletionResult = await User.deleteOne({ name: args.name });
+
+      removeUser: async (_root: any, args: any, context: Context) => {
+        // No se puede eliminar el rol admin
+    
+        const currentUser = await me(context);
+        if (!currentUser) {
+            throw new Error("No user provided");
+        }
+    
+        if (currentUser.dni === args.dni && currentUser.accounts.length === 0) {
+            const logMessage = `${new Date().toISOString()} - Mutation operation: removed self`;
+            currentUser.logs.push(logMessage);
+            await currentUser.save();
+    
+            const deletionResult = await User.deleteOne({ dni: args.dni });
             return deletionResult.deletedCount;
-        },
+        }
+
+        const deleteUser = await User.findOne({ dni: args.dni });
+        
+        if(!deleteUser){
+          throw("No exist user")
+        }
+
+        if(deleteUser.accounts.length === 0){
+          const logMessage = `${new Date().toISOString()} - Mutation operation: removed by ${currentUser.name}`;
+          currentUser.logs.push(logMessage);
+          await currentUser.save();
+  
+          const deletionResult = await User.deleteOne({ dni: args.dni });
+          return deletionResult.deletedCount;
+        }
+    
+        throw new Error("Cannot delete user");
+    },
+
+    
 
         signUpAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
 

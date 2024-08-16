@@ -6,7 +6,10 @@ import '../dialogs/logoutDialog.dart';
 import '../dialogs/showAccountsDialog.dart'; // Asegúrate de importar la función para mostrar el diálogo
 import '../functions/changeUserStatus.dart'; // Asegúrate de importar la función para cambiar el estado del usuario
 import '../dialogs/confirmacionDialog2.dart';
+import '../dialogs/confirmationOKdialog.dart';
 import '../dialogs/addUserAdminDialog.dart';
+import '../functions/removeUser.dart'; // Asegúrate de importar la función para eliminar un usuario
+
 class AdminPage extends StatefulWidget {
   final String accessToken;
 
@@ -71,6 +74,60 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
+  Future<void> _viewDeleteUser() async {
+    if (_selectedUser != null) {
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Confirmar eliminación'),
+          content: Text('¿Estás seguro de que deseas eliminar a ${_selectedUser!.name}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Eliminar'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        print("98-----------------------------------------");
+        try {
+          await removeUser(context, widget.accessToken, _selectedUser!.dni);
+          setState(() {
+            _futureUsers = getUsers(widget.accessToken); // Refresca la lista de usuarios
+            _selectedUser = null; // Resetea el usuario seleccionado
+          });
+          print("------------------------------------110");
+          Navigator.pushReplacementNamed(
+            context,
+            '/admin',
+            arguments: widget.accessToken,
+          );
+
+
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al eliminar el usuario'),
+            ),
+          );
+        }
+      }
+    } else {
+      // Muestra un mensaje si no hay usuario seleccionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor, selecciona un usuario primero.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,22 +140,13 @@ class _AdminPageState extends State<AdminPage> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              showAddUserAdminDialog(context,widget.accessToken);
-              //Navigator.pushNamed(
-                //  context,
-                  //'/registrationAdmin',
-                  //arguments: widget.accessToken);
-              //showLogoutConfirmationDialog(context);
-              // Aquí puedes manejar la lógica para el logout
-              // Navigator.pushReplacementNamed(context, '/login'); // Ejemplo de redirección al login
+              showAddUserAdminDialog(context, widget.accessToken);
             },
           ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
               showLogoutConfirmationDialog(context);
-              // Aquí puedes manejar la lógica para el logout
-              // Navigator.pushReplacementNamed(context, '/login'); // Ejemplo de redirección al login
             },
           ),
         ],
@@ -179,7 +227,14 @@ class _AdminPageState extends State<AdminPage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _onChangeUserStatus,
-                      child: Text('Change Status'),
+                      child: Text('Cambiar estado'),
+                    ),
+                  ),
+                  SizedBox(width: 16.0),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _viewDeleteUser,
+                      child: Text('Eliminar usuario'),
                     ),
                   ),
                 ],

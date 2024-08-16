@@ -12,6 +12,7 @@ import '../functions/addAccount.dart';
 import '../functions/removeUserAccount.dart';
 import '../functions/maketransfer.dart';
 import 'selectAccountDialog.dart';
+import '../dialogs/confirmationOKDialog.dart';
 
 
 
@@ -22,7 +23,7 @@ Future<void> showDeleteConfirmationDialog(BuildContext context, String accessTok
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirmar eliminación'),
-          content: Text('¿Estás seguro de que quieres eliminar esta cuenta?'),
+          content: Text('¿Estás seguro de que quieres eliminar a esta cuenta?'),
           actions: [
             TextButton(
               child: Text('Cancelar'),
@@ -35,7 +36,7 @@ Future<void> showDeleteConfirmationDialog(BuildContext context, String accessTok
               onPressed: () {
                 Navigator.of(context).pop();
                 removeAccount(context,accessToken,selectedAccount.numberAccount);
-              },
+                },
             ),
           ],
         );
