@@ -3,9 +3,23 @@ import mongoose, { Types } from "mongoose";
 import { Context } from "../utils/context";
 import { getAccessToken, getUserId } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/crypt";
-import { User } from "../model/user";
+import { User, IUser} from "../model/user";
 import { Transaction } from "../model/transaction";
 import { ContextFunction } from "@apollo/server";
+import fs from 'fs-extra';
+import path from 'path';
+
+
+const logFilePath = path.join(__dirname, '../../logs/accounts.txt');
+
+// Función para escribir logs en el archivo
+const writeLog = async (message: string) => {
+  try {
+    await fs.appendFile(logFilePath, `${message}\n`);
+  } catch (err) {
+    console.error('Error al escribir en el archivo de log:', err);
+  }
+};
 
 // Genera un número de cuenta único basado en la fecha y hora actuales
 function generateUniqueAccountNumber(): string {
@@ -34,6 +48,26 @@ interface TransferInput {
   accountOrigen: string;
   accountDestin: string;
   import: number;
+}
+
+async function findUser(accountNumber: string): Promise<IUser | null> {
+  try {
+    // Encuentra la cuenta usando el número de cuenta
+    const account = await Account.findOne({ accountNumber }).exec();
+    
+    if (!account) {
+      console.log('No se encontró ninguna cuenta con el número proporcionado.');
+      return null;
+    }
+
+    // Encuentra el usuario que tiene la cuenta en su lista de cuentas
+    const user = await User.findOne({ accounts: account._id }).exec();
+
+    return user;
+  } catch (error) {
+    console.error('Error al buscar el usuario:', error);
+    throw new Error('No se pudo encontrar el usuario.');
+  }
 }
 
 // Función local para buscar una cuenta por su número de cuenta
@@ -65,7 +99,6 @@ async function me(context: Context) {
 export const accountResolvers = {
   Query: {
 
-  
     // Obtener información de las cuentas del usuario autenticado
     getUserAccounts: async (_root: any, context: Context) => {
       try {
@@ -321,14 +354,12 @@ export const accountResolvers = {
     // des de la cuenta, tengo que tener el usuario
 
     changeAccountStatus: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context): Promise<boolean> => {
+      
+      console.log("En changeAccountStatus");
+
       try {
         // Obtener el usuario actual
         const currentUser = await me(context);
-    
-        // Verificar si el usuario actual tiene permisos de administrador
-        if (currentUser.role !== 'admin') {
-          throw new Error("Unauthorized: Only admins or account owner can change account status");
-        }
     
         // Buscar la cuenta por número
         const account = await Account.findOne({ number_account: accountNumber });
@@ -350,9 +381,11 @@ export const accountResolvers = {
         }
     
         // Registrar la operación en los logs del usuario actual
-        const logMessage = `${new Date().toISOString()} - Mutation operation: change account status to ${newStatus} by ${currentUser.name}`;
+        const logMessage = `${new Date().toISOString()} - Mutation operation: change account ${accountNumber} status to ${newStatus} by ${currentUser.name}`;
         currentUser.logs.push(logMessage);
         await currentUser.save();
+
+        await writeLog(logMessage);
     
         // Retornar el estado actualizado
         return updatedAccount.active;
@@ -496,6 +529,16 @@ export const accountResolvers = {
     // pendent de fer
     makeTransfer: async (_root: any, { input }: { input: TransferInput }, context:Context): Promise<any> => {
 
+      console.log("--------------------------------------------");
+      console.log(input.accountOrigen);
+      console.log(input.accountDestin);
+      const userOrigen = await findUser(input.accountOrigen);
+      console.log(userOrigen?.name);
+
+      const userDestin = await findUser(input.accountDestin);
+      console.log(userDestin?.name);
+      console.log("--------------------------------------------");
+
       const currentUser = await me(context);
       
       // per saber quina compte es del origen
@@ -550,9 +593,18 @@ export const accountResolvers = {
         await accountOrigenDoc.save();
         await accountDestinDoc.save();
 
+
+        // Registrar la operación en los logs del usuario actual
+      const logMessage = `${new Date().toISOString()} - Mutation operation: make transfer from ${input.accountOrigen} to ${input.accountDestin} with value ${importNumber}`;
+      
+      userDestin?.logs.push(logMessage);
+      userOrigen?.logs.push(logMessage);
+
+       await writeLog(logMessage);
+
         return {
           success: true,
-          message: `Transferencia de ${importNumber} unidades realizada correctamente desde ${input.accountOrigen} a ${input.accountDestin}.`,
+          message: `Transferencia de ${importNumber} unidades realizada correctamente desde ${input.accountOrigen} de ${userOrigen} a ${input.accountDestin} de ${userDestin}.`,
         };
       } catch (error) {
         console.error('Error al realizar la transferencia:', error);

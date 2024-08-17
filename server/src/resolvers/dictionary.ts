@@ -7,7 +7,6 @@ import { User } from "../model/user";
 import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
 import { UUID } from "mongodb";
-import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { BlobOptions } from "buffer";
 import { UpdateResult } from 'mongodb'; // Import MongoDB native types

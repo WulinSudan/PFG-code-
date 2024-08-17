@@ -15,6 +15,7 @@
   "dependencies": {
     "@apollo/server": "^4.10.4",
     "@types/mysql": "^2.15.26",
+    "fs-extra": "^11.2.0",
     "graphql": "^16.8.1",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.5.0",
@@ -22,6 +23,7 @@
     "whatwg-url": "^14.0.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.12.8",
     "nodemon": "^3.1.0",

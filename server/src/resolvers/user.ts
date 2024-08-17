@@ -8,7 +8,20 @@ import { print } from "graphql";
 import { Request, Response } from 'express';
 import { getActiveResourcesInfo } from "process";
 import { accountResolvers } from "./account";
+import fs from 'fs-extra';
+import path from 'path';
 
+
+const logFilePath = path.join(__dirname, '../../logs/users.txt');
+
+// Función para escribir logs en el archivo
+const writeLog = async (message: string) => {
+  try {
+    await fs.appendFile(logFilePath, `${message}\n`);
+  } catch (err) {
+    console.error('Error al escribir en el archivo de log:', err);
+  }
+};
 
 
 function getUtcPlusTwoDate() {
