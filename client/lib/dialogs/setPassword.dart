@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:client/functions/setPassword.dart';  // Asumiendo que has renombrado la función a `setPassword`
-import 'package:client/dialogs/confirmationOKdialog.dart';
+import '../functions/setPassword.dart';  // Asumiendo que has renombrado la función a `setPassword`
+import '../dialogs/confirmationOKdialog.dart';
 
 Future<void> showSetPasswordDialog(BuildContext context, String accessToken, String dni) async {
   final newPasswordController = TextEditingController();
@@ -56,11 +56,11 @@ Future<void> showSetPasswordDialog(BuildContext context, String accessToken, Str
                     SnackBar(content: Text('Contraseña cambiada con éxito')),
                   );
 
-                  showConfirmationOKDialog(context); // Mostrar el diálogo de confirmación
+                  // Cierra el diálogo
+                  Navigator.of(context).pop();
 
-                  Navigator.of(context).pop(); // Cierra el diálogo
-
-
+                  // Mostrar el diálogo de confirmación
+                  showConfirmationOKDialog(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('No se pudo cambiar la contraseña')),

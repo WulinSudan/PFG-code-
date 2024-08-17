@@ -76,6 +76,17 @@ interface AddAccountInput {
 
 export const userResolvers = {
     Query: {
+       getUserInfo : async (_root:any, args:any) => {
+        // Buscar el usuario en la base de datos usando el DNI proporcionado en args
+        const user = await User.findOne({ dni: args.dni });
+        if(!user){
+          throw("can't fins user");
+        }
+
+        return user;
+      },
+      
+
 
         getUserRole: async (_root: any, { name }: { name: string }): Promise<string> => {
           try {

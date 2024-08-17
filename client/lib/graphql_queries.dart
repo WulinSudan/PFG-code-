@@ -236,3 +236,4 @@ mutation SetPassword(\$new: String!, \$dni: String!) {
 }
 """;
 
+

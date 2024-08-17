@@ -14,7 +14,7 @@
     getUsers: [User]!
     allAccount: [Account]!
     countAccount: Int!
-    user(dni: String!): User
+    getUserInfo(dni: String!): User
     users: [User]
     getAllAccounts:[Account]
     getUserAccountCount(dni: String!): Int!

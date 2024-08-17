@@ -1,3 +1,4 @@
+import 'package:client/functions/addTransaction.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'account.dart';
@@ -17,6 +18,7 @@ import 'package:client/dialogs/askconfirmacion.dart';
 import 'package:client/functions/removeUser.dart';
 import 'login.dart'; // Asegúrate de importar la página de login si no lo has hecho
 import 'package:client/dialogs/changePasswordDialog.dart';
+import 'package:client/dialogs/manualTransfer.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -343,7 +345,26 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
-              SizedBox(width: 8.0), // Espaciado entre íconos
+              SizedBox(width: 8.0),
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].balance > 0
+                    ? () async{
+                  await showManualTransferDialog(
+                  context,
+                  widget.accessToken,
+                  accounts[selectedAccountIndex!],
+                  );
+                  await fetchData();
+                  setState(() {});
+                }
+                    : null,
+                icon: Icon(
+                  Icons.pending_outlined,
+                  color: selectedAccountIndex != null ? Colors.green : Colors.grey, // Cambiar color basado en selección
+                  size: 40.0,
+                ),
+              ),
+              SizedBox(width: 8.0),// Espaciado entre íconos
               IconButton(
                 onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
                     ? () async {

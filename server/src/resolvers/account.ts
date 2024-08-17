@@ -274,18 +274,10 @@ export const accountResolvers = {
     // Buscar una cuenta por su número
     findAccount: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       try {
-        const currentUser = await me(context);
         const account = await Account.findOne({ number_account: accountNumber });
         if (!account) {
           return null;
         }
-
-        // Registrar la operación en los logs del usuario
-        const logMessage = `${new Date().toISOString()} - Operación consulta: get account ${accountNumber} information`;
-        currentUser.logs.push(logMessage);
-    
-        // Guardar los cambios en los logs del usuario
-        await currentUser.save();
 
 
         return {
