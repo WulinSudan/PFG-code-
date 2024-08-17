@@ -44,6 +44,10 @@
 
   type Mutation {
 
+    setPassword(new:String, dni:String):Boolean!
+
+    changePassword(old:String, new:String):Boolean!
+
     changeUserStatus(dni:String!):Boolean!
 
     changeAccountStatus(accountNumber:String!):Boolean!

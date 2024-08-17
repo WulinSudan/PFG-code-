@@ -9,6 +9,8 @@ import '../dialogs/confirmacionDialog2.dart';
 import '../dialogs/confirmationOKdialog.dart';
 import '../dialogs/addUserAdminDialog.dart';
 import '../functions/removeUser.dart'; // Asegúrate de importar la función para eliminar un usuario
+import '../dialogs/changePasswordDialog.dart';
+import '../dialogs/setPassword.dart';
 
 class AdminPage extends StatefulWidget {
   final String accessToken;
@@ -95,21 +97,12 @@ class _AdminPageState extends State<AdminPage> {
       );
 
       if (confirmed == true) {
-        print("98-----------------------------------------");
         try {
           await removeUser(context, widget.accessToken, _selectedUser!.dni);
           setState(() {
             _futureUsers = getUsers(widget.accessToken); // Refresca la lista de usuarios
             _selectedUser = null; // Resetea el usuario seleccionado
           });
-          print("------------------------------------110");
-          Navigator.pushReplacementNamed(
-            context,
-            '/admin',
-            arguments: widget.accessToken,
-          );
-
-
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -168,6 +161,12 @@ class _AdminPageState extends State<AdminPage> {
                 );
               },
             ),
+            ListTile(
+              title: Text('Change password'),
+              onTap: () {
+                showChangePasswordDialog(context, widget.accessToken);
+              },
+            ),
           ],
         ),
       ),
@@ -214,28 +213,46 @@ class _AdminPageState extends State<AdminPage> {
           if (_selectedUser != null)
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _viewUserAccounts,
-                      child: Text('Ver sus cuentas'),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _viewUserAccounts,
+                          child: Text('Ver sus cuentas'),
+                        ),
+                      ),
+                      SizedBox(width: 16.0), // Espacio entre los botones
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showSetPasswordDialog(context, widget.accessToken, _selectedUser!.dni);
+                          },
+                          child: Text('Set new password'),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 16.0), // Espacio entre los botones
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _onChangeUserStatus,
-                      child: Text('Cambiar estado'),
-                    ),
-                  ),
-                  SizedBox(width: 16.0),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _viewDeleteUser,
-                      child: Text('Eliminar usuario'),
-                    ),
+                  SizedBox(height: 16.0), // Espacio entre las filas
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _onChangeUserStatus,
+                          child: Text('Cambiar estado'),
+                        ),
+                      ),
+                      SizedBox(width: 16.0), // Espacio entre los botones
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _viewDeleteUser,
+                          child: Text('Eliminar usuario'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

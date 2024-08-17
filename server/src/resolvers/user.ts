@@ -12,6 +12,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 
+
 const logFilePath = path.join(__dirname, '../../logs/users.txt');
 
 // Función para escribir logs en el archivo
@@ -160,6 +161,72 @@ export const userResolvers = {
         
     },
     Mutation: {
+
+      setPassword: async (_root: any, args: { new: string, dni:String}, context: Context): Promise<boolean> => {
+        try {
+          const currentAdmin = await me(context);
+          
+          if (!currentAdmin) {
+            throw new Error("Admin not found");
+          }
+
+          const user = await User.findOne({ dni: args.dni });
+          if (!user) {
+            throw new Error("User not found");
+          }
+    
+          user.password = await hashPassword(args.new);
+
+          const logMessage = `${new Date().toISOString()} - Mutation operation: ${currentAdmin.name} set password for ${user.name}`;
+          currentAdmin.logs.push(logMessage);
+          user.logs.push(logMessage);
+          await writeLog(logMessage);
+
+          await currentAdmin.save(); // Guardar el usuario con la nueva contraseña
+          await user.save(); // Guardar el usuario con la nueva contraseña
+      
+          return true; // Retornar true si se cambió la contraseña exitosamente
+        } catch (error) {
+          console.error("Error changing password:", error);
+          throw new Error("Failed to change password"); // Lanzar un error genérico en caso de fallo
+        }
+      },
+
+      changePassword: async (_root: any, args: { old: string, new: string }, context: Context): Promise<boolean> => {
+        try {
+          const currentUser = await me(context);
+          
+          if (!currentUser) {
+            throw new Error("User not found");
+          }
+      
+          // Verificar si la contraseña antigua coincide
+          const isPasswordMatch = await comparePassword(currentUser.password, args.old);
+          
+          if (!isPasswordMatch) {
+            throw new Error("Incorrect old password");
+          }
+
+
+          
+      
+          // Si coincide, actualizar la contraseña
+          currentUser.password = await hashPassword(args.new);
+
+
+          const logMessage = `${new Date().toISOString()} - Mutation operation: ${currentUser.name} change password`;
+          currentUser.logs.push(logMessage);
+          await writeLog(logMessage);
+
+          await currentUser.save(); // Guardar el usuario con la nueva contraseña
+      
+          return true; // Retornar true si se cambió la contraseña exitosamente
+        } catch (error) {
+          console.error("Error changing password:", error);
+          throw new Error("Failed to change password"); // Lanzar un error genérico en caso de fallo
+        }
+      },
+      
 
       changeUserStatus: async (_root: any, args: { dni: string }, context: Context): Promise<boolean> => {
         try {

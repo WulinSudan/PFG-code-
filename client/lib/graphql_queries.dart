@@ -223,10 +223,16 @@ mutation(\$dni: String!){
 }
 """;
 
+const String changePasswordMutation = """
+mutation(\$old: String!, \$new: String!) {
+  changePassword(old: \$old, new: \$new)
+}
+""";
 
 
-
-
-
-
+const String setPasswordMutation = """
+mutation SetPassword(\$new: String!, \$dni: String!) {
+  setPassword(new: \$new, dni: \$dni)
+}
+""";
 

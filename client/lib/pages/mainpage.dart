@@ -16,6 +16,7 @@ import 'package:client/dialogs/confirmationOKdialog.dart';
 import 'package:client/dialogs/askconfirmacion.dart';
 import 'package:client/functions/removeUser.dart';
 import 'login.dart'; // Asegúrate de importar la página de login si no lo has hecho
+import 'package:client/dialogs/changePasswordDialog.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -199,6 +200,12 @@ class _MainPageState extends State<MainPage> {
                   '/settings',
                   arguments: widget.accessToken,
                 );
+              },
+            ),
+            ListTile(
+              title: Text('Change password'),
+              onTap: () {
+                showChangePasswordDialog(context, widget.accessToken);
               },
             ),
             ListTile(
