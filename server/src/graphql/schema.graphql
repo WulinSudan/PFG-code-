@@ -40,6 +40,8 @@
 
     getUser(accountNumber:String!):User
 
+    getLogs(dni:String):[String]
+
   }
 
   type Mutation {

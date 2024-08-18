@@ -237,3 +237,8 @@ mutation SetPassword(\$new: String!, \$dni: String!) {
 """;
 
 
+const String getLogsQuery = """
+query(\$dni: String){
+  getLogs(dni: \$dni)
+}
+""";

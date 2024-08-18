@@ -76,6 +76,29 @@ interface AddAccountInput {
 
 export const userResolvers = {
     Query: {
+
+      getLogs: async (_root: any, { dni }: { dni: string }, context: Context) => {
+        // Verificar el usuario actual y su rol
+        const currentUser = await me(context);
+    
+        if (currentUser.role !== "admin") {
+            throw new Error("Solo los administradores pueden visualizar los logs.");
+        }
+    
+        // Buscar el usuario por DNI
+        const user = await User.findOne({ dni: dni });
+    
+        if (!user) {
+            throw new Error("No se puede encontrar el usuario.");
+
+        }
+              
+        // Retornar los logs del usuario
+        return user.logs;
+    },
+    
+
+
        getUserInfo : async (_root:any, args:any) => {
         // Buscar el usuario en la base de datos usando el DNI proporcionado en args
         const user = await User.findOne({ dni: args.dni });

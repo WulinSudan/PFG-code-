@@ -20,6 +20,12 @@ import 'login.dart'; // Asegúrate de importar la página de login si no lo has 
 import 'package:client/dialogs/changePasswordDialog.dart';
 import 'package:client/dialogs/manualTransfer.dart';
 
+import '../functions/setNewMax.dart'; // Asegúrate de que esta ruta sea correcta
+import '../dialogs/getDescriptionDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../dialogs/getImportDialog.dart'; // Asegúrate de que esta ruta sea correcta
+import '../functions/setAccountDescription.dart';
+
+
 class MainPage extends StatefulWidget {
   final String accessToken;
 
@@ -195,16 +201,6 @@ class _MainPageState extends State<MainPage> {
               child: Text('Navegación', style: TextStyle(color: Colors.white)),
             ),
             ListTile(
-              title: Text('Settings'),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  '/settings',
-                  arguments: widget.accessToken,
-                );
-              },
-            ),
-            ListTile(
               title: Text('Change password'),
               onTap: () {
                 showChangePasswordDialog(context, widget.accessToken);
@@ -345,25 +341,6 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
-              SizedBox(width: 8.0),
-              IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].balance > 0
-                    ? () async{
-                  await showManualTransferDialog(
-                  context,
-                  widget.accessToken,
-                  accounts[selectedAccountIndex!],
-                  );
-                  await fetchData();
-                  setState(() {});
-                }
-                    : null,
-                icon: Icon(
-                  Icons.pending_outlined,
-                  color: selectedAccountIndex != null ? Colors.green : Colors.grey, // Cambiar color basado en selección
-                  size: 40.0,
-                ),
-              ),
               SizedBox(width: 8.0),// Espaciado entre íconos
               IconButton(
                 onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
@@ -402,6 +379,95 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
+              SizedBox(width: 8.0),
+              IconButton(
+                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                    ? () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          ListTile(
+                            title: Text('Hacer transferencia manualmente'),
+                            onTap: () async {
+                              Navigator.pop(context); // Cerrar el BottomSheet
+                              await showManualTransferDialog(
+                                context,
+                                widget.accessToken,
+                                accounts[selectedAccountIndex!],
+                              );
+                              await fetchData();
+                              setState(() {});
+                            },
+                          ),
+                          ListTile(
+                            title: Text('Set max import pay day'),
+                            onTap: () async {
+                              Navigator.pop(context); // Cerrar el BottomSheet
+                              final import = await getImportDialog(context);
+                              if (import != null) {
+                                print('Importe ingresado: $import');
+                                try {
+                                  await setNewMax(widget.accessToken, accounts[selectedAccountIndex!].numberAccount, import);
+                                  print('MaxPay configurado exitosamente.');
+
+                                  // Actualizar los datos después de configurar el máximo
+                                  await fetchData(); // Actualiza los datos
+
+                                } catch (e) {
+                                  print('Error al configurar MaxPay: $e');
+                                }
+                              } else {
+                                print('No se ingresó un importe válido.');
+                              }
+                              await fetchData();
+                              setState(() {});
+                            },
+                          ),
+                          ListTile(
+                            title: Text('Set description'),
+                            onTap: () async {
+                              Navigator.pop(context); // Cerrar el BottomSheet
+                              // Llamada asincrónica para obtener la descripción
+                              final description = await getDescriptionDialog(context);
+
+                              // Verificar si se obtuvo una descripción válida
+                              if (description != null) {
+                                print('Descripción ingresada: $description');
+                                try {
+                                  await setAccountDescription(widget.accessToken, accounts[selectedAccountIndex!].numberAccount, description);
+                                  print('Descripción configurada exitosamente.');
+
+                                  // Actualizar los datos después de configurar la descripción
+                                  await fetchData(); // Actualiza los datos
+
+                                } catch (e) {
+                                  print('Error al configurar la descripción: $e');
+                                }
+                              } else {
+                                print('No se ingresó una descripción válida.');
+                              }
+                              await fetchData();
+                              setState(() {});
+                            },
+                          ),
+                          // Aquí puedes agregar más opciones si lo deseas
+                        ],
+                      );
+                    },
+                  );
+                }
+                    : null,
+                icon: Icon(
+                  Icons.pending_outlined,
+                  color: selectedAccountIndex != null ? Colors.green : Colors.grey,
+                  size: 40.0,
+                ),
+              ),
+
+
             ],
           ),
         ),

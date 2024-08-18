@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/user.dart';
 import '../functions/getAdmins.dart';
 import '../utils/user_card.dart';
+import '../functions/getLogs.dart'; // Importa la función getLogs
 
 class AllAdminsPage extends StatefulWidget {
   final String accessToken;
@@ -28,15 +29,50 @@ class _AllAdminsPageState extends State<AllAdminsPage> {
     });
   }
 
-  void _viewAdminMovements() {
+  void _viewAdminMovements() async {
     if (_selectedAdmin != null) {
-      // Aquí debes implementar la lógica para mostrar los movimientos del administrador seleccionado
-      // Por ejemplo, puedes navegar a otra página que muestre los movimientos
-      Navigator.pushNamed(
-        context,
-        '/adminMovements', // Asegúrate de definir esta ruta en tu configuración de navegación
-        arguments: _selectedAdmin!.dni,
-      );
+      try {
+        // Recuperar los logs del administrador seleccionado usando su DNI
+        List<String> logs = await getLogs(widget.accessToken, _selectedAdmin!.dni);
+
+        // Mostrar los logs en un diálogo
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Movimientos de ${_selectedAdmin!.name}'),
+              content: logs.isNotEmpty
+                  ? Container(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: logs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(logs[index]),
+                    );
+                  },
+                ),
+              )
+                  : Text('No hay movimientos disponibles para este administrador.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Cierra el diálogo
+                  },
+                  child: Text('Cerrar'),
+                ),
+              ],
+            );
+          },
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al obtener los movimientos: $e'),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

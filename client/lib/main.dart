@@ -8,7 +8,6 @@ import 'pages/paymentpage.dart';
 import 'pages/qrscanner.dart';
 import 'pages/qrgestion.dart';
 import 'pages/account.dart';
-import 'pages/settings.dart';
 import 'pages/admin.dart';
 import 'pages/registrationAdmin.dart';
 import 'pages/allAdmins.dart';
@@ -31,10 +30,6 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       initialRoute: '/login',
       routes: {
-        '/settings': (context) {
-          final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
-          return Settings(accessToken: accessToken!);
-        },
         '/admin': (context) {
           final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;
           return AdminPage(accessToken: accessToken!);

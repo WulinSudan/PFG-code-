@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import '../utils/user.dart'; // Asegúrate de importar UserCard y User
-import '../functions/getUsers.dart'; // Asegúrate de importar la función getUsers
+import '../utils/user.dart';
+import '../functions/getUsers.dart';
 import '../utils/user_card.dart';
 import '../dialogs/logoutDialog.dart';
-import '../dialogs/showAccountsDialog.dart'; // Asegúrate de importar la función para mostrar el diálogo
-import '../functions/changeUserStatus.dart'; // Asegúrate de importar la función para cambiar el estado del usuario
+import '../dialogs/showAccountsDialog.dart';
+import '../functions/changeUserStatus.dart';
 import '../dialogs/confirmacionDialog2.dart';
 import '../dialogs/confirmationOKdialog.dart';
 import '../dialogs/addUserAdminDialog.dart';
-import '../functions/removeUser.dart'; // Asegúrate de importar la función para eliminar un usuario
+import '../functions/removeUser.dart';
 import '../dialogs/changePasswordDialog.dart';
 import '../dialogs/setPassword.dart';
+import '../functions/getLogs.dart';
 
 class AdminPage extends StatefulWidget {
   final String accessToken;
@@ -23,7 +24,7 @@ class AdminPage extends StatefulWidget {
 
 class _AdminPageState extends State<AdminPage> {
   late Future<List<User>> _futureUsers;
-  User? _selectedUser; // Para almacenar el usuario seleccionado
+  User? _selectedUser;
 
   @override
   void initState() {
@@ -39,10 +40,8 @@ class _AdminPageState extends State<AdminPage> {
 
   void _viewUserAccounts() {
     if (_selectedUser != null) {
-      // Muestra el diálogo con las cuentas del usuario seleccionado
       showAccountsDialog(context, widget.accessToken, _selectedUser!.dni);
     } else {
-      // Muestra un mensaje si no hay usuario seleccionado
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Por favor, selecciona un usuario primero.'),
@@ -57,7 +56,7 @@ class _AdminPageState extends State<AdminPage> {
         bool status = await changeUserStatus(widget.accessToken, _selectedUser!.dni);
         await showConfirmationDialog2(context, _selectedUser!.name, status);
         setState(() {
-          _futureUsers = getUsers(widget.accessToken); // Refresca la lista de usuarios
+          _futureUsers = getUsers(widget.accessToken);
         });
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +66,6 @@ class _AdminPageState extends State<AdminPage> {
         );
       }
     } else {
-      // Muestra un mensaje si no hay usuario seleccionado
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Por favor, selecciona un usuario primero.'),
@@ -100,8 +98,8 @@ class _AdminPageState extends State<AdminPage> {
         try {
           await removeUser(context, widget.accessToken, _selectedUser!.dni);
           setState(() {
-            _futureUsers = getUsers(widget.accessToken); // Refresca la lista de usuarios
-            _selectedUser = null; // Resetea el usuario seleccionado
+            _futureUsers = getUsers(widget.accessToken);
+            _selectedUser = null;
           });
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -112,10 +110,62 @@ class _AdminPageState extends State<AdminPage> {
         }
       }
     } else {
-      // Muestra un mensaje si no hay usuario seleccionado
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Por favor, selecciona un usuario primero.'),
+        ),
+      );
+    }
+  }
+
+  void _viewUserMovements() async {
+    if (_selectedUser != null) {
+      try {
+        // Recuperar los logs del administrador seleccionado usando su DNI
+        List<String> logs = await getLogs(widget.accessToken, _selectedUser!.dni);
+
+        // Mostrar los logs en un diálogo
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Movimientos de ${_selectedUser!.name}'),
+              content: logs.isNotEmpty
+                  ? Container(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: logs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(logs[index]),
+                    );
+                  },
+                ),
+              )
+                  : Text('No hay movimientos disponibles para este administrador.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Cierra el diálogo
+                  },
+                  child: Text('Cerrar'),
+                ),
+              ],
+            );
+          },
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al obtener los movimientos: $e'),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor, selecciona un administrador primero.'),
         ),
       );
     }
@@ -128,7 +178,7 @@ class _AdminPageState extends State<AdminPage> {
         title: Text('Administrar'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
-        automaticallyImplyLeading: true, // Esto muestra el ícono de retroceso
+        automaticallyImplyLeading: true,
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -192,7 +242,7 @@ class _AdminPageState extends State<AdminPage> {
                         onTap: () => _onUserSelected(user),
                         child: UserCard(
                           user: user,
-                          isSelected: _selectedUser == user, // Marca el card como seleccionado si coincide
+                          isSelected: _selectedUser == user,
                         ),
                       );
                     },
@@ -224,7 +274,7 @@ class _AdminPageState extends State<AdminPage> {
                           child: Text('Ver sus cuentas'),
                         ),
                       ),
-                      SizedBox(width: 16.0), // Espacio entre los botones
+                      SizedBox(width: 16.0),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
@@ -235,7 +285,7 @@ class _AdminPageState extends State<AdminPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.0), // Espacio entre las filas
+                  SizedBox(height: 16.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -245,11 +295,23 @@ class _AdminPageState extends State<AdminPage> {
                           child: Text('Cambiar estado'),
                         ),
                       ),
-                      SizedBox(width: 16.0), // Espacio entre los botones
+                      SizedBox(width: 16.0),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _viewDeleteUser,
                           child: Text('Eliminar usuario'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // Centrar el botón
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _viewUserMovements,
+                          child: Text('Ver sus movimientos'),
                         ),
                       ),
                     ],
