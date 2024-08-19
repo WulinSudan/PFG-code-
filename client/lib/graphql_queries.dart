@@ -217,6 +217,12 @@ query(\$name: String!){
 }
 """;
 
+const String getUserNameQuery = """
+query{
+  getUserName
+}
+""";
+
 const String deleteUserMutation = """
 mutation(\$dni: String!){
   removeUser(dni: \$dni)

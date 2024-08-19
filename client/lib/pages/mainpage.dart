@@ -146,7 +146,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('Mis Cuentas - ${userName ?? ''}'),
+        title: Text('WelCome - ${userName ?? ''}'),
         centerTitle: true,
         backgroundColor: appBarColor,
         actions: [
@@ -198,7 +198,7 @@ class _MainPageState extends State<MainPage> {
               decoration: BoxDecoration(
                 color: navigationDrawerColor, // Cambiar el color del Drawer
               ),
-              child: Text('Navegación', style: TextStyle(color: Colors.white)),
+              child: Text('Navigation', style: TextStyle(color: Colors.white)),
             ),
             ListTile(
               title: Text('Change password'),
@@ -207,11 +207,11 @@ class _MainPageState extends State<MainPage> {
               },
             ),
             ListTile(
-              title: Text('Cambiar color de fondo'),
+              title: Text('Change color'),
               onTap: _navigateToColorSelection,
             ),
             ListTile(
-              title: Text('Eliminar el usuario'),
+              title: Text('Remove user'),
               onTap: () async {
                 final deleteConfirmed = await askConfirmation(context);
                 if (deleteConfirmed == true) {

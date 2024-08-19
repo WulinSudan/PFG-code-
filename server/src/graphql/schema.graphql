@@ -42,6 +42,8 @@
 
     getLogs(dni:String):[String]
 
+    getUserName:User
+
   }
 
   type Mutation {

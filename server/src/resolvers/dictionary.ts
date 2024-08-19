@@ -60,6 +60,7 @@ export const dictionaryResolvers = {
         return true; // Si todas las comprobaciones son correctas, devolver true
       } catch (error) {
         console.error('Error en checkEnable:', (error as Error).message);
+       
         return false; // Manejar el error y devolver false
       }
     },

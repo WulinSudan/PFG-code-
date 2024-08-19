@@ -10,13 +10,13 @@ class AccountCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text('Cuenta ID: ${account.numberAccount}'),
+        title: Text('Account ID: ${account.numberAccount}'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Saldo: ${account.balance}'),
-            Text('Activa: ${account.active}'),
-            Text('description: ${account.description}'),
+            Text('Amount: ${account.balance}'),
+            Text('Active: ${account.active}'),
+            Text('Description: ${account.description}'),
           ],
         ),
       ),

@@ -30,6 +30,15 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
     _passwordConfirmationController.addListener(_validatePasswordConfirmation);
   }
 
+  @override
+  void dispose() {
+    _dniController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _passwordConfirmationController.dispose();
+    super.dispose();
+  }
+
   void _validateDni() {
     setState(() {
       _isDniValid = _dniController.text.length == 9;
@@ -39,7 +48,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
   void _validateUsername() {
     final username = _usernameController.text;
     setState(() {
-      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username); // Permite caracteres alfabéticos y números con más de 2 caracteres
+      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username);
     });
   }
 
@@ -77,7 +86,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alta a un nuevo administrador'),
+        title: Text('Register a new administrator'), // Corregido aquí
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -123,7 +132,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
                 if (!_isDniValid || !_isUsernameValid || !_isPasswordValid || !_isPasswordConfirmationValid) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Por favor, corrija los errores antes de enviar el formulario.'),
+                      content: Text('Please correct the errors before submitting the form.'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -138,7 +147,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
 
                 final QueryResult result = await client.mutate(
                   MutationOptions(
-                    document: gql(signUpAdminMutation),
+                    document: gql(signUpAdminMutation), // Asegúrate de que esta variable esté definida
                     variables: {
                       'input': {
                         'dni': dni,
@@ -152,7 +161,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
                 if (result.hasException) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error en el registro: ${result.exception.toString()}'),
+                      content: Text('Error in registration: ${result.exception.toString()}'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -160,7 +169,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
                   _showSuccessDialog(context);
                 }
               },
-              child: Text('Registrar'),
+              child: Text('Register'), // Corregido aquí
             ),
           ],
         ),

@@ -8,3 +8,8 @@
 2024-08-17T10:56:41.710Z - Mutation operation: make transfer from 0816183346 to 0817124912 with value 0.5
 2024-08-17T11:25:44.696Z - Mutation operation: make transfer from 0816164445 to 0817124912 with value 0.1
 2024-08-17T11:30:38.575Z - Mutation operation: make transfer from 0816183346 to 0817124912 with value 1
+2024-08-19T11:12:49.904Z - Mutation operation: make transfer from 0819131012 to 0816164445 with value 1
+2024-08-19T11:13:07.676Z - Mutation operation: make transfer from 0819131012 to 0816164445 with value 1
+2024-08-19T11:17:04.693Z - Mutation operation: change account 0819131012 status to false by Frida
+2024-08-19T13:08:52.744Z - Mutation operation: make transfer from 0819135150 to 0817124912 with value 2
+2024-08-19T13:14:32.511Z - Mutation operation: make transfer from 0819135150 to 0817124912 with value 2

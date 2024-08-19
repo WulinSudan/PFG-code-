@@ -62,8 +62,8 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Registro Exitoso'),
-          content: Text('Registro hecho con éxito.'),
+          title: Text('Successful registration'),
+          content: Text('Registration done successfully'),
         );
       },
     );
@@ -77,7 +77,7 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alta a un nuevo cliente'),
+        title: Text('Register a new user'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -123,7 +123,7 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
                 if (!_isDniValid || !_isUsernameValid || !_isPasswordValid || !_isPasswordConfirmationValid) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Por favor, corrija los errores antes de enviar el formulario.'),
+                      content: Text('Please correct the error before submitting the form.'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -152,7 +152,7 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
                 if (result.hasException) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error en el registro: ${result.exception.toString()}'),
+                      content: Text('Error in registration: ${result.exception.toString()}'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -160,7 +160,7 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
                   _showSuccessDialog(context);
                 }
               },
-              child: Text('Registrar'),
+              child: Text('Registrer'),
             ),
           ],
         ),

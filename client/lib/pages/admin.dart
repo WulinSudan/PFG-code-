@@ -12,6 +12,7 @@ import '../functions/removeUser.dart';
 import '../dialogs/changePasswordDialog.dart';
 import '../dialogs/setPassword.dart';
 import '../functions/getLogs.dart';
+import '../functions/getUserName.dart';
 
 class AdminPage extends StatefulWidget {
   final String accessToken;
@@ -25,16 +26,43 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   late Future<List<User>> _futureUsers;
   User? _selectedUser;
+  String? adminName;
 
   @override
   void initState() {
     super.initState();
-    _futureUsers = getUsers(widget.accessToken);
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Cargar usuarios y nombre del administrador en paralelo
+    setState(() {
+      _futureUsers = getUsers(widget.accessToken);
+    });
+    _loadAdminName();
+  }
+
+  Future<void> _loadAdminName() async {
+    try {
+      final name = await getUserName(widget.accessToken);
+      setState(() {
+        adminName = name;
+      });
+    } catch (e) {
+      print('Error al obtener el nombre del administrador: $e');
+    }
   }
 
   void _onUserSelected(User user) {
     setState(() {
       _selectedUser = user;
+    });
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _futureUsers = getUsers(widget.accessToken);
+      _selectedUser = null;
     });
   }
 
@@ -55,9 +83,7 @@ class _AdminPageState extends State<AdminPage> {
       try {
         bool status = await changeUserStatus(widget.accessToken, _selectedUser!.dni);
         await showConfirmationDialog2(context, _selectedUser!.name, status);
-        setState(() {
-          _futureUsers = getUsers(widget.accessToken);
-        });
+        _refreshData();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -97,10 +123,7 @@ class _AdminPageState extends State<AdminPage> {
       if (confirmed == true) {
         try {
           await removeUser(context, widget.accessToken, _selectedUser!.dni);
-          setState(() {
-            _futureUsers = getUsers(widget.accessToken);
-            _selectedUser = null;
-          });
+          _refreshData();
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -121,10 +144,7 @@ class _AdminPageState extends State<AdminPage> {
   void _viewUserMovements() async {
     if (_selectedUser != null) {
       try {
-        // Recuperar los logs del administrador seleccionado usando su DNI
         List<String> logs = await getLogs(widget.accessToken, _selectedUser!.dni);
-
-        // Mostrar los logs en un diálogo
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -175,11 +195,15 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Administrar'),
+        title: Text('Administer ${adminName ?? ''}'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
         automaticallyImplyLeading: true,
         actions: [
+          IconButton(
+            icon: Icon(Icons.autorenew),
+            onPressed: _refreshData, // Refrescar los datos
+          ),
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
@@ -199,10 +223,10 @@ class _AdminPageState extends State<AdminPage> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              child: Text('Navegación', style: TextStyle(color: Colors.red)),
+              child: Text('Navigation', style: TextStyle(color: Colors.red)),
             ),
             ListTile(
-              title: Text('AllAdmins'),
+              title: Text('Todos los administradores'),
               onTap: () {
                 Navigator.pushNamed(
                   context,
@@ -212,7 +236,7 @@ class _AdminPageState extends State<AdminPage> {
               },
             ),
             ListTile(
-              title: Text('Change password'),
+              title: Text('Cambiar contraseña'),
               onTap: () {
                 showChangePasswordDialog(context, widget.accessToken);
               },
@@ -251,15 +275,6 @@ class _AdminPageState extends State<AdminPage> {
               },
             ),
           ),
-          if (_selectedUser == null)
-            Expanded(
-              child: Center(
-                child: Text(
-                  'Selecciona una cuenta',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16.0),
-                ),
-              ),
-            ),
           if (_selectedUser != null)
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -280,7 +295,7 @@ class _AdminPageState extends State<AdminPage> {
                           onPressed: () {
                             showSetPasswordDialog(context, widget.accessToken, _selectedUser!.dni);
                           },
-                          child: Text('Set new password'),
+                          child: Text('Establecer nueva contraseña'),
                         ),
                       ),
                     ],
@@ -306,7 +321,7 @@ class _AdminPageState extends State<AdminPage> {
                   ),
                   SizedBox(height: 16.0),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Centrar el botón
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Expanded(
                         child: ElevatedButton(

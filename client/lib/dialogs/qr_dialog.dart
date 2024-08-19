@@ -23,7 +23,7 @@ class QrDialog {
         });
 
         return AlertDialog(
-          title: Text('Codi QR per pagar'),
+          title: Text('QR code to pay'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -44,7 +44,7 @@ class QrDialog {
                     style: DefaultTextStyle.of(context).style,
                     children: [
                       TextSpan(
-                        text: 'Import a pagar: ',
+                        text: 'Amount to pay: ',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.normal,
@@ -52,7 +52,7 @@ class QrDialog {
                         ),
                       ),
                       TextSpan(
-                        text: amountToPay == -1 ? 'Libre' : '€$amountToPay',
+                        text: amountToPay == -1 ? 'Free' : '€$amountToPay',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -63,7 +63,7 @@ class QrDialog {
                   ),
                 ),
                 SizedBox(height: 10),
-                Text('Aquest codi QR es caducarà en:'),
+                Text('This QR code will expire in:'),
                 CountdownWidget(duration: duration),
               ],
             ),
@@ -74,7 +74,7 @@ class QrDialog {
                 Navigator.pop(context);
                 isDialogOpen = false;
               },
-              child: Text('Tanca'),
+              child: Text('Close'),
             ),
           ],
         );

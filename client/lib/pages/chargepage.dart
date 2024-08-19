@@ -108,7 +108,7 @@ class _ChargePageState extends State<ChargePage> {
                 ),
                 SizedBox(height: 20),
                 Text('Account Number: ${maskAccountNumber(accountNumber)}'),
-                Text('Import: ${amountToCharge == -1 ? 'Libre' : amountToCharge}'),
+                Text('Amount: ${amountToCharge == -1 ? 'Free' : amountToCharge}'),
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
@@ -117,7 +117,7 @@ class _ChargePageState extends State<ChargePage> {
                   },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Enter the amount',
+                    labelText: 'Enter the amount you want to charge',
                   ),
                   keyboardType: TextInputType.number,
                 ),

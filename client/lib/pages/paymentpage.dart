@@ -20,6 +20,7 @@ class _PaymentPageState extends State<PaymentPage> {
   TextEditingController amountController = TextEditingController();
   String? accessToken;
   String? payKey;
+  bool isAmountValid = false;
 
   @override
   void initState() {
@@ -32,6 +33,25 @@ class _PaymentPageState extends State<PaymentPage> {
           accessToken = args['accessToken'];
         });
       }
+    });
+
+    // Add listener to the amountController to validate input
+    amountController.addListener(_validateAmount);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener when the widget is disposed
+    amountController.removeListener(_validateAmount);
+    amountController.dispose(); // Clean up the controller when the widget is disposed
+    super.dispose();
+  }
+
+  void _validateAmount() {
+    final amountText = amountController.text;
+    final amount = double.tryParse(amountText);
+    setState(() {
+      isAmountValid = amount != null && amount > 0;
     });
   }
 
@@ -88,7 +108,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   controller: amountController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Entrar el import que es vol pagar (buit=màxim)',
+                    labelText: 'Enter the amount you want to pay',
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -97,12 +117,12 @@ class _PaymentPageState extends State<PaymentPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () => generateQrData(isFreeAmount: false),
-                      child: Text('Validar import'),
+                      onPressed: isAmountValid ? () => generateQrData(isFreeAmount: false) : null,
+                      child: Text('Validate amount'),
                     ),
                     ElevatedButton(
                       onPressed: () => generateQrData(isFreeAmount: true),
-                      child: Text('Importe libre'),
+                      child: Text('Free amount'),
                     ),
                   ],
                 ),

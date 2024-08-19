@@ -68,7 +68,7 @@ class _QrGestionState extends State<QrGestion> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('QR Capturado'),
+        title: Text('Captured QR'),
       ),
       body: Center(
         child: Padding(
@@ -77,34 +77,34 @@ class _QrGestionState extends State<QrGestion> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Transferencia escaneada por:',
+                'Transfer scanned by:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               Text(
-                origen.isNotEmpty ? maskAccountNumber(origen) : 'Origen no disponible',
+                origen.isNotEmpty ? maskAccountNumber(origen) : 'Origin not available',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Información del código QR:',
+                'QR code information:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               Text(
-                'Tipo de transferencia: ${typePart ?? 'Tipo no disponible'}',
+                'Transfer operation: ${typePart ?? 'Operation not available'}',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 8),
               Text(
-                destino.isNotEmpty ? maskAccountNumber(destino) : 'Destino no disponible',
+                destino.isNotEmpty ? maskAccountNumber(destino) : 'Destination not available',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 8),
               Text(
-                importe > 0 ? importe.toStringAsFixed(2) : 'Importe no disponible',
+                importe > 0 ? importe.toStringAsFixed(2) : 'Amount not available',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
@@ -118,7 +118,7 @@ class _QrGestionState extends State<QrGestion> {
                 onPressed: () {
                   Navigator.pushNamed(context, '/mainpage', arguments: accessToken);
                 },
-                child: Text('Volver a la página principal'),
+                child: Text('return to the main page'),
               ),
             ],
           ),

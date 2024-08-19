@@ -6,7 +6,7 @@ import { User } from "../model/user";
 import { Account, IAccount } from "../model/account";
 import { print } from "graphql";
 import { Request, Response } from 'express';
-import { getActiveResourcesInfo } from "process";
+import { getActiveResourcesInfo, throwDeprecation } from "process";
 import { accountResolvers } from "./account";
 import fs from 'fs-extra';
 import path from 'path';
@@ -109,6 +109,20 @@ export const userResolvers = {
         return user;
       },
       
+
+      getUserName : async (_root: any, context:Context): Promise<string> => {
+        try {
+          const user = await me(context);
+      
+          if (!user) {
+            throw new Error('User not found');
+          }
+      
+          return user.name;
+        } catch (error) {
+          throw new Error(`Failed to get user name: ${(error as Error).message}`);
+        }
+      },
 
 
         getUserRole: async (_root: any, { name }: { name: string }): Promise<string> => {
@@ -322,10 +336,15 @@ export const userResolvers = {
         }
 
         const deleteUser = await User.findOne({ dni: args.dni });
+
+        if(deleteUser!.name == "admin"){
+          throw("No es pot eliminar administrador ")
+        }
         
         if(!deleteUser){
           throw("No exist user")
         }
+
 
         if(deleteUser.accounts.length === 0){
           const logMessage = `${new Date().toISOString()} - Mutation operation: removed by ${currentUser.name}`;
