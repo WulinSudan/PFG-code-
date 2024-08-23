@@ -12,7 +12,7 @@ interface IAccount extends Document {
   maximum_amount_once: number;
   maximum_amount_day: number;
   description: string;
-  transactions: mongoose.Types.ObjectId[]; // Array de ObjectId
+  transactions: mongoose.Types.ObjectId[];
 }
 
 // Account Schema
@@ -25,9 +25,9 @@ const AccountSchema: Schema = new Schema({
     unique: true,
     validate: {
       validator: function(v: string) {
-        return /^\d{10}$/.test(v); // Validación para asegurar que sea un string de 10 dígitos
+        return /^\d{10}$/.test(v);
       },
-      message: (props: any) => `${props.value} no es un número de cuenta válido. Debe tener 10 dígitos.`,
+      message: (props: any) => `${props.value} is not a valid account number. It must be 10 digits long.`,
     },
   },
   balance: {
@@ -42,7 +42,7 @@ const AccountSchema: Schema = new Schema({
   maximum_amount_once: { type: Number, required: true },
   maximum_amount_day: { type: Number, required: true },
   description: { type: String, required: false },
-  transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }], // Lista de referencias a transacciones
+  transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }],
 });
 
 // Account Model

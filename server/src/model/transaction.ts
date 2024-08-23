@@ -4,17 +4,16 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 interface ITransaction extends Document {
   operation: string;
   import: number;
-  create_date: Date; // Asegúrate de que este campo es de tipo Date
+  create_date: Date;
   balance: number;
-  
 }
 
 // Transaction Schema
 const TransactionSchema: Schema = new Schema({
   operation: { type: String, required: true },
   import: { type: Number, required: true },
-  create_date: { type: Date }, // Usa Date para manejar fechas
-  balance: {type: Number, require:true },
+  create_date: { type: Date },
+  balance: { type: Number, required: true },
 });
 
 // Transaction Model

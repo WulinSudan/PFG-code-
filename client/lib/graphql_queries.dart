@@ -248,3 +248,9 @@ query(\$dni: String){
   getLogs(dni: \$dni)
 }
 """;
+
+const String checkSufficientAmountQuery = """
+query(\$accountNumber: String, \$amount: Float){
+  checkSufficientAmount(accountNumber: \$accountNumber, amount: \$amount)
+}
+""";

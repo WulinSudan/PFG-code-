@@ -18,7 +18,7 @@ class UserCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0), // Radio de las esquinas
       ),
       child: ListTile(
-        title: Text('Nombre usuario: ${user.name}'),
+        title: Text('User name: ${user.name}'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

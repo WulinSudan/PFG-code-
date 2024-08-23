@@ -40,7 +40,7 @@ class _AllAdminsPageState extends State<AllAdminsPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Movimientos de ${_selectedAdmin!.name}'),
+              title: Text('Movements of ${_selectedAdmin!.name}'),
               content: logs.isNotEmpty
                   ? Container(
                 width: double.maxFinite,
@@ -60,7 +60,7 @@ class _AllAdminsPageState extends State<AllAdminsPage> {
                   onPressed: () {
                     Navigator.of(context).pop(); // Cierra el diálogo
                   },
-                  child: Text('Cerrar'),
+                  child: Text('Close'),
                 ),
               ],
             );
@@ -123,7 +123,7 @@ class _AllAdminsPageState extends State<AllAdminsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Administradores'),
+        title: Text('Administrer'),
         centerTitle: true,
         backgroundColor: Colors.redAccent,
       ),
@@ -167,14 +167,14 @@ class _AllAdminsPageState extends State<AllAdminsPage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _viewAdminMovements,
-                      child: Text('Ver sus movimientos'),
+                      child: Text('Show his movements'),
                     ),
                   ),
                   SizedBox(width: 16.0), // Espacio entre los botones
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _deactivateAdmin,
-                      child: Text('Desactivar'),
+                      child: Text('Change status'),
                     ),
                   ),
                 ],

@@ -226,7 +226,7 @@ class _AdminPageState extends State<AdminPage> {
               child: Text('Navigation', style: TextStyle(color: Colors.red)),
             ),
             ListTile(
-              title: Text('Todos los administradores'),
+              title: Text('List all admins'),
               onTap: () {
                 Navigator.pushNamed(
                   context,
@@ -236,7 +236,7 @@ class _AdminPageState extends State<AdminPage> {
               },
             ),
             ListTile(
-              title: Text('Cambiar contraseña'),
+              title: Text('Change own password'),
               onTap: () {
                 showChangePasswordDialog(context, widget.accessToken);
               },
@@ -286,7 +286,7 @@ class _AdminPageState extends State<AdminPage> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _viewUserAccounts,
-                          child: Text('Ver sus cuentas'),
+                          child: Text('Show this accounts'),
                         ),
                       ),
                       SizedBox(width: 16.0),
@@ -295,7 +295,7 @@ class _AdminPageState extends State<AdminPage> {
                           onPressed: () {
                             showSetPasswordDialog(context, widget.accessToken, _selectedUser!.dni);
                           },
-                          child: Text('Establecer nueva contraseña'),
+                          child: Text('Set a new password'),
                         ),
                       ),
                     ],
@@ -307,14 +307,14 @@ class _AdminPageState extends State<AdminPage> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _onChangeUserStatus,
-                          child: Text('Cambiar estado'),
+                          child: Text('Change status'),
                         ),
                       ),
                       SizedBox(width: 16.0),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _viewDeleteUser,
-                          child: Text('Eliminar usuario'),
+                          child: Text('Remove user'),
                         ),
                       ),
                     ],
@@ -326,7 +326,7 @@ class _AdminPageState extends State<AdminPage> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _viewUserMovements,
-                          child: Text('Ver sus movimientos'),
+                          child: Text('Show his movements'),
                         ),
                       ),
                     ],

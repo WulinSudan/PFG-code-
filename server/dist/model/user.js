@@ -33,15 +33,14 @@ const UserSchema = new mongoose_1.Schema({
         required: true,
         validate: {
             validator: function (v) {
-                // Expresión regular para validar el formato de dni: 8 dígitos seguidos de 1 letra
                 return /^\d{8}[A-Za-z]$/.test(v);
             },
-            message: (props) => `${props.value} no es un DNI válido. Debe tener 8 dígitos seguidos de 1 letra.`,
+            message: (props) => `${props.value} is not a valid DNI. It must be 8 digits followed by 1 letter.`,
         },
     },
     name: { type: String, required: true },
     password: { type: String, required: true },
-    role: { type: String, default: "client", required: true },
+    role: { type: String, default: 'client', required: true },
     active: { type: Boolean, default: true, required: true },
     accounts: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Account' }],
     logs: { type: [String], default: [] },

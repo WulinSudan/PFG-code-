@@ -1,137 +1,134 @@
   
-  type Query {
-
+type Query {
+    # User information
     me: User
-
+    getUserInfo(dni: String!): User
+    getUserName: User
+    getUserRole(name: String!): String
+    getRole: String!
+    getAdmins: [User]!
+    getUsers: [User]!
+    users: [User]
+    
+    # Person information
     personCount: Int!
     allPersons: [Person]!
     findPerson(name: String!): Person
-
-    getUserRole(name: String!): String
-    getRole: String!
-
-    getAdmins:[User]!
-    getUsers: [User]!
+    
+    # Account information
     allAccount: [Account]!
     countAccount: Int!
-    getUserInfo(dni: String!): User
-    users: [User]
-    getAllAccounts:[Account]
+    getAllAccounts: [Account]
     getUserAccountCount(dni: String!): Int!
-
-    getUserAccounts:[Account]
+    getUserAccounts: [Account]
     getUserAccountsInfoByDni(dni: String!): [Account]
+    findAccount(accountNumber: String!): Account
+    
+    # Transaction information
+    getAccountTransactions(n_account: String!): [Transaction]
+    getTransactions: [Transaction]
+    
+    # Specific account information
+    getAccountPayKey(accountNumber: String!): String!
+    getMaxPayDay(accountNumber: String!): Int!
+    getAccountBalance(accountNumber: String!): Float!
+    getAccountStatus(accountNumber: String!): Boolean!
+    getUser(accountNumber: String!): User
+    getOrigenAccount(qrtext: String!): String
+    
+    # Verification functions
+    checkEnable(qrtext: String!): Boolean!
+    checkSufficientAmount(amount: Float, accountNumber: String): Boolean
+    
+    # Additional information
+    getLogs(dni: String): [String]
+}
 
-    getAccountTransactions(n_account:String!):[Transaction]
-    getTransactions:[Transaction]
-    findAccount(accountNumber:String!):Account
-     
-    getOrigenAccount(qrtext:String!):String
-  
-    getAccountPayKey(accountNumber:String!): String!
 
-    checkEnable(qrtext:String!): Boolean!
-
-    getMaxPayDay(accountNumber:String!):Int!
-
-    getAccountBalance(accountNumber:String!):Float!
-
-    getAccountStatus(accountNumber:String!):Boolean!
-
-    getUser(accountNumber:String!):User
-
-    getLogs(dni:String):[String]
-
-    getUserName:User
-
-  }
-
-  type Mutation {
-
-    setPassword(new:String, dni:String):Boolean!
-
-    changePassword(old:String, new:String):Boolean!
-
-    changeUserStatus(dni:String!):Boolean!
-
-    changeAccountStatus(accountNumber:String!):Boolean!
-
+type Mutation {
+    # User password management
+    setPassword(new: String, dni: String): Boolean!
+    changePassword(old: String, new: String): Boolean!
+    
+    # User and account status management
+    changeUserStatus(dni: String!): Boolean!
+    changeAccountStatus(accountNumber: String!): Boolean!
+    
+    # Transaction management
     addTransaction(input: TransactionInput!): Transaction!
     
-    setQrUsed(qrtext:String!): Boolean!
-    setMaxPayImport(accountNumber:String!, maxImport:Float!): Float!
-    setAccountDescription(accountNumber:String!,description:String!): String!
-
+    # QR code management
+    setQrUsed(qrtext: String!): Boolean!
+    
+    # Account settings and updates
+    setMaxPayImport(accountNumber: String!, maxImport: Float!): Float!
+    setAccountDescription(accountNumber: String!, description: String!): String!
+    setNewKey(accountNumber: String!): String!
+    
+    # User authentication and management
     logoutUser: LogoutResponse!
-
-    setNewKey(accountNumber:String!): String!
-    addDictionary(input: DictionaryInput!): Dictionary!
-
     signUp(input: SignUpInput!): User!
     signUpAdmin(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
-
+    
+    # User and person management
     removeUser(dni: String!): Int!
-
     addNewAdmin(input: AddNewAdminInput!): Admin!
-
     addPerson(name: String!, phone: Int!, street: String!, city: String!): Person!
     editNumber(name: String!, phone: Int!): Person
     removePerson(name: String!): Int!
-
-    removeAccount(number_account:String!):Int!
-
+    
+    # Account management
+    removeAccount(number_account: String!): Int!
     addAccountByAccessToken: Account!
     addAccountByUser(input: addAccountInput): Account!
-
-    makeTransfer(input: TransferInput!): TransferResult!
-
     
-  }
+    # Transfer management
+    makeTransfer(input: TransferInput!): TransferResult!
+    
+    # Dictionary management
+    addDictionary(input: DictionaryInput!): Dictionary!
+}
 
-  type LogoutResponse {
-    message: String!  
-  }
 
+# Represents a user logout response
+type LogoutResponse {
+    message: String!
+}
 
-
+# Represents a transaction with balance, operation details, and creation date
 type Transaction {
-  balance: Float!
-  operation: String!
-  import: Float!
-  create_date:Date
+    balance: Float!
+    operation: String!
+    import: Float!
+    create_date: Date
 }
 
+# Scalar type for Date
+scalar Date
 
-  scalar Date
-
-  input DictionaryInput {
-  encrypt_message: String!
-  account: String!
-  create_date: Date
-}
-
-
-
-  type Dictionary {
+# Represents a dictionary entry with encryption message, account, and creation date
+type Dictionary {
     encrypt_message: String!
     account: String!
     create_date: Date
-  }
+}
 
-
-  type Address {
+# Represents an address with street and city
+type Address {
     street: String!
     city: String!
-  }
+}
 
-  type Person {
+# Represents a person with name, phone, and address
+type Person {
     name: String!
     phone: Int!
     address: Address!
-  }
+}
 
-  type Account {
+# Represents an account with owner details, balance, status, and other attributes
+type Account {
     owner_dni: String!
     owner_name: String!
     number_account: String!
@@ -142,81 +139,94 @@ type Transaction {
     maximun_amount_day: Float!
     description: String!
 }
-    
-  
 
-   type Admin {
+# Represents an admin with dni, name, password, and status
+type Admin {
     dni: String!
     name: String!
     password: String!
     active: Boolean!
-  }
+}
 
-
-
-  type User {
+# Represents a user with dni, name, password, status, and associated accounts
+type User {
     dni: String!
     name: String!
     password: String!
     active: Boolean!
     accounts: [Account]
-  }
+}
 
-
-  type Token {
+# Represents a token used for authentication
+type Token {
     value: String!
-  }
+}
 
-  type AuthToken {
+# Represents an authentication token along with the user information
+type AuthToken {
     access_token: String!
     user: User!
-  }
+}
 
-  input TransferInput {
+# Represents the result of a transfer operation indicating success or failure
+type TransferResult {
+    success: Boolean!
+    message: String
+}
+
+# Input type for creating or updating a transaction
+input TransactionInput {
+    operation: String!
+    import: Float!
+    accountNumber: String!
+    balance: Float!
+}
+
+# Input type for making a transfer between accounts
+input TransferInput {
     accountOrigen: String!
     accountDestin: String!
     import: Float!
-  }
+}
 
-  type TransferResult {
-    success: Boolean!
-    message: String
-  }
+# Input type for adding or updating a dictionary entry
+input DictionaryInput {
+    encrypt_message: String!
+    account: String!
+    create_date: Date
+}
 
-
-  input addAccountInput{
-    owner_dni: String!
-    owner_name: String!
-  }
-  
-  input RegisterInput{
+# Input type for registering a user or admin
+input RegisterInput {
     name: String!
     password: String!
-  }
-  
-  input SignUpInput {
+}
+
+# Input type for signing up a user or admin
+input SignUpInput {
     dni: String
     name: String
     password: String
-  }
-
-  input LoginInput {
-    name: String!
-    password: String!
-  }
-
-  input AddNewAdminInput {
-  dni: String!
-  name: String!
-  password: String!
 }
 
-  input TransactionInput {
-  operation: String!
-  import: Float!
-  accountNumber: String! 
-  balance: Float!
-  }
+# Input type for logging in a user
+input LoginInput {
+    name: String!
+    password: String!
+}
+
+# Input type for adding a new admin
+input AddNewAdminInput {
+    dni: String!
+    name: String!
+    password: String!
+}
+
+# Input type for adding a new account by user
+input addAccountInput {
+    owner_dni: String!
+    owner_name: String!
+}
 
 
 

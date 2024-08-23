@@ -7,6 +7,7 @@ import '../functions/addDictionary.dart';
 import '../functions/setNewKey.dart';
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/qr_dialog.dart'; // Importa el nuevo archivo
+import '../functions/checkSufficientAmout.dart';
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -65,6 +66,13 @@ class _PaymentPageState extends State<PaymentPage> {
     try {
       if (accessToken == null) {
         throw Exception("Access token is null");
+      }
+
+      if (amountToPay != -1) {
+        bool amountAcceptable = await checkSufficientAmount(accessToken!, accountNumber, amountToPay);
+        if (!amountAcceptable) {
+          throw Exception("Amount not acceptable");
+        }
       }
 
       // Crear nueva key, haz uso, y pon en base de datos

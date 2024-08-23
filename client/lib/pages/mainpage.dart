@@ -271,7 +271,7 @@ class _MainPageState extends State<MainPage> {
                 );
               },
             )
-                : Center(child: Text('Selecciona una cuenta')),
+                : Center(child: Text('select an account')),
           ),
         ],
       ),
@@ -380,6 +380,10 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               SizedBox(width: 8.0),
+
+
+
+
               IconButton(
                 onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
                     ? () {
@@ -390,7 +394,7 @@ class _MainPageState extends State<MainPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           ListTile(
-                            title: Text('Hacer transferencia manualmente'),
+                            title: Text('Make transfer manually'),
                             onTap: () async {
                               Navigator.pop(context); // Cerrar el BottomSheet
                               await showManualTransferDialog(
@@ -466,6 +470,10 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
+
+
+
+
 
 
             ],

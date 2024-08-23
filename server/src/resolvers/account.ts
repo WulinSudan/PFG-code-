@@ -99,6 +99,29 @@ async function me(context: Context) {
 export const accountResolvers = {
   Query: {
 
+
+    checkSufficientAmount: async (
+      { accountNumber }: { accountNumber: string },
+      { amount }: { amount: number }
+    ): Promise<boolean> => {
+      const account = await findAccount(accountNumber);
+    
+      if (!account) {
+        throw new Error("Account not found");
+      }
+    
+      if (amount > account.balance) {
+        throw new Error("Insufficient balance");
+      }
+    
+      if (amount > account.maximum_amount_once) {
+        throw new Error("Amount exceeds the maximum limit allowed");
+      }
+    
+      return true;
+    },
+    
+
     // Obtener información de las cuentas del usuario autenticado
     getUserAccounts: async (_root: any, context: Context) => {
       try {
