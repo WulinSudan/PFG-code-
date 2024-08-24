@@ -3,7 +3,7 @@ import mongoose, { Types } from "mongoose";
 import { Context } from "../utils/context";
 import { getAccessToken, getUserId } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/crypt";
-import { User, IUser} from "../model/user";
+import { User, IUser } from "../model/user";
 import { Transaction } from "../model/transaction";
 import { ContextFunction } from "@apollo/server";
 import fs from 'fs-extra';
@@ -12,16 +12,16 @@ import path from 'path';
 
 const logFilePath = path.join(__dirname, '../../logs/accounts.txt');
 
-// Función para escribir logs en el archivo
+// Function to write logs to a file
 const writeLog = async (message: string) => {
   try {
     await fs.appendFile(logFilePath, `${message}\n`);
   } catch (err) {
-    console.error('Error al escribir en el archivo de log:', err);
+    console.error('Error writing to the log file:', err);
   }
-};
+}
 
-// Genera un número de cuenta único basado en la fecha y hora actuales
+
 function generateUniqueAccountNumber(): string {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -52,35 +52,35 @@ interface TransferInput {
 
 async function findUser(accountNumber: string): Promise<IUser | null> {
   try {
-    // Encuentra la cuenta usando el número de cuenta
+    // Find the account using the account number
     const account = await Account.findOne({ accountNumber }).exec();
     
     if (!account) {
-      console.log('No se encontró ninguna cuenta con el número proporcionado.');
+      console.log('No account found with the provided number.');
       return null;
     }
 
-    // Encuentra el usuario que tiene la cuenta en su lista de cuentas
+    // Find the user who has the account in their list of accounts
     const user = await User.findOne({ accounts: account._id }).exec();
 
     return user;
   } catch (error) {
-    console.error('Error al buscar el usuario:', error);
-    throw new Error('No se pudo encontrar el usuario.');
+    console.error('Error finding the user:', error);
+    throw new Error('Could not find the user.');
   }
 }
 
-// Función local para buscar una cuenta por su número de cuenta
+
 async function findAccount(accountNumber: string): Promise<IAccount | null> {
   try {
     return await Account.findOne({ number_account: accountNumber });
   } catch (error) {
-    console.error('Error al buscar la cuenta:', error);
+    console.error('Error finding the account:', error);
     throw error;
   }
 }
 
-// Resolver para obtener la información del usuario autenticado
+
 async function me(context: Context) {
   const userId = getUserId(context);
 
@@ -96,62 +96,71 @@ async function me(context: Context) {
   return user;
 }
 
+
 export const accountResolvers = {
   Query: {
 
-
-    checkSufficientAmount: async (
-      { accountNumber }: { accountNumber: string },
-      { amount }: { amount: number }
+    checkEnableAmount: async (
+      _: any,
+      { amount, accountNumber }: { amount: number; accountNumber: string }
     ): Promise<boolean> => {
-      const account = await findAccount(accountNumber);
-    
-      if (!account) {
-        throw new Error("Account not found");
+      try {
+        // Find the account using the provided account number
+        const account = await findAccount(accountNumber);
+        
+        // Check if the account exists
+        if (!account) {
+          throw new Error("Account not found");
+        }
+        
+        // Check if the requested amount exceeds the available balance
+        if (amount > account.balance) {
+          throw new Error("Insufficient balance");
+        }
+        
+        // Check if the requested amount exceeds the maximum allowed per transaction
+        if (amount > account.maximum_amount_once) {
+          throw new Error("Amount exceeds the maximum limit allowed");
+        }
+        
+        // If all checks pass, return true
+        return true;
+      } catch (error) {
+        console.error(error);
+        // In case of an error (like insufficient balance), you can handle it by returning false or throwing an exception
+        return false; // Or throw an exception depending on how you want to handle it
       }
-    
-      if (amount > account.balance) {
-        throw new Error("Insufficient balance");
-      }
-    
-      if (amount > account.maximum_amount_once) {
-        throw new Error("Amount exceeds the maximum limit allowed");
-      }
-    
-      return true;
     },
-    
 
-    // Obtener información de las cuentas del usuario autenticado
+
     getUserAccounts: async (_root: any, context: Context) => {
       try {
-        // Obtener el usuario autenticado usando la función `me`
+        // Retrieve the authenticated user using the `me` function
         const currentUser = await me(context);
-        console.log(`Usuario autenticado: ${currentUser.name}`);
+        console.log(`Authenticated user: ${currentUser.name}`);
 
         const accountIds = currentUser.accounts;
 
-        // Verificar si el usuario tiene cuentas asociadas
+        // Check if the user has associated accounts
         if (!Array.isArray(accountIds) || accountIds.length === 0) {
           return [];
         }
 
-        // Buscar todas las cuentas asociadas al usuario
+        // Find all accounts associated with the user
         const accounts = await Account.find({ _id: { $in: accountIds } });
 
-        // Filtrar las cuentas que tienen un nombre de propietario válido
+        // Filter accounts that have a valid owner name
         const validAccounts = accounts.filter(account => account.owner_name);
 
         return validAccounts;
       } catch (error) {
-        console.error('Error al obtener las cuentas del usuario:', error);
-        throw new Error('No se pudo obtener la información de las cuentas del usuario.');
+        console.error('Error fetching user accounts:', error);
+        throw new Error('Could not retrieve user account information.');
       }
     },
 
 
-
-    // Obtener información de las cuentas del usuario por DNI
+    // Get information about the user's accounts by DNI
     getUserAccountsInfoByDni: async (_root: any, { dni }: { dni: string }, context: Context) => {
 
       const currentUser = await me(context);
@@ -181,62 +190,64 @@ export const accountResolvers = {
       }
     },
 
-    // Obtener el estado de una cuenta por su número
+    // Get the status of an account by its number
     getAccountStatus: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
-      
+
       const currentUser = await me(context);
 
       try {
         const account = await findAccount(accountNumber);
 
-        const logMessage = `${new Date().toISOString()} - Operación consulta: get account ${accountNumber} status`;
+        const logMessage = `${new Date().toISOString()} - Operation query: get account ${accountNumber} status`;
         currentUser.logs.push(logMessage);
         currentUser.save();
 
         return account?.active || false; 
       } catch (error) {
-        console.error('Error al obtener el estado de la cuenta:', error);
-        throw new Error('No se pudo obtener el estado de la cuenta.');
+        console.error('Error retrieving the account status:', error);
+        throw new Error('Could not retrieve the account status.');
       }
     },
+      
 
-    // Obtener el saldo de una cuenta por su número
+    // Get the balance of an account by its number
     getAccountBalance: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       const currentUser = await me(context);
 
       try {
         const account = await findAccount(accountNumber);
 
-        const logMessage = `${new Date().toISOString()} - Operación consulta: get account ${accountNumber} balance`;
+        const logMessage = `${new Date().toISOString()} - Operation query: get account ${accountNumber} balance`;
         currentUser.logs.push(logMessage);
         currentUser.save();
 
         return account?.balance || false; 
       } catch (error) {
-        console.error('Error al obtener el estado de la cuenta:', error);
-        throw new Error('No se pudo obtener el estado de la cuenta.');
+        console.error('Error retrieving the account balance:', error);
+        throw new Error('Could not retrieve the account balance.');
       }
     },
+      
 
-    // no utiliza
+    // Not used
     getMaxPayDay: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       const currentUser = await me(context);
 
       try {
         const account = await findAccount(accountNumber);
 
-        const logMessage = `${new Date().toISOString()} - Operación consulta: get account ${accountNumber} max pay day`;
+        const logMessage = `${new Date().toISOString()} - Operation query: get account ${accountNumber} max pay day`;
         currentUser.logs.push(logMessage);
         currentUser.save();
 
         return account?.maximum_amount_day || false; 
       } catch (error) {
-        console.error('Error al obtener el estado de la cuenta:', error);
-        throw new Error('No se pudo obtener el estado de la cuenta.');
+        console.error('Error retrieving the account status:', error);
+        throw new Error('Could not retrieve the account status.');
       }
     },
 
-    // Obtener las transacciones asociadas a una cuenta
+    // Get the transactions associated with an account
     getAccountTransactions: async (_root: any, { n_account }: { n_account: string }, context: Context) => {
 
       const currentUser = await me(context);
@@ -262,46 +273,47 @@ export const accountResolvers = {
       }
     },
 
-    // Obtener la clave de pago de una cuenta
+
+    // Get the payment key of an account
     getAccountPayKey: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context): Promise<string> => {
       try {
-        // Obtener el usuario autenticado
+        // Get the authenticated user
         const currentUser = await me(context);
-    
-        // Buscar la cuenta con el número de cuenta proporcionado y verificar que pertenezca al usuario actual
+
+        // Find the account with the provided account number and verify that it belongs to the current user
         const account = await Account.findOne({
           number_account: accountNumber,
           userId: new Types.ObjectId(currentUser._id)
         });
-    
+
         if (!account) {
           throw new Error('Account not found');
         }
-    
-        // Registrar la operación en los logs del usuario
-        const logMessage = `${new Date().toISOString()} - Operación consulta: get account ${accountNumber} key`;
+
+        // Log the operation in the user's logs
+        const logMessage = `${new Date().toISOString()} - Operation query: get account ${accountNumber} key`;
         currentUser.logs.push(logMessage);
-    
-        // Guardar los cambios en los logs del usuario
+
+        // Save the changes to the user's logs
         await currentUser.save();
-    
-        // Devolver la llave de la cuenta
+
+        // Return the account payment key
         return account.key_to_pay;
       } catch (error) {
-        console.error('Error al obtener la llave de pago de la cuenta:', error);
-        throw new Error('No se pudo obtener la llave de pago de la cuenta.');
+        console.error('Error fetching the payment key of the account:', error);
+        throw new Error('Could not retrieve the payment key of the account.');
       }
     },
-    
 
-    // Buscar una cuenta por su número
+        
+
+    // Find an account by its number
     findAccount: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       try {
         const account = await Account.findOne({ number_account: accountNumber });
         if (!account) {
           return null;
         }
-
 
         return {
           number_account: account.number_account,
@@ -313,12 +325,13 @@ export const accountResolvers = {
           maximum_amount_once: account.maximum_amount_once,
         };
       } catch (error) {
-        console.error('Error al buscar la cuenta:', error);
+        console.error('Error finding the account:', error);
         throw error;
       }
     },
 
-    // Obtener todas las cuentas
+
+
     // no utiliza
     getAllAccounts: async (): Promise<IAccount[]> => {
       try {
@@ -337,24 +350,27 @@ export const accountResolvers = {
   },
 
   Mutation: {
-    // Establecer la descripción de una cuenta
-    setAccountDescription: async (_root: any, { accountNumber, description }: { accountNumber: string, description: string }, context:Context): Promise<string> => {
+    
+    // Set the description for an account
+    setAccountDescription: async (_root: any, { accountNumber, description }: { accountNumber: string, description: string }, context: Context): Promise<string> => {
       try {
-
+        // Get the authenticated user
         const currentUser = await me(context);
 
+        // Find the account by its number
         const account = await Account.findOne({ number_account: accountNumber });
         if (!account) {
           throw new Error("Account does not exist");
         }
 
+        // Update the account with the new description
         await Account.updateOne(
           { number_account: accountNumber },
           { $set: { description } }
         );
 
-        
-        const logMessage = `${new Date().toISOString()} - Mutation operation: set account  ${accountNumber} description`;
+        // Log the operation
+        const logMessage = `${new Date().toISOString()} - Mutation operation: set account ${accountNumber} description`;
         currentUser.logs.push(logMessage);
         await currentUser.save();
 
@@ -365,53 +381,50 @@ export const accountResolvers = {
       }
     },
 
-    // Cambiar el estado de una cuenta
-    // des de la cuenta, tengo que tener el usuario
 
+    // Change the status of an account
     changeAccountStatus: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context): Promise<boolean> => {
-      
-      console.log("En changeAccountStatus");
+      console.log("In changeAccountStatus");
 
       try {
-        // Obtener el usuario actual
+        // Get the current user
         const currentUser = await me(context);
-    
-        // Buscar la cuenta por número
+
+        // Find the account by its number
         const account = await Account.findOne({ number_account: accountNumber });
         if (!account) {
           throw new Error("Account does not exist");
         }
-    
-        // Alternar el estado de la cuenta
-        const newStatus = !account.active; // Cambia el estado actual
+
+        // Toggle the account status
+        const newStatus = !account.active; // Toggle the current status
         await Account.updateOne(
           { number_account: accountNumber },
           { $set: { active: newStatus } }
         );
-    
-        // Verificar si la cuenta ha sido actualizada
+
+        // Verify if the account has been updated
         const updatedAccount = await Account.findOne({ number_account: accountNumber });
         if (!updatedAccount) {
           throw new Error("Failed to retrieve updated account status");
         }
-    
-        // Registrar la operación en los logs del usuario actual
-        const logMessage = `${new Date().toISOString()} - Mutation operation: change account ${accountNumber} status to ${newStatus} by ${currentUser.name}`;
+
+        // Log the operation in the current user's logs
+        const logMessage = `${new Date().toISOString()} - Mutation operation: changed account ${accountNumber} status to ${newStatus} by ${currentUser.name}`;
         currentUser.logs.push(logMessage);
         await currentUser.save();
 
         await writeLog(logMessage);
-    
-        // Retornar el estado actualizado
+
+        // Return the updated status
         return updatedAccount.active;
       } catch (error) {
         console.error("Error setting account active status:", error);
         throw new Error("Failed to update account status");
       }
     },
-    
 
-    // Establecer el máximo importe de pago permitido
+
     setMaxPayImport: async (_root: any, { accountNumber, maxImport }: { accountNumber: string, maxImport: number }, context:Context): Promise<number> => {
       try {
         const currentUser = await me(context);
@@ -436,8 +449,7 @@ export const accountResolvers = {
       }
     },
 
-    // Agregar una cuenta a un usuario por DNI
-    // no utiliza
+
     addAccountByUser: async (_root: any, { input: { owner_dni, owner_name } }: AddAccountArgs): Promise<IAccount> => {
       try {
         const newAccount = new Account({
@@ -504,17 +516,12 @@ export const accountResolvers = {
     // falta utilizar me
     removeAccount: async (_root: any, { number_account }: { number_account: string }, context: Context) => {
       
-      const userId = getUserId(context);
-      if (!userId) {
-        throw new Error('User not authenticated');
+      const currentUser = await me(context);
+      if(!currentUser){
+        throw("User not find");
       }
 
-      const user = await User.findById(new mongoose.Types.ObjectId(userId));
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      const account = await Account.findOne({ number_account });
+      const account = await findAccount(number_account);
       if (!account) {
         throw new Error('Account not found');
       }
@@ -526,56 +533,63 @@ export const accountResolvers = {
       const deletionResult = await Account.deleteOne({ _id: account._id });
 
       const logMessage = `${new Date().toISOString()} - Mutation operation: remove user accounts ${number_account}`;
-      user.logs.push(logMessage);
-      await user.save();
-
+      currentUser.logs.push(logMessage);
+    
       if (deletionResult.deletedCount === 0) {
         throw new Error('Failed to delete the account.');
       }
 
-      user.accounts = user.accounts.filter(accountId => !accountId.equals(account._id));
-      await user.save();
+      currentUser.accounts = currentUser.accounts.filter(accountId => !accountId.equals(account._id));
+      await currentUser.save();
 
       console.log('Account deleted successfully');
       return deletionResult.deletedCount;
     },
 
-    // Realizar una transferencia entre cuentas
-    // pendent de fer
-    makeTransfer: async (_root: any, { input }: { input: TransferInput }, context:Context): Promise<any> => {
+    // Perform a transfer between accounts
+    // Pending implementation
+    makeTransfer: async (_root: any, { input }: { input: TransferInput }, context: Context): Promise<any> => {
 
-      console.log("--------------------------------------------");
-      console.log(input.accountOrigen);
-      console.log(input.accountDestin);
+
       const userOrigen = await findUser(input.accountOrigen);
       console.log(userOrigen?.name);
 
       const userDestin = await findUser(input.accountDestin);
-      console.log(userDestin?.name);
-      console.log("--------------------------------------------");
 
       const currentUser = await me(context);
-      
-      // per saber quina compte es del origen
-      // a partir de un compte bancari, trobar el usuari
+      if(!currentUser){
+        throw("Not User provided")
+      }
 
 
+      if(currentUser.dni === userOrigen!.dni){
+        if(userOrigen!.active == false){
+          throw("Current User desenable")
+        }
+      }
+
+      // To determine which account is the source
+      // From a bank account, find the user
 
       try {
         const accountOrigenDoc = await findAccount(input.accountOrigen);
         const accountDestinDoc = await findAccount(input.accountDestin);
 
+        if(accountOrigenDoc!.active == false){
+          throw("Current Account desenable")
+        }
+
         if (!accountOrigenDoc || !accountDestinDoc) {
           return {
             success: false,
-            message: 'Una o ambas cuentas no existen.',
+            message: 'One or both accounts do not exist.',
           };
         }
 
         if (accountOrigenDoc._id.equals(accountDestinDoc._id)) {
           return {
             success: false,
-            message: 'No se puede realizar transferencia en la misma cuenta',
+            message: 'Cannot transfer to the same account.',
           };
         }
 
@@ -584,21 +598,21 @@ export const accountResolvers = {
         if (isNaN(importNumber) || importNumber <= 0) {
           return {
             success: false,
-            message: 'El importe a transferir debe ser un número válido mayor que cero.',
+            message: 'The amount to transfer must be a valid number greater than zero.',
           };
         }
 
         if (accountOrigenDoc.balance < importNumber) {
           return {
             success: false,
-            message: 'Saldo insuficiente en la cuenta de origen.',
+            message: 'Insufficient balance in the source account.',
           };
         }
 
         if (importNumber > accountOrigenDoc.maximum_amount_once) {
           return {
             success: false,
-            message: 'Supera el máximo permitido para una sola transacción.',
+            message: 'Exceeds the maximum allowed for a single transaction.',
           };
         }
 
@@ -608,26 +622,26 @@ export const accountResolvers = {
         await accountOrigenDoc.save();
         await accountDestinDoc.save();
 
+        // Log the operation for the current user
+        const logMessage = `${new Date().toISOString()} - Mutation operation: make transfer from ${input.accountOrigen} to ${input.accountDestin} with value ${importNumber}`;
+        
+        userDestin?.logs.push(logMessage);
+        userOrigen?.logs.push(logMessage);
 
-        // Registrar la operación en los logs del usuario actual
-      const logMessage = `${new Date().toISOString()} - Mutation operation: make transfer from ${input.accountOrigen} to ${input.accountDestin} with value ${importNumber}`;
-      
-      userDestin?.logs.push(logMessage);
-      userOrigen?.logs.push(logMessage);
-
-       await writeLog(logMessage);
+        await writeLog(logMessage);
 
         return {
           success: true,
-          message: `Transferencia de ${importNumber} unidades realizada correctamente desde ${input.accountOrigen} de ${userOrigen} a ${input.accountDestin} de ${userDestin}.`,
+          message: `Transfer of ${importNumber} units successfully made from ${input.accountOrigen} of ${userOrigen} to ${input.accountDestin} of ${userDestin}.`,
         };
       } catch (error) {
-        console.error('Error al realizar la transferencia:', error);
+        console.error('Error performing the transfer:', error);
         return {
           success: false,
-          message: 'Error al realizar la transferencia. Por favor, inténtalo de nuevo más tarde.',
+          message: 'Error performing the transfer. Please try again later.',
         };
       }
     },
+
   },
 };

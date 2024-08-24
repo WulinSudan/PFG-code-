@@ -217,6 +217,14 @@ query(\$name: String!){
 }
 """;
 
+const String getUserStatusNameQuery = """
+query {
+  getUserStatus {
+    active
+  }
+}
+""";
+
 const String getUserNameQuery = """
 query{
   getUserName
@@ -249,8 +257,8 @@ query(\$dni: String){
 }
 """;
 
-const String checkSufficientAmountQuery = """
+const String checkEnableAmountQuery = """
 query(\$accountNumber: String, \$amount: Float){
-  checkSufficientAmount(accountNumber: \$accountNumber, amount: \$amount)
+  checkEnableAmount(accountNumber: \$accountNumber, amount: \$amount)
 }
 """;

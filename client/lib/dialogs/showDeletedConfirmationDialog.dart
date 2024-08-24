@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import '../pages/account.dart';
 import '../pages/account_card.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
+import '../graphql_client.dart'; // Make sure to import your GraphQL service
 import '../graphql_queries.dart';
 import '../functions/fetchUserData.dart';
 import '../functions/addAccount.dart';
 import '../functions/removeUserAccount.dart';
-import '../functions/maketransfer.dart';
+import '../functions/makeTransfer.dart'; // Fixed typo from maketransfer to makeTransfer
 import 'selectAccountDialog.dart';
 import '../dialogs/confirmationOKDialog.dart';
-
-
+import '../functions/addTransaction.dart';
 
 Future<void> showDeleteConfirmationDialog(BuildContext context, String accessToken, List<Account> accounts, Account selectedAccount) async {
   if (selectedAccount.balance == 0) {
@@ -22,28 +20,31 @@ Future<void> showDeleteConfirmationDialog(BuildContext context, String accessTok
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirmar eliminación'),
-          content: Text('¿Estás seguro de que quieres eliminar a esta cuenta?'),
+          title: Text('Confirm Deletion'),
+          content: Text('Are you sure you want to delete this account?'),
           actions: [
             TextButton(
-              child: Text('Cancelar'),
+              child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Eliminar'),
-              onPressed: () {
+              child: Text('Delete'),
+              onPressed: () async {
                 Navigator.of(context).pop();
-                removeAccount(context,accessToken,selectedAccount.numberAccount);
-                },
+
+                // Remove the account
+                await removeAccount(context, accessToken, selectedAccount.numberAccount);
+
+              },
             ),
           ],
         );
       },
     );
-  }
-  else {
-    selectAccountDialog(context,accessToken,accounts,selectedAccount);
+  } else {
+    // Show a dialog to select another account or handle the case when balance is not zero
+    selectAccountDialog(context, accessToken, accounts, selectedAccount);
   }
 }

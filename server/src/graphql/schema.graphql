@@ -5,6 +5,8 @@ type Query {
     getUserInfo(dni: String!): User
     getUserName: User
     getUserRole(name: String!): String
+    getUserStatusName(dni:String!):Boolean!
+    getUserStatus:Boolean!
     getRole: String!
     getAdmins: [User]!
     getUsers: [User]!
@@ -38,7 +40,7 @@ type Query {
     
     # Verification functions
     checkEnable(qrtext: String!): Boolean!
-    checkSufficientAmount(amount: Float, accountNumber: String): Boolean
+    checkEnableAmount(amount: Float, accountNumber: String): Boolean!
     
     # Additional information
     getLogs(dni: String): [String]

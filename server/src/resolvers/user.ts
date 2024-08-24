@@ -90,7 +90,6 @@ export const userResolvers = {
     
         if (!user) {
             throw new Error("No se puede encontrar el usuario.");
-
         }
               
         // Retornar los logs del usuario
@@ -107,6 +106,60 @@ export const userResolvers = {
         }
 
         return user;
+      },
+
+
+      getUserStatusName : async (_root: any, { dni }: { dni: string }, context: Context): Promise<boolean> => {
+        
+        console.log("Entering getUserStatus");
+      
+        try {
+          // Buscar el usuario por DNI
+          const user = await User.findOne({ dni: dni });
+      
+          if (!user) {
+              throw new Error("No se puede encontrar el usuario.");
+          }
+        
+          if (typeof user.active !== 'boolean') {
+            console.error("User.active is not a boolean:", user.active);
+            throw new Error('User active status is not a boolean');
+          }
+          
+          console.log("User status is", user.active);
+          return user.active;
+        } catch (error) {
+          // Mejora el mensaje de error para incluir detalles
+          console.error(`Error in getUserStatus: ${(error as Error).message}`);
+          throw new Error(`Failed to get user status: ${(error as Error).message}`);
+        }
+      },
+
+
+      getUserStatus : async (_root: any, context: Context): Promise<boolean> => {
+        console.log("Entering getUserStatus name");
+      
+        try {
+          const user = await me(context);
+      
+          // Verifica si el resultado de `me` es `undefined` o si `active` no es un booleano
+          if (!user) {
+            console.error("User is undefined or null");
+            throw new Error('User not found');
+          }
+      
+          if (typeof user.active !== 'boolean') {
+            console.error("User.active is not a boolean:", user.active);
+            throw new Error('User active status is not a boolean');
+          }
+          
+          console.log("User status is", user.active);
+          return user.active;
+        } catch (error) {
+          // Mejora el mensaje de error para incluir detalles
+          console.error(`Error in getUserStatus: ${(error as Error).message}`);
+          throw new Error(`Failed to get user status: ${(error as Error).message}`);
+        }
       },
       
 
@@ -276,7 +329,9 @@ export const userResolvers = {
       },
       
 
+      // cambiar la status de si mateix o per admin
       changeUserStatus: async (_root: any, args: { dni: string }, context: Context): Promise<boolean> => {
+
         try {
           // Buscar el usuario por DNI
           const user = await User.findOne({ dni: args.dni });

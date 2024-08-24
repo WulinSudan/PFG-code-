@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
-Future<bool> checkSufficientAmount(String accessToken, String accountNumber, double amount) async {
+Future<bool> checkEnableAmount(String accessToken, String accountNumber, double amount) async {
   print("Dentro de la función checkSufficientAmount");
 
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
@@ -11,7 +11,7 @@ Future<bool> checkSufficientAmount(String accessToken, String accountNumber, dou
   try {
     final QueryResult result = await client.mutate(
       MutationOptions(
-        document: gql(checkSufficientAmountQuery),
+        document: gql(checkEnableAmountQuery),
         variables: <String, dynamic>{
           'accountNumber': accountNumber,
           'amount': amount,
@@ -24,7 +24,7 @@ Future<bool> checkSufficientAmount(String accessToken, String accountNumber, dou
       return false;
     } else {
       final data = result.data;
-      if (data != null && data['checkSufficientAmount'] == true) {
+      if (data != null && data['checkEnableAmount'] == true) {
         print('Mutación exitosa y el resultado es true');
         return true;
       } else {

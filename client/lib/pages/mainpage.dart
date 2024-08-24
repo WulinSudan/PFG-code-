@@ -1,30 +1,31 @@
-import 'package:client/functions/addTransaction.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'account.dart';
-import 'account_card.dart';
-import '../functions/fetchUserData.dart';
-import '../functions/addAccount.dart';
-import '../functions/getAccountTransactions.dart';
-import '../dialogs/logoutDialog.dart';
-import '../dialogs/showDeletedConfirmationDialog.dart';
-import '../utils/transaction_card.dart';
-import '../utils/transaction.dart';
-import 'color_selection_page.dart';
+import 'package:client/functions/addTransaction.dart';
 import 'package:client/functions/changeAccountStatus.dart';
 import 'package:client/functions/getAccountStatus.dart';
+import 'package:client/functions/getUserStatusName.dart';
+import 'package:client/functions/fetchUserData.dart';
+import 'package:client/functions/addAccount.dart';
+import 'package:client/functions/getAccountTransactions.dart';
+import 'package:client/dialogs/logoutDialog.dart';
+import 'package:client/dialogs/showDeletedConfirmationDialog.dart';
+import 'package:client/utils/transaction_card.dart';
+import 'package:client/utils/transaction.dart';
 import 'package:client/dialogs/confirmationOKdialog.dart';
 import 'package:client/dialogs/askconfirmacion.dart';
 import 'package:client/functions/removeUser.dart';
-import 'login.dart'; // Asegúrate de importar la página de login si no lo has hecho
 import 'package:client/dialogs/changePasswordDialog.dart';
 import 'package:client/dialogs/manualTransfer.dart';
-
-import '../functions/setNewMax.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/getDescriptionDialog.dart'; // Asegúrate de que esta ruta sea correcta
-import '../dialogs/getImportDialog.dart'; // Asegúrate de que esta ruta sea correcta
-import '../functions/setAccountDescription.dart';
-
+import 'package:client/functions/setNewMax.dart';
+import 'package:client/dialogs/getDescriptionDialog.dart';
+import 'package:client/dialogs/getImportDialog.dart';
+import 'package:client/functions/setAccountDescription.dart';
+import 'color_selection_page.dart';
+import 'login.dart';
+import 'account.dart';
+import 'account_card.dart';
+import '../functions/changeUserStatus.dart';
+import '../dialogs/correctDialog.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -44,6 +45,7 @@ class _MainPageState extends State<MainPage> {
   bool isCreatingAccount = false;
   Color appBarColor = Colors.redAccent;
   Color navigationDrawerColor = Colors.redAccent;
+  bool _userStatus = true; // Asumir que el usuario está activo por defecto
 
   @override
   void initState() {
@@ -87,6 +89,12 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> fetchData() async {
     await fetchUserData(widget.accessToken, updateUserData);
+
+    // Fetch user status
+    bool userStatus = await getUserStatusName(widget.accessToken);
+    setState(() {
+      _userStatus = userStatus; // Almacenar el estado del usuario
+    });
   }
 
   Future<void> updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) async {
@@ -102,23 +110,25 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onAccountSelected(int index) async {
-    setState(() {
-      if (selectedAccountIndex == index) {
-        selectedAccountIndex = null; // Deseleccionar si ya está seleccionado
-      } else {
-        selectedAccountIndex = index; // Seleccionar nueva cuenta
-      }
-    });
+    if (index >= 0 && index < accounts.length) {
+      setState(() {
+        if (selectedAccountIndex == index) {
+          selectedAccountIndex = null; // Deseleccionar si ya está seleccionado
+        } else {
+          selectedAccountIndex = index; // Seleccionar nueva cuenta
+        }
+      });
 
-    if (selectedAccountIndex != null && selectedAccountIndex! < accounts.length) {
-      final accountNumber = accounts[selectedAccountIndex!].numberAccount;
-      try {
-        final fetchedTransactions = await getAccountTransactions(widget.accessToken, accountNumber);
-        setState(() {
-          transactions = fetchedTransactions;
-        });
-      } catch (e) {
-        print('Error al obtener transacciones: $e');
+      if (selectedAccountIndex != null) {
+        final accountNumber = accounts[selectedAccountIndex!].numberAccount;
+        try {
+          final fetchedTransactions = await getAccountTransactions(widget.accessToken, accountNumber);
+          setState(() {
+            transactions = fetchedTransactions;
+          });
+        } catch (e) {
+          print('Error al obtener transacciones: $e');
+        }
       }
     }
   }
@@ -141,6 +151,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  bool get isUserActiveAndHasSelectedAccount {
+    return _userStatus && selectedAccountIndex != null && selectedAccountIndex! < accounts.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,7 +163,7 @@ class _MainPageState extends State<MainPage> {
         title: Text('WelCome - ${userName ?? ''}'),
         centerTitle: true,
         backgroundColor: appBarColor,
-        actions: [
+        actions: _userStatus ? [
           IconButton(
             icon: Icon(Icons.autorenew),
             onPressed: () async {
@@ -188,7 +202,7 @@ class _MainPageState extends State<MainPage> {
               showLogoutConfirmationDialog(context);
             },
           ),
-        ],
+        ] : [], // Deshabilitar acciones si el usuario no está activo
       ),
       drawer: Drawer(
         child: ListView(
@@ -202,24 +216,36 @@ class _MainPageState extends State<MainPage> {
             ),
             ListTile(
               title: Text('Change password'),
-              onTap: () {
+              onTap: _userStatus ? () {
                 showChangePasswordDialog(context, widget.accessToken);
-              },
+              } : null, // Deshabilitar si el usuario no está activo
             ),
             ListTile(
               title: Text('Change color'),
-              onTap: _navigateToColorSelection,
+              onTap: _userStatus ? _navigateToColorSelection : null, // Deshabilitar si el usuario no está activo
+            ),
+            ListTile(
+              title: Text('Change user status'),
+              onTap: () async {
+                if (dni != null) {
+                  bool status = await changeUserStatus(widget.accessToken, dni!);
+                  if (status) correctDialog(context, "Enabled");
+                  else correctDialog(context, "Disabled");
+                }
+              },
             ),
             ListTile(
               title: Text('Remove user'),
-              onTap: () async {
+              onTap: _userStatus ? () async {
                 final deleteConfirmed = await askConfirmation(context);
                 if (deleteConfirmed == true) {
-                  await removeUser(context, widget.accessToken, dni!);
-                  // Redirigir a la página de login después de la eliminación
-                  Navigator.pushReplacementNamed(context, '/login');
+                  if (dni != null) {
+                    await removeUser(context, widget.accessToken, dni!);
+                    // Redirigir a la página de login después de la eliminación
+                    Navigator.pushReplacementNamed(context, '/login');
+                  }
                 }
-              },
+              } : null, // Deshabilitar si el usuario no está activo
             ),
           ],
         ),
@@ -271,7 +297,7 @@ class _MainPageState extends State<MainPage> {
                 );
               },
             )
-                : Center(child: Text('select an account')),
+                : Center(child: Text('Select an account')),
           ),
         ],
       ),
@@ -283,7 +309,7 @@ class _MainPageState extends State<MainPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].balance > 0
+                onPressed: isUserActiveAndHasSelectedAccount
                     ? () {
                   Navigator.pushNamed(
                     context,
@@ -297,13 +323,13 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.camera_alt_outlined,
-                  color: selectedAccountIndex != null ? Colors.green : Colors.grey, // Cambiar color basado en selección
+                  color: isUserActiveAndHasSelectedAccount ? Colors.green : Colors.grey,
                   size: 40.0,
                 ),
               ),
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length && accounts[selectedAccountIndex!].balance > 0
+                onPressed: accounts.isNotEmpty && selectedAccountIndex != null && accounts[selectedAccountIndex!].active
                     ? () {
                   Navigator.pushNamed(
                     context,
@@ -317,13 +343,13 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.payment_outlined,
-                  color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección
+                  color: accounts.isNotEmpty && selectedAccountIndex != null && accounts[selectedAccountIndex!].active ? Colors.red : Colors.grey,
                   size: 40.0,
                 ),
               ),
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                onPressed: isUserActiveAndHasSelectedAccount
                     ? () {
                   Navigator.pushNamed(
                     context,
@@ -337,13 +363,13 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.payment_outlined,
-                  color: selectedAccountIndex != null ? Colors.green : Colors.grey, // Cambiar color basado en selección
+                  color: isUserActiveAndHasSelectedAccount ? Colors.green : Colors.grey,
                   size: 40.0,
                 ),
               ),
-              SizedBox(width: 8.0),// Espaciado entre íconos
+              SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                onPressed: isUserActiveAndHasSelectedAccount
                     ? () async {
                   await showDeleteConfirmationDialog(
                     context,
@@ -357,35 +383,28 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.delete,
-                  color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección
+                  color: isUserActiveAndHasSelectedAccount ? Colors.red : Colors.grey,
                   size: 40.0,
                 ),
               ),
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                onPressed: isUserActiveAndHasSelectedAccount
                     ? () async {
                   _toggleAccountStatus();
                 }
                     : null,
                 icon: Icon(
-                  accounts.isNotEmpty &&
-                      selectedAccountIndex != null &&
-                      selectedAccountIndex! < accounts.length &&
-                      accounts[selectedAccountIndex!].active
+                  accounts.isNotEmpty && selectedAccountIndex != null && accounts[selectedAccountIndex!].active
                       ? Icons.lock
                       : Icons.lock_open,
-                  color: selectedAccountIndex != null ? Colors.red : Colors.grey, // Cambiar color basado en selección
+                  color: isUserActiveAndHasSelectedAccount ? Colors.red : Colors.grey,
                   size: 40.0,
                 ),
               ),
-              SizedBox(width: 8.0),
-
-
-
-
+              SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: selectedAccountIndex != null && selectedAccountIndex! < accounts.length
+                onPressed: isUserActiveAndHasSelectedAccount
                     ? () {
                   showModalBottomSheet(
                     context: context,
@@ -457,7 +476,6 @@ class _MainPageState extends State<MainPage> {
                               setState(() {});
                             },
                           ),
-                          // Aquí puedes agregar más opciones si lo deseas
                         ],
                       );
                     },
@@ -466,16 +484,10 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.pending_outlined,
-                  color: selectedAccountIndex != null ? Colors.green : Colors.grey,
+                  color: isUserActiveAndHasSelectedAccount ? Colors.green : Colors.grey,
                   size: 40.0,
                 ),
               ),
-
-
-
-
-
-
             ],
           ),
         ),

@@ -7,7 +7,8 @@ import '../functions/addDictionary.dart';
 import '../functions/setNewKey.dart';
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/qr_dialog.dart'; // Importa el nuevo archivo
-import '../functions/checkSufficientAmout.dart';
+import '../functions/checkEnableAmout.dart';
+import '../dialogs/errorDialog.dart';
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -51,6 +52,7 @@ class _PaymentPageState extends State<PaymentPage> {
   void _validateAmount() {
     final amountText = amountController.text;
     final amount = double.tryParse(amountText);
+    print("Hooa");
     setState(() {
       isAmountValid = amount != null && amount > 0;
     });
@@ -69,20 +71,21 @@ class _PaymentPageState extends State<PaymentPage> {
       }
 
       if (amountToPay != -1) {
-        bool amountAcceptable = await checkSufficientAmount(accessToken!, accountNumber, amountToPay);
+        bool amountAcceptable = await checkEnableAmount(accessToken!, accountNumber, amountToPay);
         if (!amountAcceptable) {
+          errorDialog(context, "Amount not acceptable");
           throw Exception("Amount not acceptable");
         }
       }
 
-      // Crear nueva key, haz uso, y pon en base de datos
+      // Create new key, use it, and store in database
       payKey = await setNewKey(accessToken!, accountNumber);
       print("********************En la clase paymentPage la clau de compte: $payKey");
 
       qrData = 'payment $accountNumber $amountToPay';
       String encryptedData = encryptAES(qrData, payKey!);
 
-      // Guardar la clave en el diccionario
+      // Save the key in the dictionary
       print("Añadir al diccionario--------------------------------");
       await addDictionary(accessToken!, encryptedData, accountNumber);
 
@@ -118,7 +121,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     border: OutlineInputBorder(),
                     labelText: 'Enter the amount you want to pay',
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
                 ),
                 SizedBox(height: 20),
                 Row(
