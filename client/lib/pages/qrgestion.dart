@@ -5,7 +5,7 @@ import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea corre
 import '../internal_functions/chargeGestion.dart'; // Importa el nuevo archivo
 import '../functions/getOrigenAccount.dart'; // Asegúrate de que la ruta sea correcta
 import '../functions/fetchPayKey.dart';
-import '../functions/encrypt.dart';
+import '../utils/encrypt.dart';
 import '../functions/setQrUsed.dart';
 import '../functions/checkEnable.dart';
 

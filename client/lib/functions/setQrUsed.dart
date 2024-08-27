@@ -1,13 +1,10 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
 // Ensure the function is exported correctly
 Future<bool> setQrUsed(String accessToken, String qrText) async {
-  print("ultimo paso, En la clase setQrUsed-----------------------10");
+
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -21,15 +18,15 @@ Future<bool> setQrUsed(String accessToken, String qrText) async {
     );
 
     if (result.hasException) {
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
+      print('Error executing mutation: ${result.exception.toString()}');
       return false;
     } else {
-      print('Mutación exitosa');
+      print('Mutation successful');
       // Check if result.data is not null before accessing it
       return result.data != null && result.data!['setQrUsed'] == true;
     }
   } catch (e) {
-    print('Error inesperado: $e');
+    print('Unexpected error: $e');
     return false;
   }
 }

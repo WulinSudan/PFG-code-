@@ -5,14 +5,9 @@ import 'dart:async';
 
 Future<void> addDictionary(
     String accessToken,
-    String encrypttext,
-    String accountNumber// Asegúrate de que este campo se pase correctamente
+    String encryptText,
+    String accountNumber // Ensure this field is passed correctly
     ) async {
-
-  print("Pas 3 en la operacion de addtodictionary-------------------------------------------");
-  print(accessToken);
-  print(encrypttext);
-  print(accountNumber);
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -21,7 +16,7 @@ Future<void> addDictionary(
         document: gql(addDictionaryMutation),
         variables: {
           'input': {
-            'encrypt_message': encrypttext,
+            'encrypt_message': encryptText,
             'account': accountNumber,
           },
         },
@@ -29,23 +24,18 @@ Future<void> addDictionary(
     );
 
     if (result.hasException) {
-      // Manejo de excepciones
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
+      // Handle exceptions from the mutation
+      throw Exception('Error executing mutation: ${result.exception.toString()}');
     } else {
-      print('Mutación exitosa');
-
-      // Manejar los datos de la respuesta
+      // Handle successful response
       final data = result.data?['addDictionary'];
-      if (data != null) {
-        print('Encrypt message: ${data['encrypt_message']}');
-        print('Account: ${data['account']}');
-        print('Operation: ${data['operation']}'); // Usa el nombre correcto del campo
-        print('Create date: ${data['create_date']}'); // Usa el nombre correcto del campo
-      } else {
-        print('No se recibieron datos en la respuesta.');
+      if (data == null) {
+        throw Exception('No data received in the response.');
       }
+      // Further processing of `data` can be done here if needed
     }
   } catch (e) {
-    print('Error inesperado: $e');
+    // Handle unexpected errors
+    throw Exception('Unexpected error: $e');
   }
 }

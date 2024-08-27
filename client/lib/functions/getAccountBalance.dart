@@ -18,7 +18,6 @@ Future<double> getAccountBalance(String accessToken, String account) async {
     throw Exception(result.exception.toString());
   }
 
-  // Verifica si el dato no es nulo y es del tipo correcto
   final balance = result.data?['getAccountBalance'];
   if (balance is double) {
     return balance;

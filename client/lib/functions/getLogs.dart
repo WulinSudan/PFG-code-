@@ -3,35 +3,35 @@ import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
 Future<List<String>> getLogs(String accessToken, String dni) async {
-  // Crear el cliente GraphQL con el token de acceso
+  // Create the GraphQL client with the access token
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
-  // Configurar las opciones de la consulta
+  // Configure the query options
   final QueryOptions options = QueryOptions(
-    document: gql(getLogsQuery), // Query para obtener los logs
-    variables: {'dni': dni}, // Pasar el dni como variable a la consulta
+    document: gql(getLogsQuery), // Query to get the logs
+    variables: {'dni': dni}, // Pass the DNI as a variable to the query
   );
 
-  // Realizar la consulta
+  // Execute the query
   final QueryResult result = await client.query(options);
 
-  // Manejar excepciones
+  // Handle exceptions
   if (result.hasException) {
     throw Exception(result.exception.toString());
   }
 
-  // Extraer los datos del resultado
+  // Extract data from the result
   final Map<String, dynamic> data = result.data ?? {};
 
-  // Suponiendo que los logs del usuario están en `data['getLogs']`
+  // Assuming user logs are under `data['getLogs']`
   if (data.containsKey('getLogs')) {
     List<String> logs = List<String>.from(data['getLogs']);
 
-    // Invertir el orden de los logs
+    // Reverse the order of logs
     logs = logs.reversed.toList();
 
     return logs;
   } else {
-    throw Exception("No se pudieron obtener los logs del usuario.");
+    throw Exception("Unable to retrieve user logs.");
   }
 }

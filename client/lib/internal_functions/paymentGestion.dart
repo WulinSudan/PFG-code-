@@ -1,10 +1,9 @@
-// paymentGestion.dart
 import 'package:client/functions/addTransaction.dart';
 import 'package:flutter/material.dart';
 import '../functions/checkEnable.dart';
 import '../functions/getOrigenAccount.dart';
 import '../functions/fetchPayKey.dart';
-import '../functions/encrypt.dart';
+import '../utils/encrypt.dart';
 import '../functions/doQr.dart';
 import '../functions/setQrUsed.dart';
 import '../dialogs_simples/okDialog.dart';
@@ -18,31 +17,27 @@ Future<void> processQrPayment(
     String accessToken,
     Function(String, String, double, String, bool) updateState,
     ) async {
-  print("Código QR de pago");
+  print("Processing QR payment");
 
   String? originAccount;
   String? key;
   bool success = false;
 
   try {
-    // Obtener cuenta origen
+    // Get the origin account
     originAccount = await getOrigenAccount(accessToken, qrText);
-    print('Cuenta origen: $originAccount');
-
-    // Obtener la clave
+    // Fetch the key for decryption
     key = await fetchPayKey(accessToken, originAccount!);
-    print('Clave obtenida: $key');
+    // Get the scanning account
+    String scanningAccount = arguments?['accountNumber'] as String? ?? 'Account number not available';
 
-    // Obtener la cuenta escaneadora
-    String cuentaEscaneadora = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-    print('Cuenta escaneadora: $cuentaEscaneadora');
 
-    // Desencriptar mensaje
-    String mensajeClaro = decryptAES(qrText, key!);
-    print('Mensaje claro: $mensajeClaro');
+    // Decrypt the QR code message
+    String decryptedMessage = decryptAES(qrText, key!);
 
-    // Procesar el mensaje desencriptado
-    String remainingText = mensajeClaro.substring("payment".length).trim();
+
+    // Process the decrypted message
+    String remainingText = decryptedMessage.substring("payment".length).trim();
     List<String> parts = remainingText.split(' ');
 
     if (parts.length == 2) {
@@ -51,50 +46,43 @@ Future<void> processQrPayment(
 
       if (amount == null || amount <= 0) {
         amount = await getImportDialog(context) ?? 0.0;
-        await okDialog(context,"Identifying");
+        await okDialog(context, "Identifying");
       } else {
-        await okDialog(context,"Identifying");
+        await okDialog(context, "Identifying");
       }
 
-      String origen = cuentaEscaneadora;
-      String destino = accountNumber;
-      double importe = amount;
-      String typePart = 'Cargo';
-
-      print('Llamando a doQr con:');
-      print('Origen: $origen');
-      print('Destino: $destino');
-      print('Importe: $importe');
-      double balanceOrigen = await getAccountBalance(accessToken, origen);
-      double balanceDestino = await getAccountBalance(accessToken, destino);
+      String origin = scanningAccount;
+      String destination = accountNumber;
+      double importAmount = amount;
+      String transactionType = 'Charge';
 
 
+      double originBalance = await getAccountBalance(accessToken, origin);
+      double destinationBalance = await getAccountBalance(accessToken, destination);
 
-      // Verificar si el QR está habilitado antes de llamar a doQr
-      bool enable = await checkEnable(accessToken, qrText);
-      if (enable) {
-        success = await doQr(accessToken, destino, origen, importe);
-        print('doQr completado con éxito: $success');
-        print("Estoy en chargeGestion...................");
+      // Check if the QR code is enabled before calling doQr
+      bool isEnabled = await checkEnable(accessToken, qrText);
+      if (isEnabled) {
+        success = await doQr(accessToken, destination, origin, importAmount);
 
-        // Deshabilitar el QR solo si la transferencia fue exitosa
+        // Disable the QR code only if the transfer was successful
         if (success) {
-          print("Estoy en la funcion paymentGestion");
-          await addTransaction(accessToken, accountNumber, "subtract", importe,balanceOrigen);
-          await addTransaction(accessToken, origen, "add", importe, balanceDestino);
+          print("In paymentGestion function");
+          await addTransaction(accessToken, accountNumber, "subtract", importAmount, originBalance);
+          await addTransaction(accessToken, origin, "add", importAmount, destinationBalance);
           await setQrUsed(accessToken, qrText);
         }
       } else {
-        print("QR caducado o usado.....................................................");
+        print("QR code expired or already used...");
       }
 
-      updateState(origen, destino, importe, typePart, success);
+      updateState(origin, destination, importAmount, transactionType, success);
     } else {
-      print("El texto del QR no tiene el formato esperado.");
+      print("The QR text does not have the expected format.");
       updateState('', '', -1, '', false);
     }
   } catch (e) {
-    print('Error al procesar el código QR: $e');
+    print('Error processing QR code: $e');
     updateState('', '', -1, '', false);
   }
 }

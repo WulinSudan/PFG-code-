@@ -24,14 +24,12 @@ Future<bool> changeUserStatus(String accessToken, String dni) async {
       throw Exception('No data returned from mutation');
     }
 
-    // Asegúrate de que el valor devuelto es un booleano
     if (data is bool) {
       return data;
     } else {
       throw Exception('Returned data is not a boolean');
     }
   } catch (e) {
-    // Manejo de errores, por ejemplo, loguear el error
     print('Error setting user status: $e');
     throw Exception('Failed to set user status');
   }

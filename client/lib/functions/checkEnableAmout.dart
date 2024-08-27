@@ -1,11 +1,8 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:flutter/material.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
 Future<bool> checkEnableAmount(String accessToken, String accountNumber, double amount) async {
-  print("Dentro de la función checkSufficientAmount");
-
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -20,20 +17,20 @@ Future<bool> checkEnableAmount(String accessToken, String accountNumber, double 
     );
 
     if (result.hasException) {
-      print('Error al ejecutar la mutación checkSufficientAmount: ${result.exception.toString()}');
-      return false;
+      // Handle GraphQL mutation exceptions
+      throw Exception('Error executing checkEnableAmount mutation: ${result.exception.toString()}');
     } else {
       final data = result.data;
       if (data != null && data['checkEnableAmount'] == true) {
-        print('Mutación exitosa y el resultado es true');
+        // Mutation successful and result is true
         return true;
       } else {
-        print('Mutación exitosa pero el resultado no es true');
+        // Mutation successful but result is not true
         return false;
       }
     }
   } catch (e) {
-    print('Error inesperado: $e');
-    return false;
+    // Handle unexpected errors
+    throw Exception('Unexpected error: $e');
   }
 }

@@ -17,12 +17,11 @@ Future<bool> changePassword(String accessToken, String old, String newOne) async
     final QueryResult result = await client.mutate(options);
 
     if (result.hasException) {
-      // Manejo de excepciones detallado
+
       print('GraphQL Exception: ${result.exception}');
       throw Exception('GraphQL Exception: ${result.exception}');
     }
 
-    // Asegúrate de que el campo changePassword existe y es un booleano
     final bool? changed = result.data?['changePassword'] as bool?;
 
     if (changed == null) {
@@ -31,7 +30,7 @@ Future<bool> changePassword(String accessToken, String old, String newOne) async
 
     return changed;
   } catch (e) {
-    // Manejo de errores, por ejemplo, loguear el error
+
     print('Error changing password: $e');
     throw Exception('Failed to change password');
   }

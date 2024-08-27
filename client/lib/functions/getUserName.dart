@@ -3,30 +3,29 @@ import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
 Future<String> getUserName(String accessToken) async {
-
-  // Crear el cliente GraphQL con el token de acceso
+  // Create the GraphQL client with the access token
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
-  // Configurar las opciones de la consulta
+  // Configure the query options
   final QueryOptions options = QueryOptions(
-    document: gql(getUserNameQuery), // Query importada desde graphql_queries.dart
+    document: gql(getUserNameQuery), // Query imported from graphql_queries.dart
   );
 
-  // Realizar la consulta
+  // Execute the query
   final QueryResult result = await client.query(options);
 
-  // Manejar excepciones
+  // Handle exceptions
   if (result.hasException) {
     throw Exception(result.exception.toString());
   }
 
-  // Extraer los datos del resultado
+  // Extract data from the result
   final Map<String, dynamic>? data = result.data;
 
-  // Verificar si los datos contienen el nombre del usuario
+  // Check if the data contains the user's name
   if (data != null && data.containsKey('getUserName')) {
     return data['getUserName'] as String;
   } else {
-    throw Exception("No se pudo obtener el nombre del usuario.");
+    throw Exception("Unable to retrieve the user's name.");
   }
 }

@@ -1,20 +1,13 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import '../utils/account.dart';
-import '../utils/account_card.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
+import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../functions/fetchUserData.dart';
 import 'removeUserAccount.dart';
 
-// Función para realizar la transferencia
+
 Future<bool> makeTransfer(BuildContext context, String accessToken, Account currentAccount, Account selectedAccount) async {
-  print("-------------------------------108-------------------------------");
-  print(currentAccount.numberAccount);
-  print(selectedAccount.numberAccount);
-  print(currentAccount.balance);
 
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
@@ -33,27 +26,24 @@ Future<bool> makeTransfer(BuildContext context, String accessToken, Account curr
     );
 
     if (result.hasException) {
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
-      return false; // Indica que la transferencia no fue exitosa
+      print('Error executing mutation: ${result.exception.toString()}');
+      return false; // Indicates that the transfer was not successful
     } else {
-      // Extraer el campo 'success' de la respuesta
+      // Extract the 'success' field from the response
       final bool success = result.data?['makeTransfer']['success'] ?? false;
       if (success) {
-        print('Mutación exitosa');
+        print('Mutation successful');
 
-        // Llama a la función para eliminar la cuenta si es necesario
+        // Call the function to remove the account if necessary
         await removeAccount(context, accessToken, currentAccount.numberAccount);
 
-        // Aquí puedes manejar la respuesta de la mutación si es necesario
-        // Por ejemplo, podrías actualizar las cuentas llamando a fetchUserAccounts()
-        // O realizar alguna otra acción según tus necesidades
       } else {
-        print('La mutación falló: ${result.data?['makeTransfer']['message']}');
+        print('The mutation failed: ${result.data?['makeTransfer']['message']}');
       }
-      return success; // Indica si la transferencia fue exitosa o no
+      return success; // Indicates whether the transfer was successful or not
     }
   } catch (e) {
-    print('Error inesperado: $e');
-    return false; // Indica que la transferencia no fue exitosa
+    print('Unexpected error: $e');
+    return false; // Indicates that the transfer was not successful
   }
 }

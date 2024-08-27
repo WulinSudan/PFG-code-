@@ -4,7 +4,6 @@ import '../graphql_queries.dart';
 import '../utils/account.dart';
 
 Future<List<Account>> getAccounts(String accessToken, String dni) async {
-  print("En la función getAccounts---------------------");
 
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
@@ -24,9 +23,9 @@ Future<List<Account>> getAccounts(String accessToken, String dni) async {
   print(accountsJson);
 
   if (accountsJson == null) {
-    throw Exception('No se recibieron datos de cuentas');
+    throw Exception('No account data received');
   }
 
-  // Convertir los datos JSON a una lista de objetos Account
+  // Convert JSON data to a list of Account objects
   return accountsJson.map((json) => Account.fromJson(json)).toList();
 }

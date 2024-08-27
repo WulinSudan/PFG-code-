@@ -2,7 +2,7 @@
 
 String maskAccountNumber(String accountNumber) {
   if (accountNumber.length != 10) {
-    return 'Número de cuenta inválido';
+    return 'Invalid account number';
   }
 
   String visibleDigits = accountNumber.substring(accountNumber.length - 6); // Muestra los últimos 6 dígitos

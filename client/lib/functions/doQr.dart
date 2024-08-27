@@ -1,16 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../functions/encrypt.dart'; // Asegúrate de que esta función se está usando correctamente
-import '../functions/fetchPayKey.dart';
 
-Future<bool> doQr(String accessToken, String origen, String desti, double import) async {
-  print("------------------------12-----doQR------------------------");
-  print('Origen: $origen');
-  print('Destino: $desti');
-  print('Importe: $import');
 
+Future<bool> doQr(String accessToken, String sourceAccount, String destinationAccount, double amount) async {
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -19,30 +12,29 @@ Future<bool> doQr(String accessToken, String origen, String desti, double import
         document: gql(makeTransferMutation),
         variables: {
           'input': {
-            'accountOrigen': origen,
-            'accountDestin': desti,
-            'import': import,
+            'accountOrigen': sourceAccount,
+            'accountDestin': destinationAccount,
+            'import': amount,
           }
         },
       ),
     );
 
     if (result.hasException) {
-      print('Error al ejecutar la mutación: ${result.exception.toString()}');
-      return false; // Indica que la transferencia no fue exitosa
+      // Handle GraphQL mutation exceptions
+      throw Exception('Error executing mutation: ${result.exception.toString()}');
     } else {
-      // Extraer el campo 'success' de la respuesta
+      // Extract the 'success' field from the response
       final bool success = result.data?['makeTransfer']['success'] ?? false;
       if (success) {
-        print('Mutación exitosa');
-        return true; // Indica que la transferencia fue exitosa
+        return true; // Indicates the transfer was successful
       } else {
-        print('La mutación falló: ${result.data?['makeTransfer']['message']}');
-        return false; // Indica que la transferencia no fue exitosa
+        final String? message = result.data?['makeTransfer']['message'];
+        throw Exception('Mutation failed: $message');
       }
     }
   } catch (e) {
-    print('Error inesperado: $e');
-    return false; // Indica que la transferencia no fue exitosa
+    // Handle unexpected errors
+    throw Exception('Unexpected error: $e');
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../functions/doQr.dart'; // Asegúrate de que la ruta sea correcta
-import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
+import '../functions/doQr.dart'; // Ensure the path is correct
+import '../dialogs/getImportDialog.dart'; // Ensure the path is correct
 import '../dialogs/logoutDialog.dart';
 import '../dialogs_simples/okDialog.dart';
 import '../functions/addTransaction.dart';
@@ -14,7 +14,7 @@ Future<void> processQrCharge(
     Function(String, String, double, String, bool) updateState,
     ) async {
   try {
-    print('Iniciando processQrCharge con qrText: $qrText');
+    print('Starting processQrCharge with qrText: $qrText');
     String remainingText = qrText.substring("charge".length).trim();
     List<String> parts = remainingText.split(' ');
     if (parts.length == 2) {
@@ -24,41 +24,40 @@ Future<void> processQrCharge(
       if (amount == null || amount <= 0) {
         amount = await getImportDialog(context) ?? 0.0;
         await okDialog(context,"Identifying");
-        print("En la pagina de chargeGestion.dart, el importe recogido: ${amount}");
+        print("On the chargeManagement.dart page, the collected amount: $amount");
       } else {
         await okDialog(context,"Identifying");
       }
 
-      String origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';
-      String destino = accountNumber;
-      double importe = amount;
-      String typePart = 'Cargo';
+      String origin = arguments?['accountNumber'] as String? ?? 'Account number not available';
+      String destination = accountNumber;
+      double amountValue = amount;
+      String typePart = 'Charge';
 
-      double balanceOrigen = await getAccountBalance(accessToken, origen);
-      double balanceDestino = await getAccountBalance(accessToken, destino);
+      double balanceOrigin = await getAccountBalance(accessToken, origin);
+      double balanceDestination = await getAccountBalance(accessToken, destination);
 
+      print('Calling doQr with:');
+      print('Origin: $origin');
+      print('Destination: $destination');
+      print('Amount: $amountValue');
 
-      print('Llamando a doQr con:');
-      print('Origen: $origen');
-      print('Destino: $destino');
-      print('Importe: $importe');
-
-      bool success = await doQr(accessToken, origen, destino, importe);
-      if (success) await addTransaction(accessToken, accountNumber, "add", importe,balanceOrigen);
-      if (success) await addTransaction(accessToken, origen, "subtract", importe,balanceDestino);
-      print('doQr completado con éxito: $success');
+      bool success = await doQr(accessToken, origin, destination, amountValue);
+      if (success) await addTransaction(accessToken, accountNumber, "add", amountValue, balanceOrigin);
+      if (success) await addTransaction(accessToken, origin, "subtract", amountValue, balanceDestination);
+      print('doQr completed successfully: $success');
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        updateState(origen, destino, importe, typePart, success);
+        updateState(origin, destination, amountValue, typePart, success);
       });
     } else {
-      print("El texto del QR no tiene el formato esperado.");
+      print("The QR text does not have the expected format.");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         updateState('', '', -1, '', false);
       });
     }
   } catch (e) {
-    print('Error al procesar el código QR: $e');
+    print('Error processing QR code: $e');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       updateState('', '', -1, '', false);
     });

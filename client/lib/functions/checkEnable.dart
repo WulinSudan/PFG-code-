@@ -1,13 +1,9 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
 
-// Asegúrate de que la función está exportada correctamente
+// Ensure the function is exported correctly
 Future<bool> checkEnable(String accessToken, String qrText) async {
-  print("Dins de la funcio chechEnable-----10");
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
   try {
@@ -21,20 +17,20 @@ Future<bool> checkEnable(String accessToken, String qrText) async {
     );
 
     if (result.hasException) {
-      print('Error al ejecutar la mutación checkEnable: ${result.exception.toString()}');
-      return false;
+      // Handle GraphQL mutation exceptions
+      throw Exception('Error executing checkEnable mutation: ${result.exception.toString()}');
     } else {
       final data = result.data;
       if (data != null && data['checkEnable'] == true) {
-        print('Mutación exitosa y el resultado es true');
+        // Mutation successful and result is true
         return true;
       } else {
-        print('Mutación exitosa pero el resultado no es true');
+        // Mutation successful but result is not true
         return false;
       }
     }
   } catch (e) {
-    print('Error inesperado: $e');
-    return false;
+    // Handle unexpected errors
+    throw Exception('Unexpected error: $e');
   }
 }

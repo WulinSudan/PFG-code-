@@ -1,10 +1,10 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../utils/user.dart'; // Asegúrate de importar la clase User
+import '../utils/user.dart'; // Make sure to import the User class
 
 Future<List<User>> getAdmins(String accessToken) async {
-  print("En la función getAdmins");
+  print("Inside the getAdmins function");
 
   final GraphQLClient client = GraphQLService.createGraphQLClient(accessToken);
 
@@ -15,29 +15,29 @@ Future<List<User>> getAdmins(String accessToken) async {
   final QueryResult result = await client.query(options);
 
   if (result.hasException) {
-    print("Error en la consulta: ${result.exception.toString()}");
+    print("Error in query: ${result.exception.toString()}");
     throw Exception(result.exception.toString());
   }
 
-  // Imprimir el resultado de la consulta para depuración
-  print("Resultado de la consulta: ${result.data}");
+  // Print the query result for debugging
+  print("Query result: ${result.data}");
 
-  // Cambiar 'getUsers' a la clave correcta según tu resultado
+  // Change 'getUsers' to the correct key based on your result
   final List<dynamic>? usersJson = result.data?['getAdmins'];
 
   if (usersJson == null) {
-    print('No se recibieron datos de administradores');
-    throw Exception('No se recibieron datos de administradores');
+    print('No administrator data received');
+    throw Exception('No administrator data received');
   }
 
-  // Imprimir los datos JSON para verificar su contenido
-  print("Datos JSON de administradores: $usersJson");
+  // Print JSON data to verify its content
+  print("Administrator JSON data: $usersJson");
 
-  // Convertir los datos JSON a una lista de objetos User
+  // Convert JSON data to a list of User objects
   final List<User> users = usersJson.map((json) => User.fromJson(json)).toList();
 
-  // Imprimir la lista de usuarios para verificar que la conversión fue correcta
-  print("Administradores convertidos: $users");
+  // Print the list of users to verify that the conversion was correct
+  print("Converted administrators: $users");
 
   return users;
 }
