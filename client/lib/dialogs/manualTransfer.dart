@@ -1,8 +1,7 @@
 import 'package:client/functions/makeTransfer.dart';
 import 'package:flutter/material.dart';
-import '../functions/doQr.dart';  // Importar la función doQr
-import '../pages/account.dart'; // Importar la clase Account si es necesario
-import '../functions/doQr.dart';
+import '../functions/doQr.dart';  // Import the doQr function
+import '../utils/account.dart'; // Import the Account class if needed
 import '../functions/addTransaction.dart';
 import '../functions/getAccountBalance.dart';
 
@@ -12,23 +11,23 @@ Future<void> showManualTransferDialog(BuildContext context, String accessToken, 
 
   return showDialog<void>(
     context: context,
-    barrierDismissible: false, // Evita que el diálogo se cierre al tocar fuera de él
+    barrierDismissible: false, // Prevents closing the dialog by tapping outside of it
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Transferencia Manual'),
+        title: Text('Manual Transfer'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: accountNumberController,
-                decoration: InputDecoration(labelText: 'Número de Cuenta Destino'),
+                decoration: InputDecoration(labelText: 'Destination Account Number'),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: 'Importe'),
+                decoration: InputDecoration(labelText: 'Amount'),
               ),
             ],
           ),
@@ -36,9 +35,9 @@ Future<void> showManualTransferDialog(BuildContext context, String accessToken, 
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo sin hacer cambios
+              Navigator.of(context).pop(); // Close the dialog without making any changes
             },
-            child: Text('Cancelar'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -47,7 +46,7 @@ Future<void> showManualTransferDialog(BuildContext context, String accessToken, 
 
               if (accountNumber.isEmpty || amount <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Por favor, ingresa un número de cuenta válido y un importe positivo')),
+                  SnackBar(content: Text('Please enter a valid account number and a positive amount')),
                 );
                 return;
               }
@@ -55,28 +54,28 @@ Future<void> showManualTransferDialog(BuildContext context, String accessToken, 
               try {
                 final success = await doQr(accessToken, currentAccount.numberAccount, accountNumber, amount);
                 if (success) {
-
                   double balanceDestin = await getAccountBalance(accessToken, accountNumber);
 
                   await addTransaction(accessToken, currentAccount.numberAccount, "subtract", amount, currentAccount.balance);
                   await addTransaction(accessToken, accountNumber, "add", amount, balanceDestin);
+
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Transferencia realizada con éxito')),
+                    SnackBar(content: Text('Transfer successful')),
                   );
-                  // Cierra el diálogo después de la transferencia
+                  // Close the dialog after the transfer
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('No se pudo realizar la transferencia')),
+                    SnackBar(content: Text('Failed to complete the transfer')),
                   );
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error al realizar la transferencia: $e')),
+                  SnackBar(content: Text('Error completing the transfer: $e')),
                 );
               }
             },
-            child: Text('Transferir'),
+            child: Text('Transfer'),
           ),
         ],
       );

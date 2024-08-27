@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-Future<void> correctDialog(BuildContext context, String text) async {
+Future<void> okDialog(BuildContext context, String text) async {
   showDialog<void>(
     context: context,
     barrierDismissible: false, // Prevents closing the dialog by tapping outside
@@ -16,9 +16,9 @@ Future<void> correctDialog(BuildContext context, String text) async {
       return AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green), // Add a green check icon
+            Icon(Icons.check_circle, color: Colors.green), // Add a red error icon
             SizedBox(width: 10), // Add some space between the icon and the text
-            Text('Success'), // Title for the success dialog
+            Text('Correct'), // Corrected the title text
           ],
         ),
         content: Text(text), // Ensure the content is wrapped in a Text widget

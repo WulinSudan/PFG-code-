@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import '../pages/account.dart';
-import '../pages/account_card.dart';
+import '../utils/account.dart';
+import '../utils/account_card.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tu servicio GraphQL
 import '../graphql_queries.dart';
 import '../functions/fetchUserData.dart';

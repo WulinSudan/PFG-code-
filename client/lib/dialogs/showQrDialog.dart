@@ -10,26 +10,26 @@ Future<void> showLogoutConfirmationDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Confirmar Logout'),
-        content: Text('¿Estás seguro de que deseas cerrar sesión?'),
+        title: Text('Confirm Logout'),
+        content: Text('Are you sure you want to log out?'),
         actions: <Widget>[
           TextButton(
-            child: Text('Cancelar'),
+            child: Text('Cancel'),
             onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo sin hacer nada más
+              Navigator.of(context).pop(); // Closes the dialog without doing anything else
             },
           ),
           TextButton(
-            child: Text('Salir'),
+            child: Text('Log Out'),
             onPressed: () async {
-              // Elimina el token de SharedPreferences
+              // Remove the token from SharedPreferences
               final SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.remove('access_token');
 
-              // Cierra el diálogo
+              // Close the dialog
               Navigator.of(context).pop();
 
-              // Redirige al usuario a la página de inicio de sesión
+              // Redirect the user to the login page
               Navigator.of(context).pushReplacementNamed('/login');
             },
           ),
@@ -41,7 +41,7 @@ Future<void> showLogoutConfirmationDialog(BuildContext context) async {
 
 void _showQrDialog(BuildContext context, String qrData, int amountToPay) {
   const duration = Duration(seconds: 10);
-  if (isDialogOpen) return; // Evita abrir múltiples diálogos
+  if (isDialogOpen) return; // Prevent opening multiple dialogs
 
   isDialogOpen = true;
 
@@ -57,7 +57,7 @@ void _showQrDialog(BuildContext context, String qrData, int amountToPay) {
       });
 
       return AlertDialog(
-        title: Text('Codi QR per pagar'),
+        title: Text('QR Code for Payment'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -78,7 +78,7 @@ void _showQrDialog(BuildContext context, String qrData, int amountToPay) {
                   style: DefaultTextStyle.of(context).style,
                   children: [
                     TextSpan(
-                      text: 'Import a pagar: ',
+                      text: 'Amount to Pay: ',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.normal,
@@ -86,7 +86,7 @@ void _showQrDialog(BuildContext context, String qrData, int amountToPay) {
                       ),
                     ),
                     TextSpan(
-                      text: amountToPay == -1 ? 'Libre' : '€$amountToPay',
+                      text: amountToPay == -1 ? 'Free' : '€$amountToPay',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ void _showQrDialog(BuildContext context, String qrData, int amountToPay) {
                 ),
               ),
               SizedBox(height: 10),
-              Text('Aquest codi QR es caducarà en:'),
+              Text('This QR code will expire in:'),
               CountdownWidget(duration: duration),
             ],
           ),
@@ -108,7 +108,7 @@ void _showQrDialog(BuildContext context, String qrData, int amountToPay) {
               Navigator.pop(context);
               isDialogOpen = false;
             },
-            child: Text('Tanca'),
+            child: Text('Close'),
           ),
         ],
       );
@@ -146,7 +146,7 @@ class _CountdownWidgetState extends State<CountdownWidget> {
   @override
   Widget build(BuildContext context) {
     return Text(
-      '$secondsLeft segons',
+      '$secondsLeft seconds',
       style: TextStyle(fontSize: 16),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart';
 import '../graphql_queries.dart';
-import '../pages/account.dart';
+import '../utils/account.dart';
 
 Future<List<Account>> getAccounts(String accessToken, String dni) async {
   print("En la función getAccounts---------------------");

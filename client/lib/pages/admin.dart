@@ -5,8 +5,8 @@ import '../utils/user_card.dart';
 import '../dialogs/logoutDialog.dart';
 import '../dialogs/showAccountsDialog.dart';
 import '../functions/changeUserStatus.dart';
-import '../dialogs/confirmacionDialog2.dart';
-import '../dialogs/confirmationOKdialog.dart';
+import '../dialogs/changeUserStatusDialog.dart';
+import '../dialogs_simples/okDialog.dart';
 import '../dialogs/addUserAdminDialog.dart';
 import '../functions/removeUser.dart';
 import '../dialogs/changePasswordDialog.dart';
@@ -82,7 +82,7 @@ class _AdminPageState extends State<AdminPage> {
     if (_selectedUser != null) {
       try {
         bool status = await changeUserStatus(widget.accessToken, _selectedUser!.dni);
-        await showConfirmationDialog2(context, _selectedUser!.name, status);
+        await changeUserStatusDialog(context, _selectedUser!.name, status);
         _refreshData();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

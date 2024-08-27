@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../functions/doQr.dart'; // Asegúrate de que la ruta sea correcta
 import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
 import '../dialogs/logoutDialog.dart';
-import '../dialogs/confirmationDialog.dart';
+import '../dialogs_simples/okDialog.dart';
 import '../functions/addTransaction.dart';
 import '../functions/getAccountBalance.dart';
 
@@ -23,10 +23,10 @@ Future<void> processQrCharge(
 
       if (amount == null || amount <= 0) {
         amount = await getImportDialog(context) ?? 0.0;
-        await showConfirmationDialog(context);
+        await okDialog(context,"Identifying");
         print("En la pagina de chargeGestion.dart, el importe recogido: ${amount}");
       } else {
-        await showConfirmationDialog(context);
+        await okDialog(context,"Identifying");
       }
 
       String origen = arguments?['accountNumber'] as String? ?? 'Número de cuenta no disponible';

@@ -1,7 +1,7 @@
+import 'package:client/dialogs_simples/errorDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:client/functions/changePassword.dart';
-import 'package:client/dialogs/confirmationOKdialog.dart';
-
+import 'package:client/dialogs_simples/okDialog.dart';
 
 Future<void> showChangePasswordDialog(BuildContext context, String accessToken) async {
   final oldPasswordController = TextEditingController();
@@ -10,10 +10,10 @@ Future<void> showChangePasswordDialog(BuildContext context, String accessToken) 
 
   return showDialog<void>(
     context: context,
-    barrierDismissible: false, // Evita que el diálogo se cierre al tocar fuera de él
+    barrierDismissible: false, // Prevent the dialog from closing when tapping outside of it
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Cambiar Contraseña'),
+        title: Text('Change Password'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -21,19 +21,19 @@ Future<void> showChangePasswordDialog(BuildContext context, String accessToken) 
               TextField(
                 controller: oldPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Contraseña Antigua'),
+                decoration: InputDecoration(labelText: 'Old Password'),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: newPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Nueva Contraseña'),
+                decoration: InputDecoration(labelText: 'New Password'),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: confirmNewPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Confirmar Nueva Contraseña'),
+                decoration: InputDecoration(labelText: 'Confirm New Password'),
               ),
             ],
           ),
@@ -41,9 +41,9 @@ Future<void> showChangePasswordDialog(BuildContext context, String accessToken) 
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo sin hacer cambios
+              Navigator.of(context).pop(); // Close the dialog without making changes
             },
-            child: Text('Cancelar'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -52,39 +52,29 @@ Future<void> showChangePasswordDialog(BuildContext context, String accessToken) 
               final confirmNewPassword = confirmNewPasswordController.text;
 
               if (newPassword != confirmNewPassword) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Las contraseñas no coinciden')),
-                );
+                errorDialog(context, "Passwords do not match");
                 return;
               }
 
               try {
                 final success = await changePassword(accessToken, oldPassword, newPassword);
                 if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Contraseña cambiada con éxito')),
-                  );
-                  Navigator.of(context).pop(); // Cierra el diálogo
-
-                  showConfirmationOKDialog(context);
-                  // Redirige a la página de inicio de sesión
+                  okDialog(context, "Password Changed Successfully");
+                  Navigator.of(context).pop(); // Close the dialog
+                  // Redirect to the login page
                   Navigator.pushNamedAndRemoveUntil(
                     context,
-                    '/login', // Nombre de la ruta para la página de inicio de sesión
-                        (Route<dynamic> route) => false, // Elimina todas las rutas anteriores
+                    '/login', // Route name for the login page
+                        (Route<dynamic> route) => false, // Remove all previous routes
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('No se pudo cambiar la contraseña')),
-                  );
+                  errorDialog(context, "Failed to change password");
                 }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error al cambiar la contraseña: $e')),
-                );
+                errorDialog(context, "Failed to change password");
               }
             },
-            child: Text('Cambiar'),
+            child: Text('Change'),
           ),
         ],
       );

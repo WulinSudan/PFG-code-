@@ -3,3 +3,4 @@
 2024-08-17T10:24:16.373Z - Mutation operation: Admin set password for Kai
 2024-08-17T10:25:43.175Z - Mutation operation: Admin set password for Kai
 2024-08-17T10:25:59.647Z - Mutation operation: Admin set password for Kai
+2024-08-27T14:58:33.092Z - Mutation operation: Eloi change password

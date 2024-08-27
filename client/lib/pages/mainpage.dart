@@ -11,8 +11,8 @@ import 'package:client/dialogs/logoutDialog.dart';
 import 'package:client/dialogs/showDeletedConfirmationDialog.dart';
 import 'package:client/utils/transaction_card.dart';
 import 'package:client/utils/transaction.dart';
-import 'package:client/dialogs/confirmationOKdialog.dart';
-import 'package:client/dialogs/askconfirmacion.dart';
+import 'package:client/dialogs_simples/okDialog.dart';
+import 'package:client/dialogs_simples/askconfirmacion.dart';
 import 'package:client/functions/removeUser.dart';
 import 'package:client/dialogs/changePasswordDialog.dart';
 import 'package:client/dialogs/manualTransfer.dart';
@@ -22,10 +22,9 @@ import 'package:client/dialogs/getImportDialog.dart';
 import 'package:client/functions/setAccountDescription.dart';
 import 'color_selection_page.dart';
 import 'login.dart';
-import 'account.dart';
-import 'account_card.dart';
+import '../utils/account.dart';
+import '../utils/account_card.dart';
 import '../functions/changeUserStatus.dart';
-import '../dialogs/correctDialog.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -146,7 +145,7 @@ class _MainPageState extends State<MainPage> {
           account.active = status; // Alternar el estado
         });
 
-        showConfirmationOKDialog(context);
+        okDialog(context, "Status changed");
       } catch (e) {
         print('Error al cambiar el estado de la cuenta: $e');
       }
@@ -231,8 +230,8 @@ class _MainPageState extends State<MainPage> {
               onTap: () async {
                 if (dni != null) {
                   bool status = await changeUserStatus(widget.accessToken, dni!);
-                  if (status) correctDialog(context, "Enabled");
-                  else correctDialog(context, "Disabled");
+                  if (status) okDialog(context, "Enabled");
+                  else okDialog(context, "Disabled");
                 }
                 fetchData();
               },

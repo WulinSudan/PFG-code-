@@ -7,7 +7,7 @@ import 'pages/chargepage.dart';
 import 'pages/paymentpage.dart';
 import 'pages/qrscanner.dart';
 import 'pages/qrgestion.dart';
-import 'pages/account.dart';
+import 'utils/account.dart';
 import 'pages/admin.dart';
 import 'pages/registrationAdmin.dart';
 import 'pages/allAdmins.dart';

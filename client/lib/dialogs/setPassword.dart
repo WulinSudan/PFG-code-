@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../functions/setPassword.dart';  // Asumiendo que has renombrado la función a `setPassword`
-import '../dialogs/confirmationOKdialog.dart';
+import '../functions/setPassword.dart';  // Assuming the function is renamed to `setPassword`
+import '../dialogs_simples/okDialog.dart';
 
 Future<void> showSetPasswordDialog(BuildContext context, String accessToken, String dni) async {
   final newPasswordController = TextEditingController();
@@ -8,10 +8,10 @@ Future<void> showSetPasswordDialog(BuildContext context, String accessToken, Str
 
   return showDialog<void>(
     context: context,
-    barrierDismissible: false, // Evita que el diálogo se cierre al tocar fuera de él
+    barrierDismissible: false, // Prevents closing the dialog by tapping outside of it
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Set password'),
+        title: Text('Set Password'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -19,13 +19,13 @@ Future<void> showSetPasswordDialog(BuildContext context, String accessToken, Str
               TextField(
                 controller: newPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Nueva Contraseña'),
+                decoration: InputDecoration(labelText: 'New Password'),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: confirmNewPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Confirmar Nueva Contraseña'),
+                decoration: InputDecoration(labelText: 'Confirm New Password'),
               ),
             ],
           ),
@@ -33,9 +33,9 @@ Future<void> showSetPasswordDialog(BuildContext context, String accessToken, Str
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Cierra el diálogo sin hacer cambios
+              Navigator.of(context).pop(); // Close the dialog without making changes
             },
-            child: Text('Cancelar'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -44,7 +44,7 @@ Future<void> showSetPasswordDialog(BuildContext context, String accessToken, Str
 
               if (newPassword != confirmNewPassword) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Las contraseñas no coinciden')),
+                  SnackBar(content: Text('Passwords do not match')),
                 );
                 return;
               }
@@ -53,26 +53,26 @@ Future<void> showSetPasswordDialog(BuildContext context, String accessToken, Str
                 final success = await setPassword(accessToken, newPassword, dni);
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Contraseña cambiada con éxito')),
+                    SnackBar(content: Text('Password changed successfully')),
                   );
 
-                  // Cierra el diálogo
+                  // Close the dialog
                   Navigator.of(context).pop();
 
-                  // Mostrar el diálogo de confirmación
-                  showConfirmationOKDialog(context);
+                  // Show confirmation dialog
+                  okDialog(context, "Password Changed Successfully");
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('No se pudo cambiar la contraseña')),
+                    SnackBar(content: Text('Failed to change password')),
                   );
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error al cambiar la contraseña: $e')),
+                  SnackBar(content: Text('Error changing password: $e')),
                 );
               }
             },
-            child: Text('Cambiar'),
+            child: Text('Change'),
           ),
         ],
       );

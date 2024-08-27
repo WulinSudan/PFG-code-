@@ -8,7 +8,7 @@ import '../functions/setNewKey.dart';
 import '../internal_functions/maskAccountNumber.dart';
 import '../dialogs/qr_dialog.dart'; // Importa el nuevo archivo
 import '../functions/checkEnableAmout.dart';
-import '../dialogs/errorDialog.dart';
+import '../dialogs_simples/errorDialog.dart';
 
 class PaymentPage extends StatefulWidget {
   @override

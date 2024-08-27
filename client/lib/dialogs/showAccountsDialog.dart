@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import '../pages/account.dart'; // Asegúrate de que este es el nombre correcto del archivo de la clase Account
-import '../functions/getAccounts.dart'; // Asegúrate de importar la función getAccounts
-import '../pages/account_card_admin.dart'; // Asegúrate de que este es el nombre correcto del archivo de la clase AccountCardAdmin
-import '../functions/changeAccountStatus.dart'; // Asegúrate de importar la función setDesactiveAccount
+import '../utils/account.dart'; // Make sure this is the correct name of the Account class file
+import '../functions/getAccounts.dart'; // Make sure to import the getAccounts function
+import '../utils/account_card_admin.dart'; // Make sure this is the correct name of the AccountCardAdmin class file
+import '../functions/changeAccountStatus.dart'; // Make sure to import the changeAccountStatus function
 
 Future<void> showAccountsDialog(BuildContext context, String accessToken, String dni) async {
   List<Account> accounts = [];
   Account? selectedAccount;
 
   try {
-    accounts = await getAccounts(accessToken, dni); // Obtén las cuentas aquí
+    accounts = await getAccounts(accessToken, dni); // Fetch the accounts here
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Error al obtener las cuentas: ${e.toString()}'),
+        content: Text('Error fetching accounts: ${e.toString()}'),
       ),
     );
     return;
@@ -25,7 +25,7 @@ Future<void> showAccountsDialog(BuildContext context, String accessToken, String
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return AlertDialog(
-            title: Text('Cuentas del Usuario'),
+            title: Text('User Accounts'),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -47,37 +47,37 @@ Future<void> showAccountsDialog(BuildContext context, String accessToken, String
             actions: <Widget>[
               if (selectedAccount != null)
                 TextButton(
-                  child: Text('Change status'),
+                  child: Text('Change Status'),
                   onPressed: () async {
                     try {
                       bool success = await changeAccountStatus(accessToken, selectedAccount!.numberAccount);
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Cuenta ${selectedAccount!.numberAccount} desactivada.'),
+                            content: Text('Account ${selectedAccount!.numberAccount} deactivated.'),
                           ),
                         );
-                        // Espera 2 segundos antes de cerrar el diálogo
+                        // Wait for 2 seconds before closing the dialog
                         await Future.delayed(Duration(seconds: 2));
                         Navigator.of(context).pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('No se pudo desactivar la cuenta.'),
+                            content: Text('Failed to deactivate the account.'),
                           ),
                         );
                       }
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Error al desactivar la cuenta: ${e.toString()}'),
+                          content: Text('Error deactivating the account: ${e.toString()}'),
                         ),
                       );
                     }
                   },
                 ),
               TextButton(
-                child: Text('Cerrar'),
+                child: Text('Close'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },

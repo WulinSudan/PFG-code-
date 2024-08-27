@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
 
 Future<double?> getImportDialog(BuildContext context) async {
-  print("En la funcion de getImportDialog-----------");
+  print("In the getImportDialog function-----------");
   TextEditingController _controller = TextEditingController();
 
   return showDialog<double>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Ingrese el Importe'),
+        title: Text('Enter Amount'),
         content: TextField(
           controller: _controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: 'Ingrese un número',
+            hintText: 'Enter a number',
           ),
         ),
         actions: <Widget>[
           TextButton(
-            child: Text('Cancelar'),
+            child: Text('Cancel'),
             onPressed: () {
-              Navigator.of(context).pop(); // Cerrar el diálogo sin devolver valor
+              Navigator.of(context).pop(); // Close the dialog without returning a value
             },
           ),
           TextButton(
-            child: Text('Aceptar'),
+            child: Text('OK'),
             onPressed: () {
-              // Devolver el importe ingresado convertido a double
+              // Return the entered amount converted to double
               final input = _controller.text;
               if (input.isNotEmpty) {
                 Navigator.of(context).pop(double.tryParse(input));
               } else {
-                Navigator.of(context).pop(); // Cerrar el diálogo sin devolver valor
+                Navigator.of(context).pop(); // Close the dialog without returning a value
               }
             },
           ),

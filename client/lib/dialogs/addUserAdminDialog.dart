@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 Future<void> showAddUserAdminDialog(BuildContext context, String accessToken) async {
   bool isAdmin = false;
-  bool optionSelected = false; // Variable para saber si se ha seleccionado una opción
+  bool optionSelected = false; // Variable to track if an option has been selected
 
   return showDialog<void>(
     context: context,
@@ -11,7 +11,7 @@ Future<void> showAddUserAdminDialog(BuildContext context, String accessToken) as
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text('Seleccionar tipo de usuario'),
+            title: Text('Select User Type'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -28,7 +28,7 @@ Future<void> showAddUserAdminDialog(BuildContext context, String accessToken) as
                       width: 2,
                     ),
                   ),
-                  child: Text('Agregar Usuario'),
+                  child: Text('Add User'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -43,7 +43,7 @@ Future<void> showAddUserAdminDialog(BuildContext context, String accessToken) as
                       width: 2,
                     ),
                   ),
-                  child: Text('Agregar Administrador'),
+                  child: Text('Add Admin'),
                 ),
               ],
             ),
@@ -51,7 +51,7 @@ Future<void> showAddUserAdminDialog(BuildContext context, String accessToken) as
               TextButton(
                 onPressed: optionSelected
                     ? () {
-                  Navigator.of(context).pop(); // Cierra el diálogo primero
+                  Navigator.of(context).pop(); // Close the dialog first
 
                   Navigator.pushNamed(
                     context,
@@ -59,14 +59,14 @@ Future<void> showAddUserAdminDialog(BuildContext context, String accessToken) as
                     arguments: accessToken,
                   );
                 }
-                    : null, // Desactiva el botón si no se ha seleccionado una opción
-                child: Text('Agregar'),
+                    : null, // Disable the button if no option has been selected
+                child: Text('Add'),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Cierra el diálogo
+                  Navigator.of(context).pop(); // Close the dialog
                 },
-                child: Text('Cancelar'),
+                child: Text('Cancel'),
               ),
             ],
           );

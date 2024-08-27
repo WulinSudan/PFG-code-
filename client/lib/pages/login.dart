@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_client.dart'; // Asegúrate de importar tus consultas/mutaciones GraphQL aquí
 import '../graphql_queries.dart';
-import '../dialogs/errorConnectionDialog.dart';
+import '../dialogs_simples/errorDialog.dart';
 import '../functions/getUserRole.dart';
 
 class Login extends StatefulWidget {
@@ -62,7 +62,7 @@ class _LoginState extends State<Login> {
 
                 // Manejo del resultado de la mutación
                 if (result.hasException) {
-                  await errorConnectionDialog(context);
+                  await errorDialog(context, "Autentication failed");
                   // Manejar errores de autenticación
                   print("Error en la autenticación: ${result.exception}");
                 } else {

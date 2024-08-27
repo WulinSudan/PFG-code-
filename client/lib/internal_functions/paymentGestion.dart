@@ -7,7 +7,7 @@ import '../functions/fetchPayKey.dart';
 import '../functions/encrypt.dart';
 import '../functions/doQr.dart';
 import '../functions/setQrUsed.dart';
-import '../dialogs/confirmationDialog.dart';
+import '../dialogs_simples/okDialog.dart';
 import '../dialogs/getImportDialog.dart';
 import '../functions/getAccountBalance.dart';
 
@@ -51,9 +51,9 @@ Future<void> processQrPayment(
 
       if (amount == null || amount <= 0) {
         amount = await getImportDialog(context) ?? 0.0;
-        await showConfirmationDialog(context);
+        await okDialog(context,"Identifying");
       } else {
-        await showConfirmationDialog(context);
+        await okDialog(context,"Identifying");
       }
 
       String origen = cuentaEscaneadora;
