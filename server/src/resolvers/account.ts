@@ -1,101 +1,89 @@
 import { Account, IAccount } from "../model/account";
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import { Context } from "../utils/context";
-import { getAccessToken, getUserId } from "../utils/jwt";
-import { comparePassword, hashPassword } from "../utils/crypt";
+import { getUserId } from "../utils/jwt";
 import { User, IUser } from "../model/user";
 import { Transaction } from "../model/transaction";
-import { ContextFunction } from "@apollo/server";
 import fs from 'fs-extra';
 import path from 'path';
 
-
-const logFilePath = path.join(__dirname, '../../logs/accounts.txt');
-
-// Function to write logs to a file
-const writeLog = async (message: string) => {
-  try {
-    await fs.appendFile(logFilePath, `${message}\n`);
-  } catch (err) {
-    console.error('Error writing to the log file:', err);
+  interface AddAccountInput {
+    owner_dni: string;
+    owner_name: string;
   }
-}
 
+  interface AddAccountArgs {
+    input: AddAccountInput;
+  }
 
-function generateUniqueAccountNumber(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hour = String(now.getHours()).padStart(2, '0');
-  const minute = String(now.getMinutes()).padStart(2, '0');
-  const second = String(now.getSeconds()).padStart(2, '0');
-  
-  const aux = `${month}${day}${hour}${minute}${second}`;
-  console.log(aux);
-  return aux;
-}
+  interface TransferInput {
+    accountOrigen: string;
+    accountDestin: string;
+    import: number;
+  }
 
-interface AddAccountInput {
-  owner_dni: string;
-  owner_name: string;
-}
+  const logFilePath = path.join(__dirname, '../../logs/accounts.txt');
 
-interface AddAccountArgs {
-  input: AddAccountInput;
-}
-
-interface TransferInput {
-  accountOrigen: string;
-  accountDestin: string;
-  import: number;
-}
-
-async function findUser(accountNumber: string): Promise<IUser | null> {
-  try {
-    // Find the account using the account number
-    const account = await Account.findOne({ accountNumber }).exec();
+  const writeLog = async (message: string) => {
+    try {
+      await fs.appendFile(logFilePath, `${message}\n`);
+    } catch (err) {
+      console.error('Error writing to the log file:', err);
+    }
+  }
+  function generateUniqueAccountNumber(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+    const second = String(now.getSeconds()).padStart(2, '0');
     
-    if (!account) {
-      console.log('No account found with the provided number.');
-      return null;
+    const aux = `${month}${day}${hour}${minute}${second}`;
+    console.log(aux);
+    return aux;
+  }
+  async function findUser(accountNumber: string): Promise<IUser | null> {
+    try {
+      // Find the account using the account number
+      const account = await Account.findOne({ accountNumber }).exec();
+      
+      if (!account) {
+        console.log('No account found with the provided number.');
+        return null;
+      }
+
+      // Find the user who has the account in their list of accounts
+      const user = await User.findOne({ accounts: account._id }).exec();
+
+      return user;
+    } catch (error) {
+      console.error('Error finding the user:', error);
+      throw new Error('Could not find the user.');
+    }
+  }
+  async function findAccount(accountNumber: string): Promise<IAccount | null> {
+    try {
+      return await Account.findOne({ number_account: accountNumber });
+    } catch (error) {
+      console.error('Error finding the account:', error);
+      throw error;
+    }
+  }
+  async function me(context: Context) {
+    const userId = getUserId(context);
+
+    if (!userId) {
+      throw new Error("User not authenticated");
     }
 
-    // Find the user who has the account in their list of accounts
-    const user = await User.findOne({ accounts: account._id }).exec();
+    const user = await User.findById(new Types.ObjectId(userId));
+    if (!user) {
+      throw new Error("User not found");
+    }
 
     return user;
-  } catch (error) {
-    console.error('Error finding the user:', error);
-    throw new Error('Could not find the user.');
   }
-}
-
-
-async function findAccount(accountNumber: string): Promise<IAccount | null> {
-  try {
-    return await Account.findOne({ number_account: accountNumber });
-  } catch (error) {
-    console.error('Error finding the account:', error);
-    throw error;
-  }
-}
-
-
-async function me(context: Context) {
-  const userId = getUserId(context);
-
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const user = await User.findById(new Types.ObjectId(userId));
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return user;
-}
-
 
 export const accountResolvers = {
   Query: {
@@ -131,8 +119,6 @@ export const accountResolvers = {
         return false; // Or throw an exception depending on how you want to handle it
       }
     },
-
-
     getUserAccounts: async (_root: any, context: Context) => {
       try {
         // Retrieve the authenticated user using the `me` function
@@ -158,8 +144,6 @@ export const accountResolvers = {
         throw new Error('Could not retrieve user account information.');
       }
     },
-
-
     // Get information about the user's accounts by DNI
     getUserAccountsInfoByDni: async (_root: any, { dni }: { dni: string }, context: Context) => {
 
@@ -189,7 +173,6 @@ export const accountResolvers = {
         throw new Error('Error fetching user accounts info by DNI');
       }
     },
-
     // Get the status of an account by its number
     getAccountStatus: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
 
@@ -208,8 +191,6 @@ export const accountResolvers = {
         throw new Error('Could not retrieve the account status.');
       }
     },
-      
-
     // Get the balance of an account by its number
     getAccountBalance: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       const currentUser = await me(context);
@@ -227,9 +208,7 @@ export const accountResolvers = {
         throw new Error('Could not retrieve the account balance.');
       }
     },
-      
-
-    // Not used
+    // Not use
     getMaxPayDay: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       const currentUser = await me(context);
 
@@ -246,7 +225,6 @@ export const accountResolvers = {
         throw new Error('Could not retrieve the account status.');
       }
     },
-
     // Get the transactions associated with an account
     getAccountTransactions: async (_root: any, { n_account }: { n_account: string }, context: Context) => {
 
@@ -272,8 +250,6 @@ export const accountResolvers = {
         throw new Error('Error fetching transactions info by account number');
       }
     },
-
-
     // Get the payment key of an account
     getAccountPayKey: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context): Promise<string> => {
       try {
@@ -304,9 +280,6 @@ export const accountResolvers = {
         throw new Error('Could not retrieve the payment key of the account.');
       }
     },
-
-        
-
     // Find an account by its number
     findAccount: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context) => {
       try {
@@ -329,10 +302,7 @@ export const accountResolvers = {
         throw error;
       }
     },
-
-
-
-    // no utiliza
+    // Not use
     getAllAccounts: async (): Promise<IAccount[]> => {
       try {
         return await Account.find();
@@ -341,16 +311,13 @@ export const accountResolvers = {
         throw new Error('Error fetching accounts');
       }
     },
-
-    // Contar el número total de cuentas
-    // no utiliza
+    // Not use
     countAccount: async () => {
       return await Account.countDocuments();
     },
   },
 
   Mutation: {
-    
     // Set the description for an account
     setAccountDescription: async (_root: any, { accountNumber, description }: { accountNumber: string, description: string }, context: Context): Promise<string> => {
       try {
@@ -380,8 +347,6 @@ export const accountResolvers = {
         throw new Error("Failed to set account description");
       }
     },
-
-
     // Change the status of an account
     changeAccountStatus: async (_root: any, { accountNumber }: { accountNumber: string }, context: Context): Promise<boolean> => {
       console.log("In changeAccountStatus");
@@ -423,8 +388,6 @@ export const accountResolvers = {
         throw new Error("Failed to update account status");
       }
     },
-
-
     setMaxPayImport: async (_root: any, { accountNumber, maxImport }: { accountNumber: string, maxImport: number }, context:Context): Promise<number> => {
       try {
         const currentUser = await me(context);
@@ -448,8 +411,6 @@ export const accountResolvers = {
         throw new Error("Failed to set max pay import");
       }
     },
-
-
     addAccountByUser: async (_root: any, { input: { owner_dni, owner_name } }: AddAccountArgs): Promise<IAccount> => {
       try {
         const newAccount = new Account({
@@ -479,7 +440,6 @@ export const accountResolvers = {
         throw new Error('Error creating account');
       }
     },
-
     // Agregar una cuenta al usuario autenticado
     addAccountByAccessToken: async (_root: any, _args: any, context: Context): Promise<IAccount> => {
       try {
@@ -511,8 +471,6 @@ export const accountResolvers = {
         throw new Error('Error creating account for the user');
       }
     },
-
-    // Eliminar una cuenta
     // falta utilizar me
     removeAccount: async (_root: any, { number_account }: { number_account: string }, context: Context) => {
       
@@ -545,7 +503,6 @@ export const accountResolvers = {
       console.log('Account deleted successfully');
       return deletionResult.deletedCount;
     },
-
     // Perform a transfer between accounts
     // Pending implementation
     makeTransfer: async (_root: any, { input }: { input: TransferInput }, context: Context): Promise<any> => {
@@ -642,6 +599,5 @@ export const accountResolvers = {
         };
       }
     },
-
   },
 };

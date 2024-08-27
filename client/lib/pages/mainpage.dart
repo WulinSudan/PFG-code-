@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:client/functions/addTransaction.dart';
 import 'package:client/functions/changeAccountStatus.dart';
 import 'package:client/functions/getAccountStatus.dart';
-import 'package:client/functions/getUserStatusName.dart';
+import 'package:client/functions/getUserStatusDni.dart';
 import 'package:client/functions/fetchUserData.dart';
 import 'package:client/functions/addAccount.dart';
 import 'package:client/functions/getAccountTransactions.dart';
@@ -91,10 +91,12 @@ class _MainPageState extends State<MainPage> {
     await fetchUserData(widget.accessToken, updateUserData);
 
     // Fetch user status
-    bool userStatus = await getUserStatusName(widget.accessToken);
-    setState(() {
-      _userStatus = userStatus; // Almacenar el estado del usuario
-    });
+    if (dni != null) {
+      bool userStatus = await getUserStatusDni(widget.accessToken, dni!);
+      setState(() {
+        _userStatus = userStatus; // Almacenar el estado del usuario
+      });
+    }
   }
 
   Future<void> updateUserData(String? name, String? id, List<dynamic> fetchedAccounts) async {
@@ -232,6 +234,7 @@ class _MainPageState extends State<MainPage> {
                   if (status) correctDialog(context, "Enabled");
                   else correctDialog(context, "Disabled");
                 }
+                fetchData();
               },
             ),
             ListTile(

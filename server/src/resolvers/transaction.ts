@@ -1,12 +1,35 @@
-import { Account } from '../model/account';
 import { ITransaction, Transaction } from '../model/transaction';
+import { Account } from "../model/account";
+import  { Types } from "mongoose";
+import { Context } from "../utils/context";
+import { getUserId } from "../utils/jwt";
+import { User } from "../model/user";
+
+
+async function me(context: Context) {
+  const userId = getUserId(context);
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const user = await User.findById(new Types.ObjectId(userId));
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+}
 
 export const transactionResolvers = {
   Query: {
-    // Aquí puedes definir tus resolvers de consulta
-    getTransactions : async (): Promise<ITransaction[]> => {
+    getTransactions : async (context: Context): Promise<ITransaction[]> => {
       try {
-        // Ordena las transacciones por fecha de creación en orden descendente
+        
+        const currentUser = await me(context);
+        if(!currentUser){
+          throw("User not authenticated")
+        }
         const transactions = await Transaction.find().sort({ createDate: -1 });
         return transactions;
       } catch (error) {
@@ -14,19 +37,23 @@ export const transactionResolvers = {
         throw new Error('Error fetching transactions');
       }
     },
-
   },
+
   Mutation: {
-    addTransaction: async (_root: any, args: { input: { operation: string; import: number; accountNumber: string } }) => {
+    addTransaction: async (_root: any, args: { input: { operation: string; import: number; accountNumber: string } }, context: Context) => {
       const { operation, import: importAmount, accountNumber } = args.input;
       
-       // Encuentra la cuenta y añade la transacción
+      const currentUser = await me(context);
+      if(!currentUser){
+        throw("User not authenticated")
+      }
+      
        const account = await Account.findOne({ number_account: accountNumber });
        if (!account) {
          throw new Error('Account not found');
        }
 
-      // Crea y guarda la nueva transacción
+    
       const transaction = new Transaction({
         balance: account.balance,
         operation,
@@ -35,7 +62,6 @@ export const transactionResolvers = {
       });
       const savedTransaction = await transaction.save();
 
-      // Agrega el ID de la transacción a la lista de transacciones de la cuenta
       account.transactions.push(savedTransaction._id);
       await account.save();
 

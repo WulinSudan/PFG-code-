@@ -1,63 +1,35 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import { Context } from "../utils/context";
 import { getAccessToken, getUserId } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/crypt";
 import { User } from "../model/user";
-import { Account, IAccount } from "../model/account";
-import { print } from "graphql";
-import { Request, Response } from 'express';
-import { getActiveResourcesInfo, throwDeprecation } from "process";
-import { accountResolvers } from "./account";
+import { Account } from "../model/account";
 import fs from 'fs-extra';
 import path from 'path';
 
 
+  const logFilePath = path.join(__dirname, '../../logs/users.txt');
 
-const logFilePath = path.join(__dirname, '../../logs/users.txt');
-
-// Función para escribir logs en el archivo
-const writeLog = async (message: string) => {
-  try {
-    await fs.appendFile(logFilePath, `${message}\n`);
-  } catch (err) {
-    console.error('Error al escribir en el archivo de log:', err);
+  const writeLog = async (message: string) => {
+    try {
+      await fs.appendFile(logFilePath, `${message}\n`);
+    } catch (err) {
+      console.error('Error al escribir en el archivo de log:', err);
+    }
   }
-};
-
-
-function getUtcPlusTwoDate() {
-  const now = new Date();
-  // Obtener el tiempo en milisegundos y añadir dos horas (2 * 60 * 60 * 1000 milisegundos)
-  const utcPlusTwoTime = now.getTime() + (2 * 60 * 60 * 1000);
-  // Crear un nuevo objeto Date con el tiempo UTC+2
-  return new Date(utcPlusTwoTime);
-}
-
-
-
-function generateUniqueAccountNumber(): string {
-  const now = new Date();
-  //const year = String(now.getFullYear()).slice(-2);
-  const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
-  const day = String(now.getDate()).padStart(2, '0');
-  const hour = String(now.getHours()).padStart(2, '0');
-  const minute = String(now.getMinutes()).padStart(2, '0');
-  const second = String(now.getSeconds()).padStart(2,'0');
-  
-  const aux = `${month}${day}${hour}${minute}${second}`;
-  console.log(aux);
-  return aux;
-}
-
-
-interface AddAccountInput {
-    owner_dni: string;
-    owner_name: string;
-    number_account: string;
-    balance: number;
-    active: boolean;
+  function generateUniqueAccountNumber(): string {
+    const now = new Date();
+    //const year = String(now.getFullYear()).slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Meses de 0-11, así que sumamos 1
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+    const second = String(now.getSeconds()).padStart(2,'0');
+    
+    const aux = `${month}${day}${hour}${minute}${second}`;
+    console.log(aux);
+    return aux;
   }
-
   async function me(context: Context) {
     const userId = getUserId(context);
   
@@ -71,54 +43,49 @@ interface AddAccountInput {
     }
   
     return user;
-  }
-  
+  } 
 
 export const userResolvers = {
     Query: {
+      
+      // try to make functions without input parameters
 
       getLogs: async (_root: any, { dni }: { dni: string }, context: Context) => {
-        // Verificar el usuario actual y su rol
+        // Verify the current user and their role
         const currentUser = await me(context);
-    
         if (currentUser.role !== "admin") {
-            throw new Error("Solo los administradores pueden visualizar los logs.");
+          throw new Error("Only administrators can view the logs.");
         }
-    
-        // Buscar el usuario por DNI
+      
+        // Find the user by DNI
         const user = await User.findOne({ dni: dni });
-    
+      
         if (!user) {
-            throw new Error("No se puede encontrar el usuario.");
+          throw new Error("User not found.");
         }
-              
-        // Retornar los logs del usuario
+      
+        // Return the user's logs
         return user.logs;
-    },
-    
-
-
-       getUserInfo : async (_root:any, args:any) => {
-        // Buscar el usuario en la base de datos usando el DNI proporcionado en args
+      },   
+      getUserInfo : async (_root:any, args:any,context: Context) => {
+        
+        const currentUser = await me(context);
+        if (!currentUser) {
+          throw new Error("No user provided");
+        }
         const user = await User.findOne({ dni: args.dni });
         if(!user){
           throw("can't fins user");
         }
-
         return user;
       },
-
-
-      getUserStatusName : async (_root: any, { dni }: { dni: string }, context: Context): Promise<boolean> => {
+      getUserStatusDni : async (_root: any, { dni }: { dni: string }, context: Context): Promise<boolean> => {
         
-        console.log("Entering getUserStatus");
-      
         try {
-          // Buscar el usuario por DNI
           const user = await User.findOne({ dni: dni });
       
           if (!user) {
-              throw new Error("No se puede encontrar el usuario.");
+              throw new Error("User cannot be found.");
           }
         
           if (typeof user.active !== 'boolean') {
@@ -129,20 +96,16 @@ export const userResolvers = {
           console.log("User status is", user.active);
           return user.active;
         } catch (error) {
-          // Mejora el mensaje de error para incluir detalles
           console.error(`Error in getUserStatus: ${(error as Error).message}`);
           throw new Error(`Failed to get user status: ${(error as Error).message}`);
         }
       },
-
-
       getUserStatus : async (_root: any, context: Context): Promise<boolean> => {
         console.log("Entering getUserStatus name");
       
         try {
           const user = await me(context);
       
-          // Verifica si el resultado de `me` es `undefined` o si `active` no es un booleano
           if (!user) {
             console.error("User is undefined or null");
             throw new Error('User not found');
@@ -156,13 +119,11 @@ export const userResolvers = {
           console.log("User status is", user.active);
           return user.active;
         } catch (error) {
-          // Mejora el mensaje de error para incluir detalles
+         
           console.error(`Error in getUserStatus: ${(error as Error).message}`);
           throw new Error(`Failed to get user status: ${(error as Error).message}`);
         }
       },
-      
-
       getUserName : async (_root: any, context:Context): Promise<string> => {
         try {
           const user = await me(context);
@@ -176,9 +137,7 @@ export const userResolvers = {
           throw new Error(`Failed to get user name: ${(error as Error).message}`);
         }
       },
-
-
-        getUserRole: async (_root: any, { name }: { name: string }): Promise<string> => {
+      getUserRole: async (_root: any, { name }: { name: string }): Promise<string> => {
           try {
             const user = await User.findOne({ name });
         
@@ -190,33 +149,25 @@ export const userResolvers = {
           } catch (error) {
             throw new Error(`Failed to get user role: ${(error as Error).message}`);
           }
-        },
-        
-
-        getUserAccountCount: async (_root: any, { dni }: { dni: string }) => {
+      },
+      getUserAccountCount: async (_root: any, { dni }: { dni: string }) => {
             try {
-              // Buscar al usuario por su DNI
+            
               const user = await User.findOne({ dni });
               if (!user) {
                 throw new Error('User not found');
               }
       
-              // Devolver el número de cuentas asociadas al usuario
               return user.accounts.length;
             } catch (error) {
               console.error('Error fetching user account count by DNI:', error);
               throw new Error('Error fetching user account count by DNI: ');
             }
-          },
-
-
-          getAdmins: async (): Promise<{ name: string; dni: string }[]> => {
+      },
+      getAdmins: async (): Promise<{ name: string; dni: string }[]> => {
             try {
-              // Obtener todos los usuarios, excluyendo al usuario con nombre 'admin'
-              //const users = await User.find({ name: { $ne: 'Admin' } }).exec(); 
               const users = await User.find({ role: { $ne: 'client' } }).exec();
               
-              // Mapear los resultados a un formato específico
               return users.map(user => ({
                 name: user.name,
                 dni: user.dni,
@@ -225,27 +176,22 @@ export const userResolvers = {
             } catch (error) {
               throw new Error(`Error al obtener los usuarios`);
             }
-          },
-
-          getUsers: async (): Promise<{ name: string; dni: string }[]> => {
+      },
+      getUsers: async (): Promise<{ name: string; dni: string }[]> => {
             try {
-              // Obtener todos los usuarios, excluyendo al usuario con nombre 'admin'
-              //const users = await User.find({ name: { $ne: 'Admin' } }).exec(); 
+            
               const users = await User.find({ role: { $ne: 'admin' } }).exec();
               
-              // Mapear los resultados a un formato específico
               return users.map(user => ({
                 name: user.name,
                 dni: user.dni,
                 active: user.active,
               }));
             } catch (error) {
-              throw new Error(`Error al obtener los usuarios`);
+              throw new Error(`Error getting users`);
             }
-          },
-
-        
-        me: async (_root: any, _args: any, context: Context) => {
+      },
+      me: async (_root: any, _args: any, context: Context) => {
             
           const userId = getUserId(context);
 
@@ -257,10 +203,9 @@ export const userResolvers = {
                 throw new Error("User not found");
             }
             return user;
-        },
-        
-        
+      }, 
     },
+
     Mutation: {
 
       setPassword: async (_root: any, args: { new: string, dni:String}, context: Context): Promise<boolean> => {
@@ -283,16 +228,15 @@ export const userResolvers = {
           user.logs.push(logMessage);
           await writeLog(logMessage);
 
-          await currentAdmin.save(); // Guardar el usuario con la nueva contraseña
-          await user.save(); // Guardar el usuario con la nueva contraseña
+          await currentAdmin.save(); 
+          await user.save(); 
       
-          return true; // Retornar true si se cambió la contraseña exitosamente
+          return true; 
         } catch (error) {
           console.error("Error changing password:", error);
-          throw new Error("Failed to change password"); // Lanzar un error genérico en caso de fallo
+          throw new Error("Failed to change password");
         }
       },
-
       changePassword: async (_root: any, args: { old: string, new: string }, context: Context): Promise<boolean> => {
         try {
           const currentUser = await me(context);
@@ -301,17 +245,12 @@ export const userResolvers = {
             throw new Error("User not found");
           }
       
-          // Verificar si la contraseña antigua coincide
           const isPasswordMatch = await comparePassword(currentUser.password, args.old);
           
           if (!isPasswordMatch) {
             throw new Error("Incorrect old password");
           }
 
-
-          
-      
-          // Si coincide, actualizar la contraseña
           currentUser.password = await hashPassword(args.new);
 
 
@@ -319,63 +258,39 @@ export const userResolvers = {
           currentUser.logs.push(logMessage);
           await writeLog(logMessage);
 
-          await currentUser.save(); // Guardar el usuario con la nueva contraseña
+          await currentUser.save(); 
       
-          return true; // Retornar true si se cambió la contraseña exitosamente
+          return true; 
         } catch (error) {
           console.error("Error changing password:", error);
-          throw new Error("Failed to change password"); // Lanzar un error genérico en caso de fallo
+          throw new Error("Failed to change password"); 
         }
       },
-      
-
       // cambiar la status de si mateix o per admin
       changeUserStatus: async (_root: any, args: { dni: string }, context: Context): Promise<boolean> => {
 
         try {
-          // Buscar el usuario por DNI
           const user = await User.findOne({ dni: args.dni });
           if (!user) {
             throw new Error("User does not exist");
           }
-      
-          // Alternar el estado del usuario
-          const newStatus: boolean = !user.active; // Cambia el estado actual y asegura el tipo primitivo booleano
+
+          const newStatus: boolean = !user.active; 
           await User.updateOne(
             { dni: args.dni },
             { $set: { active: newStatus } }
           );
       
-          // Verificar si el usuario ha sido actualizado
           const updatedUser = await User.findOne({ dni: args.dni });
-      
-          // Asegúrate de retornar un valor booleano
-          return updatedUser ? updatedUser.active === true : false; // Convierte explícitamente a booleano
+
+          return updatedUser ? updatedUser.active === true : false; 
         } catch (error) {
           console.error("Error setting user active status:", error);
           throw new Error("Failed to update user status");
         }
       },
-      
-      
-
-      logoutUser: async (_parent: any, _args: any, context: Context) => {
-        try {
-          // Aquí puedes manejar cualquier lógica adicional que necesites para el logout
-          // Por ejemplo, invalidar el token en una lista negra si es necesario
-  
-          // Enviar una respuesta de éxito
-          return { message: 'Logout successful' };
-        } catch (error) {
-          // Lanza el error para que GraphQL lo maneje
-          throw new Error('Error during logout');
-        }
-      },
-
-
       removeUser: async (_root: any, args: any, context: Context) => {
-        // No se puede eliminar el rol admin
-    
+
         const currentUser = await me(context);
         if (!currentUser) {
             throw new Error("No user provided");
@@ -411,11 +326,8 @@ export const userResolvers = {
         }
     
         throw new Error("Cannot delete user");
-    },
-
-    
-
-        signUpAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
+      },
+      signUpAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
 
           console.log("En proceso de registrar");
             try {
@@ -437,25 +349,20 @@ export const userResolvers = {
                 }
                 throw error;
             }
-        },
-
-        signUp: async (_root: any, { input: { dni, name, password } }: any, context: Context) => {
+      },
+      signUp: async (_root: any, { input: { dni, name, password } }: any, context: Context) => {
   
-          // Inicializar logMessage
           let logMessage = '';
         
           try {
-            // Verificar si ya existe un usuario con el mismo DNI
             const existingUser = await User.findOne({ dni });
             if (existingUser) {
-              // Si el usuario ya existe, registrar el mensaje en los logs del usuario existente
               logMessage = `${new Date().toISOString()} - Operación fallida: Usuario con DNI ${dni} ya existe.`;
               existingUser.logs.push(logMessage);
               await existingUser.save();
               throw new Error("User already exists");
             }
         
-            // Crear nuevo usuario
             const userInput = {
               dni: dni,
               name: name,
@@ -465,12 +372,11 @@ export const userResolvers = {
         
             const user = new User(userInput);
         
-            // Crear una nueva cuenta para el usuario
             const newAccount = new Account({
               owner_dni: dni,
               owner_name: name,
-              number_account: generateUniqueAccountNumber(), // Generar un número de cuenta único
-              balance: 10.5, // Saldo inicial
+              number_account: generateUniqueAccountNumber(), 
+              balance: 10.5, 
               active: true,
               key_to_pay: "1234567890123456",
               maximum_amount_once: 50,
@@ -478,16 +384,13 @@ export const userResolvers = {
               description: "cuenta nomina",
             });
         
-            // Guardar la nueva cuenta
             await newAccount.save();
         
-            // Añadir la nueva cuenta al array de cuentas del usuario
             user.accounts.push(newAccount._id);
 
             logMessage = `${new Date().toISOString()} - Operación: Usuario ${dni} registrado y cuenta ${newAccount.number_account} creada.`;
             user.logs.push(logMessage);
         
-            // Guardar el usuario con los logs actualizados
             await user.save();
         
             return user;
@@ -497,14 +400,8 @@ export const userResolvers = {
             }
             throw error;
           }
-        },
-        
-        
-        
-
-
-
-        addNewAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
+      },
+      addNewAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
           try {
               const userInput = {
                   dni:dni,
@@ -524,24 +421,20 @@ export const userResolvers = {
               throw error;
           }
       },
-
-
       loginUser : async (_root: any, { input: { name, password } }: any, context: Context) => {
         try {
-          // Buscar el usuario por nombre
+    
           const user = await User.findOne({ name }).select("password accounts");
           
           if (!user) {
             throw new Error("Usuario no encontrado");
           }
-      
-          // Verificar la contraseña del usuario
+
           const isPasswordValid = await comparePassword(user.password, password);
           if (!isPasswordValid) {
             throw new Error("Usuario o contraseña inválidos");
           }
       
-          // Obtener el token de acceso
           const accessToken = getAccessToken(
             {
               user: user.id.toString(),
@@ -551,18 +444,15 @@ export const userResolvers = {
             }
           );
       
-          // Retornar el token de acceso y el usuario
           return {
             access_token: accessToken,
             user: user,
           };
       
         } catch (error) {
-          console.error(error); // Loguear el error para depuración
-          //throw new Error(`Error al iniciar sesión: ${error.message}`);
+          console.error(error);
         }
       },
-
     },
 };
 

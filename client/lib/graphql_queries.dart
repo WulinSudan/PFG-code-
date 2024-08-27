@@ -217,13 +217,14 @@ query(\$name: String!){
 }
 """;
 
-const String getUserStatusNameQuery = """
-query {
-  getUserStatus {
+const String getUserStatusDniQuery = """
+query GetUserStatusDni(\$dni: String!) {
+  getUserStatusDni(dni: \$dni) {
     active
   }
 }
 """;
+
 
 const String getUserNameQuery = """
 query{

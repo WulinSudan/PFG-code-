@@ -1,217 +1,230 @@
 import Dictionary from "../model/dictionary";
 import { Types, UpdateWriteOpResult } from "mongoose";
 import { Context } from "../utils/context";
-import { getAccessToken, getUserId } from "../utils/jwt";
-import { comparePassword, hashPassword } from "../utils/crypt";
+import { getUserId } from "../utils/jwt";
 import { User } from "../model/user";
 import { Account, IAccount } from "../model/account";
-import { print } from "graphql";
-import { UUID } from "mongodb";
 import crypto from 'crypto';
-import { BlobOptions } from "buffer";
-import { UpdateResult } from 'mongodb'; // Import MongoDB native types
 
 
+async function me(context: Context) {
+  const userId = getUserId(context);
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const user = await User.findById(new Types.ObjectId(userId));
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+}
 
 export const dictionaryResolvers = {
   Query: {
-
     checkEnable: async (_root: any, args: { qrtext: string }, context: Context): Promise<boolean> => {
-      console.log("En la función checkEnable............");
+      // Check if the user is authenticated
+      const currentUser = await me(context);
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+    
       const { qrtext } = args;
     
-      // Asegúrate de que qrtext sea válido y no esté vacío
+      // Ensure that qrtext is valid and not empty
       if (!qrtext) {
         throw new Error('QR text is required');
       }
     
       try {
-        // Buscar en la base de datos el diccionario por qrtext
+        // Search the database for the dictionary entry by qrtext
         const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
     
-        // Si no se encuentra el diccionario, lanzar un error
+        // If the dictionary entry is not found, throw an error
         if (!dictionary) {
           throw new Error('Dictionary entry not found');
         }
     
-        // Verificar el valor actual de 'enable'
+        // Check the current value of 'enable'
         if (!dictionary.enable) {
-          return false; // No es necesario hacer más comprobaciones si 'enable' ya es false
+          return false; // No further checks are needed if 'enable' is already false
         }
     
-        // Verificar la fecha de creación
+        // Verify the creation date
         const createDate: Date = dictionary.create_date;
         if (!createDate) {
           throw new Error('Create date not found in dictionary entry');
         }
-        console.log(`48`);
     
-        // Obtener la fecha actual
+        // Get the current date
         const now: Date = new Date();
         const expirationTime: Date = new Date(createDate);
-        expirationTime.setMinutes(expirationTime.getMinutes() + 2); // Agregar 2 minutos a la fecha de creación
-        console.log(`54`);
-        // Comprobar si ha pasado más de 2 minutos
+        expirationTime.setMinutes(expirationTime.getMinutes() + 2); // Add 2 minutes to the creation date
+    
+        // Check if more than 2 minutes have passed
         if (now > expirationTime) {
-          console.log(`En la funcion chechEnable, se ha pasado mas de 2 minutos`);
+          console.log('In the checkEnable function, more than 2 minutes have passed');
           return false;
         }
-        console.log(`59`);
-        return true; // Si todas las comprobaciones son correctas, devolver true
+    
+        return true; // If all checks are correct, return true
       } catch (error) {
-        console.error('Error en checkEnable:', (error as Error).message);
-       
-        return false; // Manejar el error y devolver false
+        console.error('Error in checkEnable:', (error as Error).message);
+        return false; // Handle the error and return false
       }
     },
-    
-    
-
-    // Define tus resolvers de Query aquí, si tienes alguno
     getOrigenAccount: async (_root: any, args: { qrtext: string }, context: Context): Promise<string> => {
+
+      const currentUser = await me(context);
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+
       const { qrtext } = args;
 
-      // Asegúrate de que qrtext sea válido y no esté vacío
+      // Ensure that qrtext is valid and not empty
       if (!qrtext) {
         throw new Error('QR text is required');
       }
 
       try {
-        // Buscar en la base de datos solo por qrtext
+        // Search the database only by qrtext
         const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
 
-        // Si no se encuentra el diccionario, lanzar un error
+        // If the dictionary entry is not found, throw an error
         if (!dictionary) {
           throw new Error('Account not found');
         }
 
-        // Imprimir el tipo de operación solo para fines de depuración
-        console.log(`En getOriginAccount, la cuenta encontrada es: ${dictionary.account}`);
-        //console.log(${dictionary.qrtext}, ${})
+        // Log the account type for debugging purposes only
+        console.log(`In getOriginAccount, the found account is: ${dictionary.account}`);
 
-        // Devolver la cuenta encontrada
+        // Return the found account
         return dictionary.account;
       } catch (error) {
-        // Manejar posibles errores durante la consulta
-        console.error('Error al obtener la cuenta de origen:', error);
-        throw new Error('Error al obtener la cuenta de origen');
+        // Handle possible errors during the query
+        console.error('Error retrieving the origin account:', error);
+        throw new Error('Error retrieving the origin account');
       }
     },
-  },
+  }, 
 
   Mutation: {
+    setQrUsed: async (_root: any, args: { qrtext: string }, context: Context): Promise<boolean> => {
 
+      const currentUser = await me(context);
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+
+      const { qrtext } = args;
     
+      // Ensure that qrtext is valid and not empty
+      if (!qrtext) {
+        throw new Error('QR text is required');
+      }
+    
+      try {
+        // Search the database by qrtext and update enable to false
+        const updateResult: UpdateWriteOpResult = await Dictionary.updateOne(
+          { encrypt_message: qrtext },
+          { $set: { enable: false } }
+        );
+    
+        console.log(`QR text: ${qrtext}`);
+        console.log(`Update result: ${JSON.stringify(updateResult)}`);
+    
+        // Check if the entry was found and updated
+        if (updateResult.matchedCount === 0) {
+          console.error('No documents matched the query. Check if the qrtext exists.');
+          throw new Error('Dictionary entry not found');
+        }
+    
+        if (updateResult.modifiedCount === 0) {
+          console.log('Dictionary entry was already disabled or not modified');
+        }
+    
+        const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
+    
+        if (!dictionary) {
+          throw new Error('Dictionary entry not found after update');
+        }
+    
+        console.log("Account successfully disabled.");
+        console.log(`Enable status: ${dictionary.enable}`);
+    
+        // Check if the update was successful and return true if enable was set to false
+        return !dictionary.enable;
+      } catch (error) {
+        console.error('Error updating dictionary entry:', error);
+        throw new Error('Error updating dictionary entry');
+      }
+    },
+    setNewKey: async (_root: any, { accountNumber }: { accountNumber: string }, context:Context): Promise<string> => {
+      try {
+        // Input validation
+        const currentUser = await me(context);
+        if (!currentUser) {
+          throw new Error("User not authenticated");
+        }
 
-setQrUsed : async (
-  _root: any,
-  args: { qrtext: string },
-  context: Context
-): Promise<boolean> => {
-  console.log("En la función setQrUsed...");
-
-  const { qrtext } = args;
-
-  // Asegúrate de que qrtext sea válido y no esté vacío
-  if (!qrtext) {
-    throw new Error('QR text is required');
-  }
-
-  try {
-    // Buscar en la base de datos solo por qrtext y actualizar enable a false
-    const updateResult: UpdateWriteOpResult = await Dictionary.updateOne(
-      { encrypt_message: qrtext },
-      { $set: { enable: false } }
-    );
-
-    console.log(`QR text: ${qrtext}`);
-    console.log(`Update result: ${JSON.stringify(updateResult)}`);
-
-    // Verificar si se encontró y actualizó la entrada
-    if (updateResult.matchedCount === 0) {
-      console.error('No documents matched the query. Check if the qrtext exists.');
-      throw new Error('Dictionary entry not found');
-    }
-
-    if (updateResult.modifiedCount === 0) {
-      console.log('Dictionary entry was already disabled or not modified');
-    }
-
-    const dictionary = await Dictionary.findOne({ encrypt_message: qrtext });
-
-    if (!dictionary) {
-      throw new Error('Dictionary entry not found after update');
-    }
-
-    console.log("Cuenta deshabilitada exitosamente.");
-    console.log(`Estado de habilitación: ${dictionary.enable}`);
-
-    // Verificar si la actualización fue exitosa y devolver true si enable fue actualizado a false
-    return !dictionary.enable;
-  } catch (error) {
-    console.error('Error updating dictionary entry:', error);
-    throw new Error('Error updating dictionary entry');
-  }
-},
-
-
-setNewKey : async (_root: any, { accountNumber }: { accountNumber: string }): Promise<string> => {
-  try {
-    // Validación de entrada
-    if (!accountNumber) {
-      throw new Error("Account number is required");
-    }
-
-    // Buscar la cuenta
-    const account = await Account.findOne({ number_account: accountNumber });
-    if (!account) {
-      throw new Error("Account does not exist");
-    }
-    console.log(`cuenta actual: ${account.number_account}`)
-    console.log(`En la clase de setNewKey, la clave vieja: ${account.key_to_pay}`);
-
-    // Generar una nueva clave
-    const newKey = crypto.randomBytes(8).toString('hex').toUpperCase();
-    console.log(`En la clase de setNewKey, clave generada: ${newKey}`);
-
-    // Actualizar el campo key_to_pay y obtener el documento actualizado
-    const updatedAccount = await Account.findOneAndUpdate(
-      { number_account: accountNumber },
-      { $set: { key_to_pay: newKey } },
-    );
-
-    return newKey;
-  } catch (error) {
-    console.error("Error setting new key:", error);
-    throw new Error("Failed to set new key");
-  }
-},
-
-
-
-    addDictionary:async (_root: any, { input: { encrypt_message, account } }: any) => {
+        if (!accountNumber) {
+          throw new Error("Account number is required");
+        }
+    
+        // Find the account
+        const account = await Account.findOne({ number_account: accountNumber });
+        if (!account) {
+          throw new Error("Account does not exist");
+        }
+        console.log(`Current account: ${account.number_account}`);
+        console.log(`In the setNewKey function, the old key: ${account.key_to_pay}`);
+    
+        // Generate a new key
+        const newKey = crypto.randomBytes(8).toString('hex').toUpperCase();
+        console.log(`In the setNewKey function, generated key: ${newKey}`);
+    
+        // Update the key_to_pay field and get the updated document
+        const updatedAccount = await Account.findOneAndUpdate(
+          { number_account: accountNumber },
+          { $set: { key_to_pay: newKey } },
+        );
+    
+        return newKey;
+      } catch (error) {
+        console.error("Error setting new key:", error);
+        throw new Error("Failed to set new key");
+      }
+    },
+    addDictionary: async (_root: any, { input: { encrypt_message, account } }: any, context:Context) => {
 
       try {
-        // Verificar que encrypt_message no es null o vacío
+        const currentUser = await me(context);
+        if (!currentUser) {
+          throw new Error("User not authenticated");
+        }
+
+        // Ensure that encrypt_message is not null or empty
         if (!encrypt_message) {
           throw new Error("Encrypt message cannot be null or empty");
         }
-
-        console.log("En la funcion de addDictionary");
-
     
-        // Obtener la fecha y hora actuales
+        console.log("In the addDictionary function");
+    
+        // Get the current date and time
         const now = new Date(); 
     
         const newDictionary = new Dictionary({
           encrypt_message: encrypt_message,
           account: account,
-          create_date: now, // Usar la fecha actual
+          create_date: now, // Use the current date
         });
     
         await newDictionary.save();
     
-        console.log("En la función addDictionary: generado un código QR");
+        console.log("In the addDictionary function: a QR code has been generated");
         return newDictionary;
       } catch (error: any) {
         console.error("Error details:", error);
@@ -219,4 +232,5 @@ setNewKey : async (_root: any, { accountNumber }: { accountNumber: string }): Pr
       }
     },
   },
+
 };

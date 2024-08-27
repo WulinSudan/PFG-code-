@@ -5,7 +5,7 @@ type Query {
     getUserInfo(dni: String!): User
     getUserName: User
     getUserRole(name: String!): String
-    getUserStatusName(dni:String!):Boolean!
+    getUserStatusDni(dni:String!):Boolean!
     getUserStatus:Boolean!
     getRole: String!
     getAdmins: [User]!
@@ -68,7 +68,6 @@ type Mutation {
     setNewKey(accountNumber: String!): String!
     
     # User authentication and management
-    logoutUser: LogoutResponse!
     signUp(input: SignUpInput!): User!
     signUpAdmin(input: SignUpInput!): User!
     loginUser(input: LoginInput!): AuthToken!
@@ -92,11 +91,6 @@ type Mutation {
     addDictionary(input: DictionaryInput!): Dictionary!
 }
 
-
-# Represents a user logout response
-type LogoutResponse {
-    message: String!
-}
 
 # Represents a transaction with balance, operation details, and creation date
 type Transaction {
