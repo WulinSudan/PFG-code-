@@ -21,6 +21,7 @@ import '../utils/account_card.dart';
 import '../functions/changeUserStatus.dart';
 import '../internal_functions/setDescription.dart';
 import '../internal_functions/setMaxImport.dart';
+import '../internal_functions/ViewAndChangeUserStatus.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -104,6 +105,17 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onAccountSelected(int index) async {
+    fetchData();
+
+    print("------------------------------------------");
+    print(_userStatus);
+    print("------------------------------------------");
+
+    if (!_userStatus) {
+      errorDialog(context, "User is inactive. You cannot select accounts.");
+      return;
+    }
+
     if (index >= 0 && index < accounts.length) {
       setState(() {
         if (selectedAccountIndex == index) {
@@ -146,8 +158,8 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  bool get isUserActiveAndHasSelectedAccount {
-    return _userStatus && selectedAccountIndex != null && selectedAccountIndex! < accounts.length;
+  bool get hasSelectedAccount {
+    return selectedAccountIndex != null;
   }
 
   @override
@@ -216,12 +228,8 @@ class _MainPageState extends State<MainPage> {
             ListTile(
               title: Text('Change user status'),
               onTap: () async {
-                if (dni != null) {
-                  bool status = await changeUserStatus(widget.accessToken, dni!);
-                  if (status) okDialog(context, "Enabled");
-                  else okDialog(context, "Disabled");
-                }
-                fetchData();
+                selectedAccountIndex = null;
+                await showUserStatusDialog(context, widget.accessToken, dni, fetchData);
               },
             ),
             ListTile(
@@ -299,7 +307,7 @@ class _MainPageState extends State<MainPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
-                onPressed: isUserActiveAndHasSelectedAccount
+                onPressed: hasSelectedAccount
                     ? () {
                   Navigator.pushNamed(
                     context,
@@ -313,7 +321,7 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.camera_alt_outlined,
-                  color: isUserActiveAndHasSelectedAccount ? Colors.green : Colors.grey,
+                  color: hasSelectedAccount ? Colors.green : Colors.grey,
                   size: 40.0,
                 ),
               ),
@@ -339,7 +347,7 @@ class _MainPageState extends State<MainPage> {
               ),
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: isUserActiveAndHasSelectedAccount
+                onPressed: hasSelectedAccount
                     ? () {
                   Navigator.pushNamed(
                     context,
@@ -353,13 +361,13 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.payment_outlined,
-                  color: isUserActiveAndHasSelectedAccount ? Colors.green : Colors.grey,
+                  color: hasSelectedAccount ? Colors.green : Colors.grey,
                   size: 40.0,
                 ),
               ),
               SizedBox(width: 8.0),
               IconButton(
-                onPressed: isUserActiveAndHasSelectedAccount
+                onPressed: hasSelectedAccount
                     ? () async {
                   await showDeleteConfirmationDialog(
                     context,
@@ -373,13 +381,13 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.delete,
-                  color: isUserActiveAndHasSelectedAccount ? Colors.red : Colors.grey,
+                  color: hasSelectedAccount ? Colors.red : Colors.grey,
                   size: 40.0,
                 ),
               ),
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: isUserActiveAndHasSelectedAccount
+                onPressed: hasSelectedAccount
                     ? () async {
                   _toggleAccountStatus();
                 }
@@ -388,13 +396,13 @@ class _MainPageState extends State<MainPage> {
                   accounts.isNotEmpty && selectedAccountIndex != null && accounts[selectedAccountIndex!].active
                       ? Icons.lock
                       : Icons.lock_open,
-                  color: isUserActiveAndHasSelectedAccount ? Colors.red : Colors.grey,
+                  color: hasSelectedAccount ? Colors.red : Colors.grey,
                   size: 40.0,
                 ),
               ),
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
-                onPressed: isUserActiveAndHasSelectedAccount
+                onPressed: hasSelectedAccount
                     ? () {
                   showModalBottomSheet(
                     context: context,
@@ -442,7 +450,7 @@ class _MainPageState extends State<MainPage> {
                     : null,
                 icon: Icon(
                   Icons.pending_outlined,
-                  color: isUserActiveAndHasSelectedAccount ? Colors.green : Colors.grey,
+                  color: hasSelectedAccount ? Colors.green : Colors.grey,
                   size: 40.0,
                 ),
               ),
