@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart';
-import '../graphql_queries.dart';
-import '../functions/addAccount.dart';
+import '../functions/registerAdmin.dart'; // Import your registration function
 
 class RegistrationAdminPage extends StatefulWidget {
   @override
-  _RegistrationPageState createState() => _RegistrationPageState();
+  _RegistrationAdminPageState createState() => _RegistrationAdminPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationAdminPage> {
+class _RegistrationAdminPageState extends State<RegistrationAdminPage> {
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -48,7 +45,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
   void _validateUsername() {
     final username = _usernameController.text;
     setState(() {
-      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username);
+      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username); // Allows alphanumeric characters with at least 3 characters
     });
   }
 
@@ -56,7 +53,7 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
     setState(() {
       _isPasswordValid = _passwordController.text.length >= 3;
     });
-    _validatePasswordConfirmation(); // Revalidar confirmación si la contraseña cambia
+    _validatePasswordConfirmation();
   }
 
   void _validatePasswordConfirmation() {
@@ -66,27 +63,11 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
     });
   }
 
-  void _showSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Registro Exitoso'),
-          content: Text('Registro hecho con éxito.'),
-        );
-      },
-    );
-    Timer(Duration(seconds: 2), () {
-      Navigator.pop(context); // Cierra el diálogo
-      Navigator.pop(context); // Vuelve a AdminPage
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Register a new administrator'), // Corregido aquí
+        title: Text('Register a new administrator'),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -136,40 +117,27 @@ class _RegistrationPageState extends State<RegistrationAdminPage> {
                       backgroundColor: Colors.red,
                     ),
                   );
-                  return; // No hacer nada más si hay errores de validación
+                  return; // Do nothing further if there are validation errors
                 }
 
                 final String dni = _dniController.text.trim();
                 final String username = _usernameController.text.trim();
                 final String password = _passwordController.text.trim();
 
-                final GraphQLClient client = GraphQLService.createGraphQLClient('');
-
-                final QueryResult result = await client.mutate(
-                  MutationOptions(
-                    document: gql(signUpAdminMutation), // Asegúrate de que esta variable esté definida
-                    variables: {
-                      'input': {
-                        'dni': dni,
-                        'name': username,
-                        'password': password,
-                      },
-                    },
-                  ),
-                );
-
-                if (result.hasException) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error in registration: ${result.exception.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } else {
-                  _showSuccessDialog(context);
+                final registrationSuccess = await registerAdmin(context, dni, username, password);
+                await Future.delayed(Duration(seconds: 2));
+                if (registrationSuccess) {
+                  Navigator.pop(context); // Navigate back to the previous page
                 }
               },
-              child: Text('Register'), // Corregido aquí
+              child: Text('Register'),
+            ),
+            SizedBox(height: 10.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Navigate back to the previous page
+              },
+              child: Text('Cancel'),
             ),
           ],
         ),

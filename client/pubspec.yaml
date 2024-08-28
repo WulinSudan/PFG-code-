@@ -72,6 +72,7 @@ flutter:
     - assets/exito.png
     - assets/public_key.pem
     - assets/private_key.pem
+    - assets/qrPay.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

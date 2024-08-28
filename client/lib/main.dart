@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/login',
+      initialRoute: '/welcomepage',
       routes: {
         '/admin': (context) {
           final String? accessToken = ModalRoute.of(context)?.settings.arguments as String?;

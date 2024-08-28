@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Espera 2 segundos antes de navegar a la página de inicio de sesión
+    // Waits for 3 seconds before navigating to the login page
     Future.delayed(Duration(seconds: 3), () {
-      Navigator.pushNamed(context, '/login');
+      Navigator.pushReplacementNamed(context, '/login');
     });
 
     return Scaffold(
@@ -24,7 +24,11 @@ class WelcomeBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FlutterLogo(size: 100.0),
+          Image.asset(
+            'assets/qrPay.png',
+            width: 100.0,  // Adjust the size as needed
+            height: 100.0, // Adjust the size as needed
+          ),
           SizedBox(height: 20.0),
           Text(
             'PAYMENT QR',

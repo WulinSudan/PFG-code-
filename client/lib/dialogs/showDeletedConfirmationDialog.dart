@@ -11,7 +11,6 @@ import '../functions/addAccount.dart';
 import '../functions/removeUserAccount.dart';
 import '../functions/makeTransfer.dart'; // Fixed typo from maketransfer to makeTransfer
 import 'selectAccountDialog.dart';
-import '../dialogs/confirmationOKDialog.dart';
 import '../functions/addTransaction.dart';
 
 Future<void> showDeleteConfirmationDialog(BuildContext context, String accessToken, List<Account> accounts, Account selectedAccount) async {

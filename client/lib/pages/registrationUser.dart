@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart';
-import '../graphql_queries.dart';
-import '../functions/addAccount.dart';
+import '../functions/registerUser.dart'; // Import your registerUser function
 
 class RegistrationUserPage extends StatefulWidget {
   @override
-  _RegistrationPageState createState() => _RegistrationPageState();
+  _RegistrationUserPageState createState() => _RegistrationUserPageState();
 }
 
-class _RegistrationPageState extends State<RegistrationUserPage> {
+class _RegistrationUserPageState extends State<RegistrationUserPage> {
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -39,7 +36,7 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
   void _validateUsername() {
     final username = _usernameController.text;
     setState(() {
-      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username); // Permite caracteres alfabéticos y números con más de 2 caracteres
+      _isUsernameValid = RegExp(r'^[a-zA-Z0-9]{3,}$').hasMatch(username); // Allows alphanumeric characters with at least 3 characters
     });
   }
 
@@ -47,29 +44,13 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
     setState(() {
       _isPasswordValid = _passwordController.text.length >= 3;
     });
-    _validatePasswordConfirmation(); // Revalidar confirmación si la contraseña cambia
+    _validatePasswordConfirmation();
   }
 
   void _validatePasswordConfirmation() {
     setState(() {
       _isPasswordConfirmationValid = _passwordConfirmationController.text == _passwordController.text &&
           _passwordConfirmationController.text.length >= 3;
-    });
-  }
-
-  void _showSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Successful registration'),
-          content: Text('Registration done successfully'),
-        );
-      },
-    );
-    Timer(Duration(seconds: 2), () {
-      Navigator.pop(context); // Cierra el diálogo
-      Navigator.pop(context); // Vuelve a AdminPage
     });
   }
 
@@ -123,44 +104,34 @@ class _RegistrationPageState extends State<RegistrationUserPage> {
                 if (!_isDniValid || !_isUsernameValid || !_isPasswordValid || !_isPasswordConfirmationValid) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Please correct the error before submitting the form.'),
+                      content: Text('Please correct the errors before submitting the form.'),
                       backgroundColor: Colors.red,
                     ),
                   );
-                  return; // No hacer nada más si hay errores de validación
+                  return; // Do nothing further if there are validation errors
                 }
 
                 final String dni = _dniController.text.trim();
                 final String username = _usernameController.text.trim();
                 final String password = _passwordController.text.trim();
 
-                final GraphQLClient client = GraphQLService.createGraphQLClient('');
+                // Call the registerUser function to handle registration
+                final registrationSuccess = await registerUser(context, dni, username, password);
 
-                final QueryResult result = await client.mutate(
-                  MutationOptions(
-                    document: gql(signUpMutation),
-                    variables: {
-                      'input': {
-                        'dni': dni,
-                        'name': username,
-                        'password': password,
-                      },
-                    },
-                  ),
-                );
-
-                if (result.hasException) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error in registration: ${result.exception.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } else {
-                  _showSuccessDialog(context);
+                if (registrationSuccess) {
+                  // Show a success message and wait 3 seconds before navigating
+                  await Future.delayed(Duration(seconds: 2));
+                  Navigator.pop(context);
                 }
               },
-              child: Text('Registrer'),
+              child: Text('Register'),
+            ),
+            SizedBox(height: 10.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Navigate back to the previous page
+              },
+              child: Text('Cancel'),
             ),
           ],
         ),

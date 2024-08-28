@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import '../internal_functions/paymentGestion.dart'; // Asegúrate de que la ruta sea correcta
 import '../internal_functions/maskAccountNumber.dart';
-import '../dialogs/getImportDialog.dart'; // Asegúrate de que la ruta sea correcta
 import '../internal_functions/chargeGestion.dart'; // Importa el nuevo archivo
-import '../functions/getOrigenAccount.dart'; // Asegúrate de que la ruta sea correcta
-import '../functions/fetchPayKey.dart';
-import '../utils/encrypt.dart';
-import '../functions/setQrUsed.dart';
-import '../functions/checkEnable.dart';
 
 class QrGestion extends StatefulWidget {
   @override
@@ -45,12 +39,6 @@ class _QrGestionState extends State<QrGestion> {
   }
 
   void updateState(String origen, String destino, double importe, String typePart, bool success) {
-    print('Actualizando estado:');
-    print('Origen: $origen');
-    print('Destino: $destino');
-    print('Importe: $importe');
-    print('TypePart: $typePart');
-    print('Success: $success');
 
     if (mounted) {
       setState(() {

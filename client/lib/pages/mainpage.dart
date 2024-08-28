@@ -1,8 +1,7 @@
+import 'package:client/dialogs_simples/errorDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:client/functions/addTransaction.dart';
 import 'package:client/functions/changeAccountStatus.dart';
-import 'package:client/functions/getAccountStatus.dart';
 import 'package:client/functions/getUserStatusDni.dart';
 import 'package:client/functions/fetchUserData.dart';
 import 'package:client/functions/addAccount.dart';
@@ -16,15 +15,12 @@ import 'package:client/dialogs_simples/askconfirmacion.dart';
 import 'package:client/functions/removeUser.dart';
 import 'package:client/dialogs/changePasswordDialog.dart';
 import 'package:client/dialogs/manualTransfer.dart';
-import 'package:client/functions/setNewMax.dart';
-import 'package:client/dialogs/getDescriptionDialog.dart';
-import 'package:client/dialogs/getImportDialog.dart';
-import 'package:client/functions/setAccountDescription.dart';
 import 'color_selection_page.dart';
-import 'login.dart';
 import '../utils/account.dart';
 import '../utils/account_card.dart';
 import '../functions/changeUserStatus.dart';
+import '../internal_functions/setDescription.dart';
+import '../internal_functions/setMaxImport.dart';
 
 class MainPage extends StatefulWidget {
   final String accessToken;
@@ -44,7 +40,7 @@ class _MainPageState extends State<MainPage> {
   bool isCreatingAccount = false;
   Color appBarColor = Colors.redAccent;
   Color navigationDrawerColor = Colors.redAccent;
-  bool _userStatus = true; // Asumir que el usuario está activo por defecto
+  bool _userStatus = true;
 
   @override
   void initState() {
@@ -105,9 +101,6 @@ class _MainPageState extends State<MainPage> {
       accounts = fetchedAccounts.map((accountData) => Account.fromJson(accountData)).toList();
     });
 
-    print('UserName actualizado: $userName');
-    print('DNI actualizado: $dni');
-    print('Cuentas actualizadas: $accounts');
   }
 
   void _onAccountSelected(int index) async {
@@ -128,7 +121,7 @@ class _MainPageState extends State<MainPage> {
             transactions = fetchedTransactions;
           });
         } catch (e) {
-          print('Error al obtener transacciones: $e');
+          errorDialog(context, "Error getting transactions");
         }
       }
     }
@@ -147,7 +140,8 @@ class _MainPageState extends State<MainPage> {
 
         okDialog(context, "Status changed");
       } catch (e) {
-        print('Error al cambiar el estado de la cuenta: $e');
+        errorDialog(context, "Error changing status");
+
       }
     }
   }
@@ -181,13 +175,7 @@ class _MainPageState extends State<MainPage> {
                 });
 
                 await addAccount(widget.accessToken);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Cuenta añadida correctamente'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+                okDialog(context,"Account added successfully");
 
                 await fetchData();
 
@@ -203,7 +191,7 @@ class _MainPageState extends State<MainPage> {
               showLogoutConfirmationDialog(context);
             },
           ),
-        ] : [], // Deshabilitar acciones si el usuario no está activo
+        ] : [],
       ),
       drawer: Drawer(
         child: ListView(
@@ -211,7 +199,7 @@ class _MainPageState extends State<MainPage> {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: navigationDrawerColor, // Cambiar el color del Drawer
+                color: navigationDrawerColor,
               ),
               child: Text('Navigation', style: TextStyle(color: Colors.white)),
             ),
@@ -219,11 +207,11 @@ class _MainPageState extends State<MainPage> {
               title: Text('Change password'),
               onTap: _userStatus ? () {
                 showChangePasswordDialog(context, widget.accessToken);
-              } : null, // Deshabilitar si el usuario no está activo
+              } : null,
             ),
             ListTile(
               title: Text('Change color'),
-              onTap: _userStatus ? _navigateToColorSelection : null, // Deshabilitar si el usuario no está activo
+              onTap: _userStatus ? _navigateToColorSelection : null,
             ),
             ListTile(
               title: Text('Change user status'),
@@ -243,7 +231,7 @@ class _MainPageState extends State<MainPage> {
                 if (deleteConfirmed == true) {
                   if (dni != null) {
                     await removeUser(context, widget.accessToken, dni!);
-                    // Redirigir a la página de login después de la eliminación
+
                     Navigator.pushReplacementNamed(context, '/login');
                   }
                 }
@@ -369,7 +357,7 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
-              SizedBox(width: 8.0), // Espaciado entre íconos
+              SizedBox(width: 8.0),
               IconButton(
                 onPressed: isUserActiveAndHasSelectedAccount
                     ? () async {
@@ -418,11 +406,7 @@ class _MainPageState extends State<MainPage> {
                             title: Text('Make transfer manually'),
                             onTap: () async {
                               Navigator.pop(context); // Cerrar el BottomSheet
-                              await showManualTransferDialog(
-                                context,
-                                widget.accessToken,
-                                accounts[selectedAccountIndex!],
-                              );
+                              await showManualTransferDialog(context, widget.accessToken, accounts[selectedAccountIndex!]);
                               await fetchData();
                               setState(() {});
                             },
@@ -430,52 +414,24 @@ class _MainPageState extends State<MainPage> {
                           ListTile(
                             title: Text('Set max import pay day'),
                             onTap: () async {
-                              Navigator.pop(context); // Cerrar el BottomSheet
-                              final import = await getImportDialog(context);
-                              if (import != null) {
-                                print('Importe ingresado: $import');
-                                try {
-                                  await setNewMax(widget.accessToken, accounts[selectedAccountIndex!].numberAccount, import);
-                                  print('MaxPay configurado exitosamente.');
-
-                                  // Actualizar los datos después de configurar el máximo
-                                  await fetchData(); // Actualiza los datos
-
-                                } catch (e) {
-                                  print('Error al configurar MaxPay: $e');
-                                }
+                              if (selectedAccountIndex != null) {
+                                await setMaxImport(context, widget.accessToken, accounts[selectedAccountIndex!].numberAccount, fetchData,);
                               } else {
-                                print('No se ingresó un importe válido.');
+                                errorDialog(context, "No account selected"); // Mostrar error si no se selecciona una cuenta
                               }
-                              await fetchData();
-                              setState(() {});
+                              setState(() {}); // Actualizar el estado después de cambiar el importe máximo
                             },
                           ),
+
                           ListTile(
                             title: Text('Set description'),
                             onTap: () async {
-                              Navigator.pop(context); // Cerrar el BottomSheet
-                              // Llamada asincrónica para obtener la descripción
-                              final description = await getDescriptionDialog(context);
-
-                              // Verificar si se obtuvo una descripción válida
-                              if (description != null) {
-                                print('Descripción ingresada: $description');
-                                try {
-                                  await setAccountDescription(widget.accessToken, accounts[selectedAccountIndex!].numberAccount, description);
-                                  print('Descripción configurada exitosamente.');
-
-                                  // Actualizar los datos después de configurar la descripción
-                                  await fetchData(); // Actualiza los datos
-
-                                } catch (e) {
-                                  print('Error al configurar la descripción: $e');
-                                }
+                              if (selectedAccountIndex != null) {
+                                await setDescription(context, widget.accessToken, accounts[selectedAccountIndex!].numberAccount, fetchData,);
                               } else {
-                                print('No se ingresó una descripción válida.');
+                                errorDialog(context, "No account selected"); // Mostrar error si no se selecciona una cuenta
                               }
-                              await fetchData();
-                              setState(() {});
+                              setState(() {}); // Actualizar el estado después de cambiar la descripción
                             },
                           ),
                         ],

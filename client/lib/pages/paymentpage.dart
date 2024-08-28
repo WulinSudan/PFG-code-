@@ -80,13 +80,11 @@ class _PaymentPageState extends State<PaymentPage> {
 
       // Create new key, use it, and store in database
       payKey = await setNewKey(accessToken!, accountNumber);
-      print("********************En la clase paymentPage la clau de compte: $payKey");
+
 
       qrData = 'payment $accountNumber $amountToPay';
       String encryptedData = encryptAES(qrData, payKey!);
 
-      // Save the key in the dictionary
-      print("Añadir al diccionario--------------------------------");
       await addDictionary(accessToken!, encryptedData, accountNumber);
 
       setState(() {
@@ -95,7 +93,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
       QrDialog.showQrDialog(context, qrData, amountToPay);
     } catch (e) {
-      print('Error generando la clave de pago o añadiendo al diccionario: $e');
+      print('Error generating payment key or adding to dictionary: $e');
     }
   }
 

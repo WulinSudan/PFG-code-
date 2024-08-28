@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart'; // Asegúrate de importar tus consultas/mutaciones GraphQL aquí
-import '../graphql_queries.dart';
-import '../dialogs_simples/errorDialog.dart';
 import '../functions/getUserRole.dart';
+import '../functions/loginUser.dart';
+import '../dialogs_simples/errorDialog.dart'; // Asegúrate de tener este archivo para mostrar errores
+import '../dialogs_simples/processingDialog.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -13,6 +12,13 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,52 +51,42 @@ class _LoginState extends State<Login> {
                 final String username = _usernameController.text.trim();
                 final String password = _passwordController.text.trim();
 
-                final GraphQLClient client = GraphQLService.createGraphQLClient('');
+                // Show processing dialog
+                processingDialog(context,"Identifying");
 
-                // Envío de la mutación al servidor GraphQL
-                final QueryResult result = await client.mutate(
-                  MutationOptions(
-                    document: gql(loginUserMutation),
-                    variables: {
-                      'input': {
-                        'name': username,
-                        'password': password,
-                      },
-                    },
-                  ),
-                );
+                // Call loginUser to get the access token
+                final String? accessToken = await loginUser(context, username, password);
 
-                // Manejo del resultado de la mutación
-                if (result.hasException) {
-                  await errorDialog(context, "Autentication failed");
-                  // Manejar errores de autenticación
-                  print("Error en la autenticación: ${result.exception}");
+                // Dismiss the processing dialog
+                Navigator.pop(context);
+
+                if (accessToken != null) {
+                  // Call getUserRole to determine the user's role
+                  final String role = await getUserRole(accessToken, username);
+
+                  // Navigate based on user role
+                  if (role != "admin") {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/mainpage',
+                      arguments: accessToken,
+                    );
+                  } else {
+                    print("User is an administrator");
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/admin',
+                      arguments: accessToken,
+                    );
+                  }
                 } else {
-                  // Autenticación exitosa, obtener el token de acceso y navegar a la siguiente pantalla
-                  final String accessToken = result.data!['loginUser']['access_token'];
-
-                  print(accessToken);
-                  
-                  String role = await getUserRole(accessToken, username);
-
-                  if(role!="admin"){
-                    Navigator.pushNamed(
-                        context,
-                        '/mainpage',
-                        arguments: accessToken);
-                  }
-                  else {
-                    print("---------------------En un administrador");
-                    Navigator.pushNamed(
-                        context,
-                        '/admin',
-                        arguments: accessToken);
-                  }
-
+                  // Handle login failure (e.g., show an error message)
+                  errorDialog(context, "Login failed. Please check your credentials.");
                 }
               },
               child: Text('Login'),
             ),
+            SizedBox(height: 10.0),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/registrationUser');
