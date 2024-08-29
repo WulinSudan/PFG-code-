@@ -424,8 +424,6 @@ class _MainPageState extends State<MainPage> {
                             onTap: () async {
                               if (selectedAccountIndex != null) {
                                 await setMaxImport(context, widget.accessToken, accounts[selectedAccountIndex!].numberAccount, fetchData,);
-                              } else {
-                                errorDialog(context, "No account selected"); // Mostrar error si no se selecciona una cuenta
                               }
                               setState(() {}); // Actualizar el estado después de cambiar el importe máximo
                             },
@@ -436,8 +434,6 @@ class _MainPageState extends State<MainPage> {
                             onTap: () async {
                               if (selectedAccountIndex != null) {
                                 await setDescription(context, widget.accessToken, accounts[selectedAccountIndex!].numberAccount, fetchData,);
-                              } else {
-                                errorDialog(context, "No account selected"); // Mostrar error si no se selecciona una cuenta
                               }
                               setState(() {}); // Actualizar el estado después de cambiar la descripción
                             },
