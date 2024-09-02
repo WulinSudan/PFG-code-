@@ -9,7 +9,7 @@ class ColorSelectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Seleccionar Color'),
+        title: Text('Select color'),
         backgroundColor: Colors.redAccent,
       ),
       body: GridView.builder(

@@ -1,18 +1,12 @@
+import 'package:client/dialogs_simples/errorDialog.dart';
+import 'package:client/functions/removeUserAccount.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import '../utils/account.dart';
-import '../utils/account_card.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import '../graphql_client.dart'; // Ensure your GraphQL service is imported
-import '../graphql_queries.dart';
-import '../functions/fetchUserData.dart';
-import '../functions/addAccount.dart';
-import '../functions/removeUserAccount.dart';
 import '../functions/makeTransfer.dart'; // Fixed typo from maketransfer to makeTransfer
 import '../functions/addTransaction.dart';
 
-Future<void> selectAccountDialog(BuildContext context, String accessToken, List<Account> accounts, Account currentAccount) async {
+Future<void> selectAccountDialog(BuildContext context, String accessToken, List<Account> accounts, Account currentAccount, Future<void> Function() fetchData) async {
 
   // Filter accounts excluding the current account
   List<Account> filteredAccounts = accounts.where((account) => account.numberAccount != currentAccount.numberAccount).toList();
@@ -26,7 +20,7 @@ Future<void> selectAccountDialog(BuildContext context, String accessToken, List<
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return AlertDialog(
-            title: Text('Transfer Balance'),
+            title: Text('Empty the balance'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: filteredAccounts.map((account) {
@@ -54,20 +48,31 @@ Future<void> selectAccountDialog(BuildContext context, String accessToken, List<
                 onPressed: selectedAccount != null
                     ? () async {
                   if (selectedAccount != null) {
-                    Navigator.of(context).pop(); // Close the dialog
 
                     // Perform the transfer between the accounts
-                    await makeTransfer(context, accessToken, currentAccount, selectedAccount!);
+                    print("Llegado en aqui----------seleccionat un compte------------?");
 
-                    // Add a transaction for the current account
-                    await addTransaction(
-                        accessToken,
-                        selectedAccount!.numberAccount,
-                        "add", // Operation type
-                        currentAccount.balance,
-                        currentAccount.balance + selectedAccount!.balance // New balance after transfer
-                    );
+                    bool transfer = await makeTransfer(context, accessToken, currentAccount, selectedAccount!);
+
+                    if(transfer){
+                      // Add a transaction for the current account
+                      await addTransaction(
+                          accessToken,
+                          selectedAccount!.numberAccount,
+                          "add", // Operation type
+                          currentAccount.balance,
+                          currentAccount.balance + selectedAccount!.balance // New balance after transfer
+                      );
+                      await fetchData();
+                      removeAccount(context, accessToken, selectedAccount!.numberAccount);
+                    }
+                    else{
+                      errorDialog(context, "Fail make transfer");
+                    }
+
+
                   }
+                  Navigator.of(context).pop(); // Close the dialog
                 }
                     : null,
                 style: TextButton.styleFrom(

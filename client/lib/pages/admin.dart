@@ -14,6 +14,9 @@ import '../dialogs/setPassword.dart';
 import '../functions/getLogs.dart';
 import '../functions/getUserName.dart';
 import '../dialogs_simples/errorDialog.dart'; // Ensure this file exists to show error dialogs
+import '../dialogs_simples/okDialog.dart'; // Ensure this file exists to show error dialogs
+import '../dialogs_simples/askconfirmacion.dart'; // Ensure this file exists to show error dialogs
+
 
 class AdminPage extends StatefulWidget {
   final String accessToken;
@@ -82,20 +85,25 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
-  // Method to change the status of the selected user
+// Method to change the status of the selected user
   Future<void> _onChangeUserStatus() async {
-    if (_selectedUser != null) {
-      try {
-        bool status = await changeUserStatus(widget.accessToken, _selectedUser!.dni); // Change user status
-        await changeUserStatusDialog(context, _selectedUser!.name, status); // Show status change dialog
-        _refreshData(); // Refresh data after status change
-      } catch (e) {
-        errorDialog(context, "Error changing user status"); // Show error if status change fails
+    bool? confirm = await askConfirmation(context);
+
+    if (confirm == true) {
+      if (_selectedUser != null) {
+        try {
+          bool status = await changeUserStatus(widget.accessToken, _selectedUser!.dni); // Change user status
+          await changeUserStatusDialog(context, _selectedUser!.name, status); // Show status change dialog
+          _refreshData(); // Refresh data after status change
+        } catch (e) {
+          errorDialog(context, "Error canviant l'estat de l'usuari"); // Show error if status change fails
+        }
+      } else {
+        errorDialog(context, "Si us plau, selecciona primer un usuari"); // Show error if no user is selected
       }
-    } else {
-      errorDialog(context, "Please, select a user first"); // Show error if no user is selected
     }
   }
+
 
   // Method to handle user deletion
   Future<void> _viewDeleteUser() async {

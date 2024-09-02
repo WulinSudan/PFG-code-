@@ -37,3 +37,19 @@
 2024-08-28T15:18:19.711Z - Mutation operation: changed account 0828122555 status to false by Isa
 2024-08-28T15:24:44.451Z - Mutation operation: changed account 0828122555 status to true by Isa
 2024-08-28T15:43:24.616Z - Mutation operation: changed account 0828122555 status to false by Isa
+2024-09-01T09:49:11.416Z - Mutation operation: make transfer from 0901113104 to 0828122555 with value 4
+2024-09-01T10:34:18.898Z - Mutation operation: changed account 0901113104 status to false by Nil
+2024-09-01T10:34:27.572Z - Mutation operation: changed account 0901113104 status to true by Nil
+2024-09-01T10:34:34.502Z - Mutation operation: changed account 0901113104 status to false by Nil
+2024-09-02T10:00:27.214Z - Mutation operation: changed account 0901123004 status to false by Nil
+2024-09-02T10:48:16.905Z - Mutation operation: changed account 0823115528 status to false by Eloi
+2024-09-02T10:58:43.236Z - Mutation operation: changed account 0823125731 status to true by Eloi
+2024-09-02T10:58:47.494Z - Mutation operation: changed account 0823115528 status to true by Eloi
+2024-09-02T10:58:55.115Z - Mutation operation: make transfer from 0823125731 to 0823115528 with value 10.5
+2024-09-02T11:08:37.493Z - Mutation operation: changed account 0902130833 status to false by Isa
+2024-09-02T11:08:43.522Z - Mutation operation: changed account 0902130833 status to true by Isa
+2024-09-02T11:08:50.476Z - Mutation operation: changed account 0828122555 status to true by Isa
+2024-09-02T11:08:59.926Z - Mutation operation: make transfer from 0902130833 to 0828122555 with value 10.5
+2024-09-02T11:09:50.456Z - Mutation operation: make transfer from 0902130943 to 0828122555 with value 10.5
+2024-09-02T11:13:18.492Z - Mutation operation: make transfer from 0902131310 to 0828122555 with value 10.5
+2024-09-02T11:14:53.651Z - Mutation operation: make transfer from 0902131350 to 0828122555 with value 10.5

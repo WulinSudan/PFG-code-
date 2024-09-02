@@ -507,6 +507,8 @@ export const accountResolvers = {
     // Pending implementation
     makeTransfer: async (_root: any, { input }: { input: TransferInput }, context: Context): Promise<any> => {
 
+      
+      console.log("in Make Transfer");
 
       const userOrigen = await findUser(input.accountOrigen);
       console.log(userOrigen?.name);

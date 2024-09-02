@@ -170,13 +170,6 @@ class _AllAdminsPageState extends State<AllAdminsPage> {
                       child: Text('Show his movements'),
                     ),
                   ),
-                  SizedBox(width: 16.0), // Espacio entre los botones
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _deactivateAdmin,
-                      child: Text('Change status'),
-                    ),
-                  ),
                 ],
               ),
             ),

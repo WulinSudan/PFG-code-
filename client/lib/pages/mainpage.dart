@@ -244,6 +244,7 @@ class _MainPageState extends State<MainPage> {
                   }
                 }
               } : null, // Deshabilitar si el usuario no está activo
+
             ),
           ],
         ),
@@ -345,6 +346,8 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
+
+
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
                 onPressed: hasSelectedAccount
@@ -365,6 +368,9 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
+
+
+
               SizedBox(width: 8.0),
               IconButton(
                 onPressed: hasSelectedAccount
@@ -374,7 +380,9 @@ class _MainPageState extends State<MainPage> {
                     widget.accessToken,
                     accounts,
                     accounts[selectedAccountIndex!],
+                    fetchData,
                   );
+                  selectedAccountIndex = null;
                   await fetchData();
                   setState(() {});
                 }
@@ -385,6 +393,10 @@ class _MainPageState extends State<MainPage> {
                   size: 40.0,
                 ),
               ),
+
+
+
+
               SizedBox(width: 8.0), // Espaciado entre íconos
               IconButton(
                 onPressed: hasSelectedAccount

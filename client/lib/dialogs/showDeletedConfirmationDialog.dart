@@ -5,7 +5,7 @@ import '../functions/removeUserAccount.dart';
 import 'selectAccountDialog.dart';
 
 
-Future<void> showDeleteConfirmationDialog(BuildContext context, String accessToken, List<Account> accounts, Account selectedAccount) async {
+Future<void> showDeleteConfirmationDialog(BuildContext context, String accessToken, List<Account> accounts, Account selectedAccount, Future<void> Function() fetchData) async {
   if (selectedAccount.balance == 0) {
     showDialog(
       context: context,
@@ -27,7 +27,7 @@ Future<void> showDeleteConfirmationDialog(BuildContext context, String accessTok
 
                 // Remove the account
                 await removeAccount(context, accessToken, selectedAccount.numberAccount);
-
+                await fetchData();
               },
             ),
           ],
@@ -36,6 +36,7 @@ Future<void> showDeleteConfirmationDialog(BuildContext context, String accessTok
     );
   } else {
     // Show a dialog to select another account or handle the case when balance is not zero
-    selectAccountDialog(context, accessToken, accounts, selectedAccount);
+    selectAccountDialog(context, accessToken, accounts, selectedAccount, fetchData);
+
   }
 }

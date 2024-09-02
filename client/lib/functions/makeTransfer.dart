@@ -35,7 +35,7 @@ Future<bool> makeTransfer(BuildContext context, String accessToken, Account curr
         print('Mutation successful');
 
         // Call the function to remove the account if necessary
-        await removeAccount(context, accessToken, currentAccount.numberAccount);
+        //await removeAccount(context, accessToken, currentAccount.numberAccount);
 
       } else {
         print('The mutation failed: ${result.data?['makeTransfer']['message']}');
