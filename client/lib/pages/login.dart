@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../functions/getUserRole.dart';
 import '../functions/loginUser.dart';
-import '../dialogs_simples/errorDialog.dart'; // Asegúrate de tener este archivo para mostrar errores
+import '../dialogs_simples/errorDialog.dart';
 import '../dialogs_simples/processingDialog.dart';
 
 class Login extends StatefulWidget {
@@ -52,36 +52,44 @@ class _LoginState extends State<Login> {
                 final String password = _passwordController.text.trim();
 
                 // Show processing dialog
-                processingDialog(context,"Identifying");
+                processingDialog(context, "Identifying");
 
-                // Call loginUser to get the access token
-                final String? accessToken = await loginUser(context, username, password);
+                try {
+                  // Call loginUser to get the access token
+                  final String? accessToken = await loginUser(context, username, password);
 
-                // Dismiss the processing dialog
-                Navigator.pop(context);
+                  // Dismiss the processing dialog
+                  Navigator.pop(context);
 
-                if (accessToken != null) {
-                  // Call getUserRole to determine the user's role
-                  final String role = await getUserRole(accessToken, username);
+                  if (accessToken != null) {
+                    // Call getUserRole to determine the user's role
+                    final String role = await getUserRole(accessToken, username);
 
-                  // Navigate based on user role
-                  if (role != "admin") {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      '/mainpage',
-                      arguments: accessToken,
-                    );
+                    // Navigate based on user role
+                    if (role != "admin") {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        '/mainpage',
+                        arguments: accessToken,
+                      );
+                    } else {
+                      print("User is an administrator");
+                      Navigator.pushReplacementNamed(
+                        context,
+                        '/admin',
+                        arguments: accessToken,
+                      );
+                    }
                   } else {
-                    print("User is an administrator");
-                    Navigator.pushReplacementNamed(
-                      context,
-                      '/admin',
-                      arguments: accessToken,
-                    );
+                    Navigator.pop(context);
+                    // Handle login failure (e.g., show an error message)
+                    errorDialog(context, "Login failed. Please check your credentials.");
                   }
-                } else {
-                  // Handle login failure (e.g., show an error message)
-                  errorDialog(context, "Login failed. Please check your credentials.");
+                } catch (error) {
+                  // Dismiss the processing dialog in case of an error
+                  Navigator.pop(context);
+                  // Handle the error (e.g., show an error message)
+                  errorDialog(context, "An error occurred. Please try again.");
                 }
               },
               child: Text('Login'),

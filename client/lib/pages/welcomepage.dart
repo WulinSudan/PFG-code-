@@ -26,12 +26,12 @@ class WelcomeBody extends StatelessWidget {
         children: [
           Image.asset(
             'assets/qrPay.png',
-            width: 100.0,  // Adjust the size as needed
-            height: 100.0, // Adjust the size as needed
+            width: 140.0,  // Adjust the size as needed
+            height: 140.0, // Adjust the size as needed
           ),
           SizedBox(height: 20.0),
           Text(
-            'PAYMENT QR',
+            'QR PAYMENT',
             style: TextStyle(
               fontSize: 24.0,
               fontWeight: FontWeight.bold,

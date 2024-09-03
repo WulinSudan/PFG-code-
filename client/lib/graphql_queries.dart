@@ -212,3 +212,8 @@ mutation SetPassword(\$new: String!, \$dni: String!) {
   setPassword(new: \$new, dni: \$dni)
 }
 """;
+const String isRemovebleQuery = """
+query(\$dni: String!){
+  isRemoveble(dni: \$dni)
+}
+""";

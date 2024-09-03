@@ -204,6 +204,41 @@ export const userResolvers = {
             }
             return user;
       }, 
+
+      isRemoveble: async (_root: any, { dni }: { dni: string }, context: Context): Promise<boolean> => {
+        try {
+          /*
+            const currentUser = await me(context);
+            if (!currentUser) {
+                return false; // No user provided
+            }
+            if (currentUser.role !== "Admin") {
+                return false; // Current user is not an admin
+            }*/
+    
+            const user = await User.findOne({ dni });
+            if (!user) {
+                return false; // User not found
+            }
+
+          
+            if (user.accounts.length > 0) {
+                return false; // User has more than one account available
+            }
+    
+            // Fetch the account details using the project ID
+            const accountId = user.accounts[0]; // Assuming this is a project ID
+            const account = await Account.findById(accountId); // Replace with your actual method to find an account
+    
+            return true; // All conditions met, account is removable
+        } catch (error) {
+            // Handle any unexpected errors
+            console.error(error);
+            return false;
+        }
+      }
+    
+    
     },
 
     Mutation: {
@@ -401,8 +436,14 @@ export const userResolvers = {
             throw error;
           }
       },
-      addNewAdmin: async (_root: any, { input: {dni,name, password} }: any ) => {
+      addNewAdmin: async (_root: any, { input: {dni,name, password} }: any,context:Context ) => {
           try {
+
+              const currentUser = await me(context);
+              if (currentUser.role !== "Admin") {
+                throw new Error("User provided is not an admin");
+              }
+              
               const userInput = {
                   dni:dni,
                   name: name,

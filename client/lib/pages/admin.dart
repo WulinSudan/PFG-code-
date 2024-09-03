@@ -16,7 +16,7 @@ import '../functions/getUserName.dart';
 import '../dialogs_simples/errorDialog.dart'; // Ensure this file exists to show error dialogs
 import '../dialogs_simples/okDialog.dart'; // Ensure this file exists to show error dialogs
 import '../dialogs_simples/askconfirmacion.dart'; // Ensure this file exists to show error dialogs
-
+import '../functions/isRemoveble.dart';
 
 class AdminPage extends StatefulWidget {
   final String accessToken;
@@ -107,35 +107,45 @@ class _AdminPageState extends State<AdminPage> {
 
   // Method to handle user deletion
   Future<void> _viewDeleteUser() async {
-    if (_selectedUser != null) {
-      final bool? confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Confirm deletion'),
-          content: Text('Are you sure you want to delete ${_selectedUser!.name}?'), // Confirmation dialog
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false), // Cancel deletion
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true), // Confirm deletion
-              child: Text('Delete'),
-            ),
-          ],
-        ),
-      );
+    bool status = await isRemoveble(widget.accessToken,_selectedUser!.dni);
+    print("------------------------------");
+    print(status);
+    print("------------------------------");
+    if(status){
+      if (_selectedUser != null) {
+        final bool? confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Confirm deletion'),
+            content: Text('Are you sure you want to delete ${_selectedUser!.name}?'), // Confirmation dialog
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false), // Cancel deletion
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true), // Confirm deletion
+                child: Text('Delete'),
+              ),
+            ],
+          ),
+        );
 
-      if (confirmed == true) {
-        try {
-          await removeUser(context, widget.accessToken, _selectedUser!.dni); // Remove the selected user
-          okDialog(context, "User deleted"); // Show confirmation of deletion
-          _refreshData(); // Refresh data after deletion
-        } catch (e) {
-          errorDialog(context, "Error deleting user, may have an account with amount"); // Show error if deletion fails
+        if (confirmed == true) {
+          try {
+            await removeUser(context, widget.accessToken, _selectedUser!.dni); // Remove the selected user
+            okDialog(context, "User deleted"); // Show confirmation of deletion
+            _refreshData(); // Refresh data after deletion
+          } catch (e) {
+            errorDialog(context, "Error deleting user, may have an account with amount"); // Show error if deletion fails
+          }
         }
       }
     }
+    else{
+      errorDialog(context, "User has more than one account available");
+    }
+
   }
 
   // Method to view user movements/logs

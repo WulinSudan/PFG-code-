@@ -1,14 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/services.dart';
 import '../utils/encrypt.dart';
-import '../functions/fetchPayKey.dart';
 import '../functions/addDictionary.dart';
 import '../functions/setNewKey.dart';
 import '../internal_functions/maskAccountNumber.dart';
-import '../dialogs/qr_dialog.dart'; // Importa el nuevo archivo
+import '../dialogs/qr_dialog.dart';
 import '../functions/checkEnableAmout.dart';
 import '../dialogs_simples/errorDialog.dart';
+
+// Formatter to limit the number of decimals to 2 and ensure the number is > 0
+class DecimalTextInputFormatter extends TextInputFormatter {
+  final int decimalRange;
+
+  DecimalTextInputFormatter({required this.decimalRange});
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final String newText = newValue.text;
+
+    // Si el texto está vacío, permitir la actualización
+    if (newText.isEmpty) {
+      return newValue;
+    }
+
+    // Si el texto no es un número válido (por ejemplo, "-", ".", "-."), regresar el valor anterior
+    if (double.tryParse(newText) == null) {
+      return oldValue;
+    }
+
+    // No permitir números negativos o cero
+    if (double.parse(newText) <= 0) {
+      return oldValue;
+    }
+
+    // Si el texto contiene más de una coma o punto, regresar el valor anterior
+    if (newText.indexOf('.') != newText.lastIndexOf('.')) {
+      return oldValue;
+    }
+
+    // Verificar la cantidad de decimales permitidos
+    final int indexOfDot = newText.indexOf('.');
+    if (indexOfDot != -1) {
+      final int decimals = newText.length - indexOfDot - 1;
+      if (decimals > decimalRange) {
+        return oldValue;
+      }
+    }
+
+    return newValue;
+  }
+}
 
 class PaymentPage extends StatefulWidget {
   @override
@@ -52,7 +94,6 @@ class _PaymentPageState extends State<PaymentPage> {
   void _validateAmount() {
     final amountText = amountController.text;
     final amount = double.tryParse(amountText);
-    print("Hooa");
     setState(() {
       isAmountValid = amount != null && amount > 0;
     });
@@ -80,7 +121,6 @@ class _PaymentPageState extends State<PaymentPage> {
 
       // Create new key, use it, and store in database
       payKey = await setNewKey(accessToken!, accountNumber);
-
 
       qrData = 'payment $accountNumber $amountToPay';
       String encryptedData = encryptAES(qrData, payKey!);
@@ -120,6 +160,9 @@ class _PaymentPageState extends State<PaymentPage> {
                     labelText: 'Enter the amount you want to pay',
                   ),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    DecimalTextInputFormatter(decimalRange: 2),
+                  ],
                 ),
                 SizedBox(height: 20),
                 Row(

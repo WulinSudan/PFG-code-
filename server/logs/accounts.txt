@@ -53,3 +53,8 @@
 2024-09-02T11:09:50.456Z - Mutation operation: make transfer from 0902130943 to 0828122555 with value 10.5
 2024-09-02T11:13:18.492Z - Mutation operation: make transfer from 0902131310 to 0828122555 with value 10.5
 2024-09-02T11:14:53.651Z - Mutation operation: make transfer from 0902131350 to 0828122555 with value 10.5
+2024-09-03T07:41:40.280Z - Mutation operation: make transfer from 0823115528 to 0902130618 with value 90.6
+2024-09-03T07:41:50.254Z - Mutation operation: remove user accounts 0823115528
+2024-09-03T07:43:40.628Z - Mutation operation: make transfer from 0903094311 to 0902130618 with value 5
+2024-09-03T07:51:44.817Z - Mutation operation: make transfer from 0902130618 to 0903094311 with value 1
+2024-09-03T07:51:55.046Z - Mutation operation: make transfer from 0902130618 to 0903094311 with value 1

@@ -490,8 +490,9 @@ export const accountResolvers = {
 
       const deletionResult = await Account.deleteOne({ _id: account._id });
 
-      const logMessage = `${new Date().toISOString()} - Mutation operation: remove user accounts ${number_account}`;
+      const logMessage = `${new Date().toISOString()} - Mutation operation: remove user account ${number_account}`;
       currentUser.logs.push(logMessage);
+      await writeLog(logMessage);
     
       if (deletionResult.deletedCount === 0) {
         throw new Error('Failed to delete the account.');

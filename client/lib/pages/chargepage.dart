@@ -5,6 +5,8 @@ import '../utils/encrypt.dart';
 import '../functions/addDictionary.dart';
 import '../internal_functions/maskAccountNumber.dart';
 
+import 'package:flutter/services.dart'; // Afegeix aquesta línia
+
 class ChargePage extends StatefulWidget {
   @override
   _ChargePageState createState() => _ChargePageState();
@@ -27,35 +29,8 @@ class _ChargePageState extends State<ChargePage> {
           accountNumber = args['accountNumber']!;
           accessToken = args['accessToken'];
         });
-
-        // Inicializar qrData con un importe de -1 al cargar la página
-        await _initializeQrData();
       }
     });
-  }
-
-  Future<void> _initializeQrData() async {
-    if (accessToken == null) {
-      print("Access token is null");
-      return;
-    }
-
-    try {
-      //String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
-      qrData = 'charge $accountNumber $amountToCharge';
-      //String encryptedData = encryptAES(qrData, chargeKey);
-      print("encryptedData..................................");
-      print(qrData);
-      // Guardar la clave en el diccionario
-      print("en la classe chargepage");
-      print(accessToken);
-      print(accountNumber);
-
-
-    } catch (e) {
-      print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
-      // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
-    }
   }
 
   Future<void> updateQrData() async {
@@ -63,29 +38,19 @@ class _ChargePageState extends State<ChargePage> {
       print("Access token is null");
       return;
     }
-
     setState(() {
       amountToCharge = double.tryParse(amountController.text) ?? -1;
     });
-
-    try {
-
-      //String chargeKey = await fetchChargeKey(accessToken!, accountNumber);
-
-      qrData = 'charge $accountNumber $amountToCharge';
-      //String encryptedData = encryptAES(qrData, chargeKey);
-      print("encryptedData..................................");
-      print(qrData);
-      // Guardar la clave en el diccionario
-      //await addKeyToDictionary(accessToken!, encryptedData, accountNumber, "charge");
-
-    } catch (e) {
-      print('Error obteniendo la Pay Key o añadiendo al diccionario: $e');
-      // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
-    }
   }
 
-
+  bool isAmountValid(String value) {
+    final regex = RegExp(r'^\d+(\.\d{1,2})?$');
+    if (regex.hasMatch(value)) {
+      final amount = double.tryParse(value);
+      return amount != null && amount > 0;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,19 +77,21 @@ class _ChargePageState extends State<ChargePage> {
                 SizedBox(height: 20),
                 TextField(
                   controller: amountController,
-                  onChanged: (_) {
-                    // Actualizar QR solo cuando se presione el botón
-                  },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Enter the amount you want to charge',
                   ),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    updateQrData();
+                    if (isAmountValid(amountController.text)) {
+                      updateQrData();
+                    }
                   },
                   child: Text('Update QR Code'),
                 ),

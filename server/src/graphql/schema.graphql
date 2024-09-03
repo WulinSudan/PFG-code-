@@ -11,6 +11,8 @@ type Query {
     getAdmins: [User]!
     getUsers: [User]!
     users: [User]
+    isRemoveble(dni: String!): Boolean!
+    
     
     # Person information
     personCount: Int!
