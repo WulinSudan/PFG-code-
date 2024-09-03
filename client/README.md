@@ -1,23 +1,31 @@
-# client
+# Client
 
-A new Flutter project.
+This project was generated with [Flutter]:
+    Flutter 3.22.3 • channel stable • https://github.com/flutter/flutter.git
+    Tools • Dart 3.4.4 • DevTools 2.34.3
 
-## Getting Started
-Actualitzar dependencies: flutter pub get
+## Development server
 
-Cal instal·lar Flutter i editar enviroment de flutter/bin
+- Edit the environment in flutter/bin
+- Obtain the current IP and update it in serves/client/lib/graphql_client.dart
 
+## Update Dependencies
 
-Per començar cal modificar dependencies:
-- Per poder traballar amb imatges, cal anar a "pubspec.yaml" i descomentar "assets" i a sota possar el nom de la carpeta on es guarden els imatges
-    assets:
-        - assets/
-- Per poder fer servir la càmara d'escanejar codi QR, cal anar a "pubsec.yaml" i a sota de "dependencies" afegir:
-  qr_code_scanner: ^1.0.1
-    
-  * Si es traballa amb Android Studio,es requereix una alta versió de compileSDKVersion. Anar a android/app/build.gradle en apartat d'android afegir:  compileSdkVersion 30 
+Use the command flutter pub get to fetch all the dependencies
 
+## Using Images
 
-per fer una prova de git
+- To work with images, go to pubspec.yaml and uncomment the assets section
+
+## Using the Camera
+
+- To use the camera for scanning QR codes, go to pubspec.yaml and add the following under dependencies:    qr_code_scanner: ^1.0.1
+
+- If you are working with Android Studio, you need to use a higher version of compileSdkVersion. Go to android/app/build.gradle, and under the android section, add: compileSdkVersion 30
+
+## Further help
+
+To get more help on theFlutter go check out the https://docs.flutter.dev/
+
 
 
