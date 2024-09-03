@@ -3,9 +3,9 @@
 Aquest projecte és una aplicació mòbil desenvolupada en Flutter que està optimitzada per a Android Studio
 
 
-CLIENT
+##CLIENT
 
-## Requisits Prèvies
+### Requisits Prèvies
 
 Abans de començar, assegura't de tenir instal·lats els següents components al teu entorn de desenvolupament:
 - Flutter SDK: Assegura't que tens instal·lada la versió més recent
@@ -14,7 +14,7 @@ Abans de començar, assegura't de tenir instal·lats els següents components al
 - Dispositiu o emulador Android configurat: Pots utilitzar un dispositiu físic o un emulador d'Android Studio
 - Plugin de Flutter per a Android Studio: Necessari per a integrar Flutter amb Android Studio
 
-## Instruccions d'execusió
+### Instruccions d'execusió
 
 - Accedir al directori /client
 - Activar dispositiu o emulador
@@ -22,9 +22,9 @@ Abans de començar, assegura't de tenir instal·lats els següents components al
 
 
 
-SERVER
+##SERVER
 
-## Requisits Prèvies
+### Requisits Prèvies
 
 Abans de començar a treballar amb el servidor, assegura't de tenir instal·lats i configurats els següents components:
 
@@ -35,17 +35,17 @@ Abans de començar a treballar amb el servidor, assegura't de tenir instal·lats
         - Apollo GraphQL: Proporciona eines per treballar amb GraphQL
 
 
-## Instruccions d'execusió
+### Instruccions d'execusió
 
 - Accedir al directori /server
 - Executar npm install per a instal·lar tots els paquets necessàris
 - Executar npm run start per a executar el servidor
 
 
-ACCÉS:
+##ACCÉS:
 - Accedir a http://localhost:4000/
 
-Usuaris disponibles a la base de dades
+##Usuaris disponibles a la base de dades
 
 El login de l'aplicació és amb el nom i la comtrasenya (mímin de 3 caràcters), s'ha adaptat el login dels usuaris que demanaven amb aquest sistema i queden con segueix:
 
